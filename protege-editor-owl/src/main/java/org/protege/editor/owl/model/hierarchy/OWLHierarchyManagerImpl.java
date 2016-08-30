@@ -93,7 +93,9 @@ public class OWLHierarchyManagerImpl implements OWLHierarchyManager {
 
 
     public OWLAnnotationPropertyHierarchyProvider getOWLAnnotationPropertyHierarchyProvider(Set<OWLAnnotationProperty> filterProps) {
-        if (assertedAnnotationPropertyHierarchyProvider == null){
+    	
+        if ((assertedAnnotationPropertyHierarchyProvider == null) ||
+        		(this.filterProps != filterProps)) {
         	this.filterProps = filterProps;
             assertedAnnotationPropertyHierarchyProvider = new OWLAnnotationPropertyHierarchyProvider(mngr.getOWLOntologyManager(), filterProps);
             assertedAnnotationPropertyHierarchyProvider.setOntologies(mngr.getOntologies());
