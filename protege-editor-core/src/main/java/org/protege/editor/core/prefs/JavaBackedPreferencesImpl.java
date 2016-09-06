@@ -31,6 +31,8 @@ public class JavaBackedPreferencesImpl implements Preferences {
     
     private void init() {
     	preferences = java.util.prefs.Preferences.userRoot().node(PROTEGE_PREFS_KEY).node(setID).node(prefsID);
+    	
+    	
     }
 
     public void clear() {

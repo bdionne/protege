@@ -6,9 +6,14 @@ package org.protege.editor.core.prefs;
  */
 
 
+import org.protege.editor.core.ui.workspace.TabbedWorkspaceStateManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.prefs.BackingStoreException;
 
 /**
@@ -47,6 +52,8 @@ public class JavaBackedPreferencesManagerImpl extends PreferencesManager {
      */
     @Override
     public void resetPreferencesToFactorySettings() {
+    	this.exportPreferencesToFile();
+    	/**
         try {
             java.util.prefs.Preferences userRoot = java.util.prefs.Preferences.userRoot();
             java.util.prefs.Preferences protegePreferencesRoot = userRoot.node(JavaBackedPreferencesImpl.PROTEGE_PREFS_KEY);
@@ -57,6 +64,32 @@ public class JavaBackedPreferencesManagerImpl extends PreferencesManager {
         catch (BackingStoreException e) {
             logger.error("An error occurred whilst clearing the preferences: {}", e);
         }
+        **/
     }
+    
+    public void exportPreferencesToFile() {
+        try {
+        	java.util.prefs.Preferences userRoot = java.util.prefs.Preferences.userRoot();
+            java.util.prefs.Preferences protegePreferencesRoot = userRoot.node(JavaBackedPreferencesImpl.PROTEGE_PREFS_KEY);
+            PreferencesManager.getInstance().getApplicationPreferences(TabbedWorkspaceStateManager.TABS_PREFERENCES_SET);
+            //protegePreferencesRoot.removeNode();
+            
+            FileOutputStream fis = new FileOutputStream("tabsfoo.xml"); 
+            protegePreferencesRoot.exportNode(fis); 
+            fis.close(); 
+
+
+        }
+        catch (BackingStoreException e) {
+            logger.error("An error occurred whilst clearing the preferences: {}", e);
+        } catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    }
+    
 
 }
