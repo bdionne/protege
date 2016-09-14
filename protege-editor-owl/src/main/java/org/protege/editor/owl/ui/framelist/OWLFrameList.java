@@ -101,11 +101,11 @@ public class OWLFrameList<R> extends MList implements LinkedObjectComponent, Dro
 
     private boolean axiomSelectionGlobal = true;
     
-    private boolean no_buttons = false;
+    private boolean read_only = false;
     
-    public OWLFrameList(OWLEditorKit editorKit, OWLFrame<R> frame, boolean no_buttons) {
+    public OWLFrameList(OWLEditorKit editorKit, OWLFrame<R> frame, boolean read_only) {
     	this(editorKit, frame);
-    	this.no_buttons = no_buttons;
+    	this.read_only = read_only;
     }
 
 
@@ -198,7 +198,7 @@ public class OWLFrameList<R> extends MList implements LinkedObjectComponent, Dro
 
     protected List<MListButton> getButtons(Object value) {
     	List<MListButton> buttons = new ArrayList<MListButton>();
-    	if (no_buttons) {
+    	if (read_only) {
 
     	} else {
     		buttons = new ArrayList<>(super.getButtons(value));
