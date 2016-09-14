@@ -1,18 +1,22 @@
 package org.protege.editor.core.ui.workspace;
 
-import org.protege.editor.core.plugin.PluginProperties;
+import java.awt.BorderLayout;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import javax.swing.JComponent;
+import javax.swing.JPanel;
+import javax.swing.JTabbedPane;
+
 import org.protege.editor.core.ui.tabbedpane.CloseableTabbedPaneUI;
 import org.protege.editor.core.ui.tabbedpane.WorkspaceTabCloseHandler;
 import org.protege.editor.core.ui.util.ComponentFactory;
+import org.protege.editor.core.ui.view.ViewComponentPlugin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.swing.*;
-import java.awt.*;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.*;
-import java.util.List;
 
 /**
  * Author: Matthew Horridge<br> The University Of Manchester<br> Medical Informatics Group<br> Date: Mar 17,
@@ -73,6 +77,15 @@ public abstract class TabbedWorkspace extends Workspace {
     	return true;
 
     }
+   
+   public boolean canShow(ViewComponentPlugin plugin) {
+   	
+   	if (this.checkPermissionLevel != null) {
+   		return checkPermissionLevel.checkViewable(plugin);
+   	}
+   	return true;
+
+   }
     
     public void recheckPlugins() {
     	
