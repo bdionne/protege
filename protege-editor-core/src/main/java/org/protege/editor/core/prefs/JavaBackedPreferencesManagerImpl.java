@@ -52,8 +52,7 @@ public class JavaBackedPreferencesManagerImpl extends PreferencesManager {
      */
     @Override
     public void resetPreferencesToFactorySettings() {
-    	this.exportPreferencesToFile();
-    	/**
+    	
         try {
             java.util.prefs.Preferences userRoot = java.util.prefs.Preferences.userRoot();
             java.util.prefs.Preferences protegePreferencesRoot = userRoot.node(JavaBackedPreferencesImpl.PROTEGE_PREFS_KEY);
@@ -64,9 +63,10 @@ public class JavaBackedPreferencesManagerImpl extends PreferencesManager {
         catch (BackingStoreException e) {
             logger.error("An error occurred whilst clearing the preferences: {}", e);
         }
-        **/
+        
     }
     
+    /**
     public void exportPreferencesToFile() {
         try {
         	java.util.prefs.Preferences userRoot = java.util.prefs.Preferences.userRoot();
@@ -90,6 +90,7 @@ public class JavaBackedPreferencesManagerImpl extends PreferencesManager {
 			e.printStackTrace();
 		}
     }
+    **/
     
 
 }
