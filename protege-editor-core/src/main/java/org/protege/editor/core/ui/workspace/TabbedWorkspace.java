@@ -1,5 +1,6 @@
 package org.protege.editor.core.ui.workspace;
 
+import org.protege.editor.core.plugin.PluginProperties;
 import org.protege.editor.core.ui.tabbedpane.CloseableTabbedPaneUI;
 import org.protege.editor.core.ui.tabbedpane.WorkspaceTabCloseHandler;
 import org.protege.editor.core.ui.util.ComponentFactory;
@@ -24,11 +25,19 @@ import java.util.List;
  */
 public abstract class TabbedWorkspace extends Workspace {
 
+
     private final Logger logger = LoggerFactory.getLogger(TabbedWorkspace.class);
 
     private final JTabbedPane tabbedPane = new JTabbedPane();
 
     private final Set<WorkspaceTab> workspaceTabs = new HashSet<>();
+    
+    private TabViewable checkPermissionLevel;
+    
+    public void setCheckLevel(TabViewable tvw) {
+    	checkPermissionLevel = tvw;
+    }
+
 
     public TabbedWorkspace() {
         tabbedPane.setUI(new CloseableTabbedPaneUI(CloseableTabbedPaneUI.TabClosability.CLOSABLE, new WorkspaceTabCloseHandler()));
@@ -54,6 +63,56 @@ public abstract class TabbedWorkspace extends Workspace {
                 addTabForPlugin(plugin);
             }
         }
+    }
+
+   public boolean canShow(WorkspaceTabPlugin plugin) {
+    	
+    	if (this.checkPermissionLevel != null) {
+    		return checkPermissionLevel.checkViewable(plugin);
+    	}
+    	return true;
+
+    }
+    
+    public void recheckPlugins() {
+    	
+        // If no tabs are set as visible (ie we have yet to customise, show all by default
+        for (WorkspaceTabPlugin plugin : getOrderedPlugins()) {
+        	WorkspaceTab tab = getWorkspaceTab(plugin.getId());
+        	if (this.canShow(plugin)) {  
+        		if (tab == null) {
+        			try {
+						tab = plugin.newInstance();
+						this.addTab(tab);
+					} catch (ClassNotFoundException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (IllegalAccessException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (InstantiationException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+        			
+        		}
+        		
+        	} else {
+        		if (tab != null) {
+            		// tab is currently showing, but shouldn't
+        			removeTab(tab);
+                    try {
+    					tab.dispose();
+    				} catch (Exception e) {
+    					// TODO Auto-generated catch block
+    					e.printStackTrace();
+    				}
+            		
+                }                
+        	}
+        	
+        }
+    	
     }
 
     public WorkspaceTab addTabForPlugin(WorkspaceTabPlugin plugin) {
