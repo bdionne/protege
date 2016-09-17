@@ -93,7 +93,7 @@ public class OWLObjectRestrictionCreatorPanel extends AbstractRestrictionCreator
 
 
     protected AbstractHierarchySelectorPanel<OWLObjectProperty> createPropertySelectorPanel() {
-        return new OWLObjectPropertySelectorPanel(getOWLEditorKit());
+        return new OWLObjectPropertySelectorPanel(getOWLEditorKit(), false);
     }
 
 
