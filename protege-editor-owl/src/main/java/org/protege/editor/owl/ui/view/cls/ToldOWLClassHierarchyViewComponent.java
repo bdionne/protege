@@ -1,6 +1,7 @@
 package org.protege.editor.owl.ui.view.cls;
 
 import org.protege.editor.core.ui.menu.PopupMenuId;
+import org.protege.editor.core.ui.workspace.TabbedWorkspace;
 import org.protege.editor.core.util.HandlerRegistration;
 import org.protege.editor.owl.model.OWLModelManager;
 import org.protege.editor.owl.model.entity.OWLEntityCreationSet;
@@ -55,6 +56,9 @@ public class ToldOWLClassHierarchyViewComponent extends AbstractOWLClassHierarch
         // Add in the manipulation actions - we won't need to keep track
         // of these, as this will be done by the view - i.e. we won't
         // need to dispose of these actions.
+    	if (((TabbedWorkspace) getWorkspace()).isReadOnly(this.getView().getPlugin())) {
+    		
+    	} else {
 
         addAction(new AbstractOWLTreeAction<OWLClass>("Add subclass", ADD_SUB_ICON,
                 getTree().getSelectionModel()) {
@@ -80,6 +84,7 @@ public class ToldOWLClassHierarchyViewComponent extends AbstractOWLClassHierarch
 
         addAction(new DeleteClassAction(getOWLEditorKit(),
                 () -> new HashSet<>(getTree().getSelectedOWLObjects())), "B", "A");
+    	}
 
         getTree().setDragAndDropHandler(new OWLTreeDragAndDropHandler<OWLClass>() {
             public boolean canDrop(Object child, Object parent) {
