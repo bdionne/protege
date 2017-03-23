@@ -207,7 +207,7 @@ public class OWLEditorKit extends AbstractEditorKit<OWLEditorKitFactory> {
      */
     @Nonnull
     private OWLOntologyID createDefaultOntologyId() {
-        return new OWLOntologyID(Optional.of(createFreshOntologyIRI()), Optional.<IRI>absent());
+        return new OWLOntologyID(java.util.Optional.of(createFreshOntologyIRI()), java.util.Optional.empty());
     }
 
     /**

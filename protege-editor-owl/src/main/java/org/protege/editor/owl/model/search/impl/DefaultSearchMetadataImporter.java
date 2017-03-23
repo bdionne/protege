@@ -1,20 +1,17 @@
 package org.protege.editor.owl.model.search.impl;
 
 import org.protege.editor.owl.OWLEditorKit;
-import org.protege.editor.owl.model.search.SearchCategory;
-import org.protege.editor.owl.model.search.impl.importer.AxiomAnnotationSearchMetadataImporter;
-import org.protege.editor.owl.model.search.impl.importer.DisplayNameSearchMetadataImporter;
-import org.protege.editor.owl.model.search.impl.importer.EntityAnnotationValueSearchMetadataImporter;
-import org.protege.editor.owl.model.search.impl.importer.EntityIRISearchMetadataImporter;
-import org.protege.editor.owl.model.search.impl.importer.LogicalAxiomRenderingSearchMetadataImporter;
-import org.protege.editor.owl.model.search.impl.importer.OntologyAnnotationSearchMetadataImporter;
 
-import org.semanticweb.owlapi.model.AxiomType;
-import org.semanticweb.owlapi.model.OWLAxiom;
-import org.semanticweb.owlapi.model.OWLEntity;
-import org.semanticweb.owlapi.model.OWLObject;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.util.AxiomSubjectProvider;
+import org.protege.editor.owl.model.OWLEditorKitOntologyShortFormProvider;
+import org.protege.editor.owl.model.OWLEditorKitShortFormProvider;
+import org.protege.editor.owl.model.search.SearchCategory;
+import org.protege.editor.owl.model.search.impl.importer.*;
+import org.protege.editor.owl.ui.renderer.context.OWLObjectRenderingContext;
+import org.protege.editor.owl.ui.renderer.styledstring.OWLObjectStyledStringRenderer;
+import org.protege.editor.owl.ui.renderer.styledstring.StyledString;
+import org.semanticweb.owlapi.model.*;
+import org.semanticweb.owlapi.util.AxiomSubjectProviderEx;
+//>>>>>>> 03213cc0... Conversion to owlapi 5.0.5:protege-editor-owl/src/main/java/org/protege/editor/owl/model/search/DefaultSearchMetadataImporter.java
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -73,7 +70,7 @@ public class DefaultSearchMetadataImporter implements SearchMetadataImporter {
         for (AxiomBasedSearchMetadataImporter importer : getAxiomBasedSearchMetadataImporters(categories, axiomType)) {
             for (OWLOntology ontology : context.getOntologies()) {
                 for (OWLAxiom ax : ontology.getAxioms(axiomType)) {
-                    OWLObject subject = new AxiomSubjectProvider().getSubject(ax);
+                    OWLObject subject = new AxiomSubjectProviderEx().getSubject(ax);
                     if (subject instanceof OWLEntity) {
                         OWLEntity entSubject = (OWLEntity) subject;
                         String rendering = context.getRendering(entSubject);
@@ -154,4 +151,6 @@ public class DefaultSearchMetadataImporter implements SearchMetadataImporter {
         }
         return result;
     }
+
+	
 }
