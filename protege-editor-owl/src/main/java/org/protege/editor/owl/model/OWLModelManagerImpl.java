@@ -21,7 +21,6 @@ import org.protege.editor.owl.model.hierarchy.OWLHierarchyManagerImpl;
 import org.protege.editor.owl.model.history.HistoryManager;
 import org.protege.editor.owl.model.history.HistoryManagerImpl;
 import org.protege.editor.owl.model.inference.OWLReasonerManager;
-import org.protege.editor.owl.model.inference.OWLReasonerManagerImpl;
 import org.protege.editor.owl.model.inference.ReasonerPreferences;
 import org.protege.editor.owl.model.io.*;
 import org.protege.editor.owl.model.library.OntologyCatalogManager;
@@ -172,7 +171,7 @@ public class OWLModelManagerImpl extends AbstractModelManager implements OWLMode
 
         historyManager = new HistoryManagerImpl(this);
 
-        owlReasonerManager = new OWLReasonerManagerImpl(this);
+        owlReasonerManager = new OWLReasonerManager(this);
         owlReasonerManager.getReasonerPreferences().addListener(() -> fireEvent(EventType.ONTOLOGY_CLASSIFIED));
 
 

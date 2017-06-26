@@ -584,7 +584,7 @@ public class OWLWorkspace extends TabbedWorkspace implements SendErrorReportHand
         registry.addListener(new IRegistryEventListener() {
 
             public void added(IExtension[] extensions) {
-                OWLReasonerManagerImpl reasonerManager = (OWLReasonerManagerImpl) getOWLModelManager().getOWLReasonerManager();
+                OWLReasonerManager reasonerManager = (OWLReasonerManager) getOWLModelManager().getOWLReasonerManager();
                 Set<ProtegeOWLReasonerPlugin> plugins = new HashSet<>();
                 for (IExtension extension : extensions) {
                     plugins.add(new ProtegeOWLReasonerPluginJPFImpl(getOWLModelManager(), extension));
