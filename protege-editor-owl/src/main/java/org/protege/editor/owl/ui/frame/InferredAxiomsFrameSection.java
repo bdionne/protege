@@ -3,7 +3,13 @@ package org.protege.editor.owl.ui.frame;
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.ui.editor.OWLObjectEditor;
 import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.*;
+import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLAxiom;
+import org.semanticweb.owlapi.model.OWLClass;
+import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyChange;
+import org.semanticweb.owlapi.model.OWLOntologyManager;
+//import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.util.*;
 
 import java.util.ArrayList;
@@ -49,7 +55,7 @@ public class InferredAxiomsFrameSection extends AbstractOWLFrameSection<OWLOntol
 
 
     protected void refillInferred() {
-        try {
+    	try {
             for (OWLClass cls : getReasoner().getUnsatisfiableClasses()) {
                 if (!cls.isOWLNothing()) {
                     OWLAxiom unsatAx = getOWLDataFactory().getOWLSubClassOfAxiom(cls,
@@ -60,7 +66,7 @@ public class InferredAxiomsFrameSection extends AbstractOWLFrameSection<OWLOntol
             OWLOntologyManager man = OWLManager.createOWLOntologyManager();
             OWLOntology inferredOnt = man.createOntology(IRI.create("http://another.com/ontology" + System.currentTimeMillis()));
             InferredOntologyGenerator ontGen = new InferredOntologyGenerator(getOWLModelManager().getReasoner(), new ArrayList<>());
-            //ontGen.addGenerator(new InferredSubClassAxiomGenerator());
+            ontGen.addGenerator(new InferredSubClassAxiomGenerator());
             //ontGen.addGenerator(new InferredClassAssertionAxiomGenerator());
             //ontGen.addGenerator(new InferredSubObjectPropertyAxiomGenerator());
             //ontGen.addGenerator(new InferredSubDataPropertyAxiomGenerator());
