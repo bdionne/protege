@@ -54,22 +54,14 @@ public class InferredAxiomsFrameSection extends AbstractOWLFrameSection<OWLOntol
     }
 
 
-    protected void refillInferred() {
+    @SuppressWarnings("rawtypes")
+	protected void refillInferred() {
     	try {
-            for (OWLClass cls : getReasoner().getUnsatisfiableClasses()) {
-                if (!cls.isOWLNothing()) {
-                    OWLAxiom unsatAx = getOWLDataFactory().getOWLSubClassOfAxiom(cls,
-                            getOWLDataFactory().getOWLNothing());
-                    addRow(new InferredAxiomsFrameSectionRow(getOWLEditorKit(), this, null, getRootObject(), unsatAx));
-                }
-            }
             OWLOntologyManager man = OWLManager.createOWLOntologyManager();
             OWLOntology inferredOnt = man.createOntology(IRI.create("http://another.com/ontology" + System.currentTimeMillis()));
             InferredOntologyGenerator ontGen = new InferredOntologyGenerator(getOWLModelManager().getReasoner(), new ArrayList<>());
             ontGen.addGenerator(new InferredSubClassAxiomGenerator());
-            //ontGen.addGenerator(new InferredClassAssertionAxiomGenerator());
-            //ontGen.addGenerator(new InferredSubObjectPropertyAxiomGenerator());
-            //ontGen.addGenerator(new InferredSubDataPropertyAxiomGenerator());
+           
             ontGen.fillOntology(man.getOWLDataFactory(), inferredOnt);
 
 
