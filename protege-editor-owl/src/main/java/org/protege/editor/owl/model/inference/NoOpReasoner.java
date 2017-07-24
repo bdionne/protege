@@ -197,7 +197,7 @@ public class NoOpReasoner implements OWLReasoner {
     }
 
     @Nonnull
-    public Set<OWLSubClassOfAxiom> getAllInferredSuperClasses(boolean direct) {
+    public Set<OWLSubClassOfAxiom> getAllInferredSuperClasses() {
         return new HashSet<>();
     }
 
