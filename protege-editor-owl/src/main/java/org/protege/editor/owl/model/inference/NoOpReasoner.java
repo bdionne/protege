@@ -8,9 +8,9 @@ import uk.ac.manchester.cs.owl.owlapi.OWLDataFactoryImpl;
 
 import javax.annotation.Nonnull;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 
 /**
  * Author: Matthew Horridge<br>
@@ -194,6 +194,11 @@ public class NoOpReasoner implements OWLReasoner {
     @Nonnull
     public NodeSet<OWLClass> getSuperClasses(@Nonnull OWLClassExpression ce, boolean direct) throws InconsistentOntologyException, ClassExpressionNotInProfileException, ReasonerInterruptedException, TimeOutException {
         return new OWLClassNodeSet();
+    }
+
+    @Nonnull
+    public Set<OWLSubClassOfAxiom> getAllInferredSuperClasses() {
+        return new HashSet<>();
     }
 
     @Nonnull
