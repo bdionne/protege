@@ -40,10 +40,7 @@ public class ToldSuperClassHierarchyViewComponent extends AbstractSuperClassHier
 
     @Override
     protected Optional<OWLObjectHierarchyProvider<OWLClass>> getInferredHierarchyProvider() {
-        if(inferredProvider == null) {
-            inferredProvider = new InferredSuperClassHierarchyProvider(getOWLModelManager());
-        }
-        return Optional.of(inferredProvider);
+    	return Optional.empty();
     }
 
 
