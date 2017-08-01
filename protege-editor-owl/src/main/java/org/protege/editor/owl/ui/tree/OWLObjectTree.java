@@ -349,7 +349,7 @@ public class OWLObjectTree<N extends OWLObject> extends JTree implements OWLObje
         Set<N> roots = provider.getRoots();
         OWLObjectTreeRootNode<N> rootNode = new OWLObjectTreeRootNode<>(this, roots);
         ((DefaultTreeModel) getModel()).setRoot(rootNode);
-        setSelectedOWLObject(currentSelection);
+        setSelectedOWLObject(rootNode.getOWLObject());
     }
 
 
