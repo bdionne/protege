@@ -845,6 +845,8 @@ public class OWLWorkspace extends TabbedWorkspace implements SendErrorReportHand
         synchronizeReasonerAction.putValue(Action.SHORT_DESCRIPTION, status.getSynchronizationTooltip());
 
         stopReasonerAction.setEnabled(status.isEnableStop());
+        
+        restartReasonerAction.setEnabled(status.isEnableStop());
 
         explainInconsistentOntologyAction.setEnabled(status == ReasonerStatus.INCONSISTENT);
 
