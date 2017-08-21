@@ -61,6 +61,7 @@ import java.net.URI;
 import java.net.URL;
 import java.util.*;
 import java.util.List;
+import java.util.concurrent.Callable;
 
 
 /**
@@ -84,8 +85,9 @@ public class OWLWorkspace extends TabbedWorkspace implements SendErrorReportHand
 
     private static final String WINDOW_MODIFIED = "Window.documentModified";
 
+	private static final Object REASONER_RESTART = "Restart Remote Reasoner";
 
-    private final Logger logger = LoggerFactory.getLogger(OWLWorkspace.class);
+	private final Logger logger = LoggerFactory.getLogger(OWLWorkspace.class);
 
     private final JComboBox<OWLOntology> ontologiesList = new JComboBox<>();
 
@@ -105,6 +107,8 @@ public class OWLWorkspace extends TabbedWorkspace implements SendErrorReportHand
 
     private final BackgroundTaskLabel backgroundTaskLabel = new BackgroundTaskLabel(ProtegeApplication.getBackgroundTaskManager());
 
+    public Optional<Callable<Void>> pelletRestartCallback = Optional.absent();
+
     private final OWLEntityCollectingOntologyChangeListener listener = new OWLEntityCollectingOntologyChangeListener() {
         public void ontologiesChanged() {
             verifySelection(getEntities());
@@ -123,6 +127,31 @@ public class OWLWorkspace extends TabbedWorkspace implements SendErrorReportHand
     private final PrecomputeAction synchronizeReasonerAction = new PrecomputeAction();
 
     private final ProtegeOWLAction stopReasonerAction = new StopReasonerAction();
+
+    private final ProtegeOWLAction restartReasonerAction = new ProtegeOWLAction() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (pelletRestartCallback.isPresent()) {
+					try {
+						pelletRestartCallback.get().call();
+					} catch (Exception e1) {
+						throw new RuntimeException(e1);
+					}
+				} else {
+					logger.info("pellet restart callback absent");
+				}
+			}
+
+			@Override
+			public void initialise() throws Exception {
+
+			}
+
+			@Override
+			public void dispose() throws Exception {
+
+			}
+		};
 
     private final ExplainInconsistentOntologyAction explainInconsistentOntologyAction = new ExplainInconsistentOntologyAction();
 
@@ -542,6 +571,10 @@ public class OWLWorkspace extends TabbedWorkspace implements SendErrorReportHand
         stopReasonerAction.setEditorKit(getOWLEditorKit());
         stopReasonerAction.putValue(Action.NAME, REASONER_STOP);
         reasonerMenu.add(stopReasonerAction);
+
+			restartReasonerAction.setEditorKit(getOWLEditorKit());
+			restartReasonerAction.putValue(Action.NAME, REASONER_RESTART);
+			reasonerMenu.add(restartReasonerAction);
 
         explainInconsistentOntologyAction.setEditorKit(getOWLEditorKit());
         explainInconsistentOntologyAction.putValue(Action.NAME, REASONER_EXPLAIN);
