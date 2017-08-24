@@ -5,6 +5,7 @@ import org.eclipse.core.runtime.IExtension;
 import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.IRegistryEventListener;
+import org.protege.common.NotWorkflowManager;
 import org.protege.editor.core.Fonts;
 import org.protege.editor.core.ProtegeApplication;
 import org.protege.editor.core.ProtegeManager;
@@ -134,6 +135,9 @@ public class OWLWorkspace extends TabbedWorkspace implements SendErrorReportHand
 				if (pelletRestartCallback.isPresent()) {
 					try {
 						pelletRestartCallback.get().call();
+					} catch (NotWorkflowManager e1) {
+						JOptionPane.showMessageDialog(null,
+							"You must be a workflow manager to restart pellet");
 					} catch (Exception e1) {
 						throw new RuntimeException(e1);
 					}
