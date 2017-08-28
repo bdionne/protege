@@ -109,6 +109,8 @@ public class OWLWorkspace extends TabbedWorkspace implements SendErrorReportHand
 
     public Optional<Callable<Void>> pelletRestartCallback = Optional.absent();
 
+    public boolean enablePelletRestart = false;
+
     private final OWLEntityCollectingOntologyChangeListener listener = new OWLEntityCollectingOntologyChangeListener() {
         public void ontologiesChanged() {
             verifySelection(getEntities());
@@ -141,15 +143,11 @@ public class OWLWorkspace extends TabbedWorkspace implements SendErrorReportHand
 					logger.info("pellet restart callback absent");
 				}
 			}
-
 			@Override
 			public void initialise() throws Exception {
-
 			}
-
 			@Override
 			public void dispose() throws Exception {
-
 			}
 		};
 
@@ -572,9 +570,9 @@ public class OWLWorkspace extends TabbedWorkspace implements SendErrorReportHand
         stopReasonerAction.putValue(Action.NAME, REASONER_STOP);
         reasonerMenu.add(stopReasonerAction);
 
-			restartReasonerAction.setEditorKit(getOWLEditorKit());
-			restartReasonerAction.putValue(Action.NAME, REASONER_RESTART);
-			reasonerMenu.add(restartReasonerAction);
+        restartReasonerAction.setEditorKit(getOWLEditorKit());
+        restartReasonerAction.putValue(Action.NAME, REASONER_RESTART);
+        reasonerMenu.add(restartReasonerAction);
 
         explainInconsistentOntologyAction.setEditorKit(getOWLEditorKit());
         explainInconsistentOntologyAction.putValue(Action.NAME, REASONER_EXPLAIN);
@@ -846,7 +844,7 @@ public class OWLWorkspace extends TabbedWorkspace implements SendErrorReportHand
 
         stopReasonerAction.setEnabled(status.isEnableStop());
         
-        restartReasonerAction.setEnabled(status.isEnableStop());
+        restartReasonerAction.setEnabled(status.isEnableStop() && enablePelletRestart);
 
         explainInconsistentOntologyAction.setEnabled(status == ReasonerStatus.INCONSISTENT);
 
