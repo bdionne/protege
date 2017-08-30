@@ -107,9 +107,9 @@ public class OWLWorkspace extends TabbedWorkspace implements SendErrorReportHand
 
     private final BackgroundTaskLabel backgroundTaskLabel = new BackgroundTaskLabel(ProtegeApplication.getBackgroundTaskManager());
 
-    public Optional<Callable<Void>> pelletRestartCallback = Optional.absent();
+    public Optional<Callable<Void>> reasonerRestartCallback = Optional.absent();
 
-    public boolean enablePelletRestart = false;
+    public boolean enableReasonerRestart = false;
 
     private final OWLEntityCollectingOntologyChangeListener listener = new OWLEntityCollectingOntologyChangeListener() {
         public void ontologiesChanged() {
@@ -133,9 +133,9 @@ public class OWLWorkspace extends TabbedWorkspace implements SendErrorReportHand
     private final ProtegeOWLAction restartReasonerAction = new ProtegeOWLAction() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if (pelletRestartCallback.isPresent()) {
+				if (reasonerRestartCallback.isPresent()) {
 					try {
-						pelletRestartCallback.get().call();
+						reasonerRestartCallback.get().call();
 					} catch (Exception e1) {
 						throw new RuntimeException(e1);
 					}
@@ -844,7 +844,7 @@ public class OWLWorkspace extends TabbedWorkspace implements SendErrorReportHand
 
         stopReasonerAction.setEnabled(status.isEnableStop());
         
-        restartReasonerAction.setEnabled(status.isEnableStop() && enablePelletRestart);
+        restartReasonerAction.setEnabled(status.isEnableStop() && enableReasonerRestart);
 
         explainInconsistentOntologyAction.setEnabled(status == ReasonerStatus.INCONSISTENT);
 
