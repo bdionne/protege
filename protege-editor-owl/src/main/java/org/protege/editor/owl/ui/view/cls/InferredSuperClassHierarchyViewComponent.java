@@ -30,6 +30,11 @@ public class InferredSuperClassHierarchyViewComponent extends AbstractSuperClass
         if (event.getType() == EventType.REASONER_CHANGED){
             getOWLClassHierarchyProvider().setReasoner(getOWLModelManager().getReasoner());
         }
+        
+        if(event.isType(EventType.ONTOLOGY_CLASSIFIED)) {
+        	// force a refresh
+        	super.updateView(getSelectedEntity());            
+        }
     };
 
 
