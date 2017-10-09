@@ -137,6 +137,8 @@ public class Launcher {
                     framework.stop();
                     framework.waitForStop(0);
                 }
+                // Give the prefs file a chance to close :)
+                Thread.sleep(2000);
                 cleanup();
             } catch (Throwable t) {
                 logger.error("Error shutting down OSGi session: {}", t.getMessage(), t);
