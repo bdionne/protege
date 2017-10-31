@@ -2,9 +2,8 @@ package org.protege.editor.owl.model.hierarchy;
 
 import org.protege.editor.owl.model.OWLModelManager;
 import org.protege.editor.owl.model.event.EventType;
-import org.protege.editor.owl.model.event.OWLModelManagerChangeEvent;
 import org.protege.editor.owl.model.event.OWLModelManagerListener;
-import org.protege.editor.owl.model.hierarchy.cls.InferredOWLClassHierarchyProvider;
+import org.protege.editor.owl.model.hierarchy.cls.InferredOWLClassHierarchyProvider2;
 import org.protege.editor.owl.model.hierarchy.property.InferredObjectPropertyHierarchyProvider;
 import org.semanticweb.owlapi.model.OWLAnnotationProperty;
 import org.semanticweb.owlapi.model.OWLClass;
@@ -27,7 +26,7 @@ public class OWLHierarchyManagerImpl implements OWLHierarchyManager {
 
     private OWLObjectHierarchyProvider<OWLClass> assertedClassHierarchyProvider;
 
-    private InferredOWLClassHierarchyProvider inferredClassHierarchyProvider;
+    private InferredOWLClassHierarchyProvider2 inferredClassHierarchyProvider;
 
     private OWLObjectHierarchyProvider<OWLObjectProperty> assertedObjectPropertyHierarchyProvider;
 
@@ -68,7 +67,8 @@ public class OWLHierarchyManagerImpl implements OWLHierarchyManager {
 
     public OWLObjectHierarchyProvider<OWLClass> getInferredOWLClassHierarchyProvider() {
         if (inferredClassHierarchyProvider == null) {
-            inferredClassHierarchyProvider = new InferredOWLClassHierarchyProvider(mngr, mngr.getOWLOntologyManager());
+            inferredClassHierarchyProvider = new InferredOWLClassHierarchyProvider2(mngr, mngr.getOWLOntologyManager());
+            this.inferredClassHierarchyProvider.setOntologies(mngr.getActiveOntologies());
         }
         return inferredClassHierarchyProvider;
     }

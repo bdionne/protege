@@ -21,6 +21,8 @@ import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import javax.swing.event.ChangeListener;
+import javax.swing.event.TreeExpansionEvent;
+import javax.swing.event.TreeExpansionListener;
 import javax.swing.event.TreeModelEvent;
 import javax.swing.event.TreeModelListener;
 import javax.swing.event.TreeSelectionListener;
@@ -96,19 +98,14 @@ public abstract class AbstractOWLEntityHierarchyViewComponent<E extends OWLEntit
             }
         };
         assertedTree.getModel().addTreeModelListener(treeModelListener);
+        
 
         assertedTree.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent e) {
-            	assertedTree.ensureSelected(e.getX(), e.getY());
-                transmitSelection();
                 if (e.isPopupTrigger()) {  
                 	
                 	assertedTree.showPopupMenu(e);
                 }
-                if (e.isAltDown()) {
-                    assertedTree.expandDescendantsOfRowAt(e.getX(), e.getY());
-                }
-                
             }
         });
 
@@ -120,12 +117,6 @@ public abstract class AbstractOWLEntityHierarchyViewComponent<E extends OWLEntit
                 inferredTree.get().setBackground(OWLFrameList.INFERRED_BG_COLOR);
                 inferredTree.get().setOWLObjectComparator(treeNodeComp);
                 inferredTree.get().getModel().addTreeModelListener(treeModelListener);
-                inferredTree.get().addMouseListener(new MouseAdapter() {
-                    @Override
-                    public void mouseReleased(MouseEvent e) {
-                        transmitSelection();
-                    }
-                });
                 viewModeComponent.add(inferredTree.get(), ViewMode.INFERRED, true);
                 getView().addViewMode(ViewMode.ASSERTED);
                 getView().addViewMode(ViewMode.INFERRED);
