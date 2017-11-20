@@ -66,7 +66,7 @@ public enum ReasonerStatus {
 		
 		@Override
 		public boolean isEnableSynchronization() {
-			return false;
+			return true;
 		}
 		
 		@Override
