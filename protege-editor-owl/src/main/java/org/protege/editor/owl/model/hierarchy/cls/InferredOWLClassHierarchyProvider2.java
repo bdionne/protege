@@ -143,6 +143,7 @@ public class InferredOWLClassHierarchyProvider2 extends AbstractOWLObjectHierarc
 
     public void dispose() {
         getManager().removeOntologyChangeListener(listener);
+        owlModelManager.removeListener(owlModelManagerListener);
     }
 
 
