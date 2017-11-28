@@ -73,7 +73,7 @@ public class OWLSubClassAxiomFrameSection extends AbstractOWLClassAxiomFrameSect
                             if (!added.contains(inferredSuperClass)) {
                                 addInferredRowIfNontrivial(new OWLSubClassAxiomFrameSectionRow(getOWLEditorKit(),
                                                                                                OWLSubClassAxiomFrameSection.this,
-                                                                                               reasoner.getRootOntology(),
+                                                                                               null,
                                                                                                getRootObject(),
                                                                                                getOWLModelManager().getOWLDataFactory().getOWLSubClassOfAxiom(getRootObject(),
                                                                                                                                                               inferredSuperClass),
