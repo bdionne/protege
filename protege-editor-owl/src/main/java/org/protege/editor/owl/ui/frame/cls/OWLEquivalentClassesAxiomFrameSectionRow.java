@@ -38,15 +38,19 @@ public class OWLEquivalentClassesAxiomFrameSectionRow extends AbstractOWLFrameSe
         return new ArrayList<>(clses);
     }
 
-    public boolean isEditable() {
-        Set<OWLClassExpression> descs = new HashSet<>(getAxiom().getClassExpressions());
-        descs.remove(getRoot());
-        return descs.size() == 1;
-    }
+	public boolean isEditable() {
+		if (super.isEditable()) {
+			Set<OWLClassExpression> descs = new HashSet<>(getAxiom().getClassExpressions());
+			descs.remove(getRoot());
+			return descs.size() == 1;
+		} else {
+			return false;
+		}
+	}
     
     @Override
     public boolean isDeleteable() {
-    	return true;
+    	return super.isDeleteable();
     }
     
     protected OWLObjectEditor<OWLClassExpression> getObjectEditor() {

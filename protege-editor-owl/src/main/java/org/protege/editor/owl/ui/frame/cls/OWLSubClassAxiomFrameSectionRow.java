@@ -26,6 +26,12 @@ public class OWLSubClassAxiomFrameSectionRow extends AbstractOWLFrameSectionRow<
                                            OWLClassExpression rootObject, OWLSubClassOfAxiom axiom) {
         super(owlEditorKit, section, ontology, rootObject, axiom);
     }
+    
+	public OWLSubClassAxiomFrameSectionRow(OWLEditorKit owlEditorKit,
+			OWLFrameSection<OWLClassExpression, OWLSubClassOfAxiom, OWLClassExpression> section, OWLOntology ontology,
+			OWLClassExpression rootObject, OWLSubClassOfAxiom axiom, boolean isEditable) {
+		super(owlEditorKit, section, ontology, rootObject, axiom, isEditable);
+	}
 
 
     protected OWLObjectEditor<OWLClassExpression> getObjectEditor() {

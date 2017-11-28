@@ -76,7 +76,8 @@ public class OWLSubClassAxiomFrameSection extends AbstractOWLClassAxiomFrameSect
                                                                                                reasoner.getRootOntology(),
                                                                                                getRootObject(),
                                                                                                getOWLModelManager().getOWLDataFactory().getOWLSubClassOfAxiom(getRootObject(),
-                                                                                                                                                              inferredSuperClass)));
+                                                                                                                                                              inferredSuperClass),
+                                                                                               false));
                                 added.add(inferredSuperClass);
                             }
                         }
