@@ -74,6 +74,7 @@ import org.protege.editor.owl.ui.frame.OWLFrameListener;
 import org.protege.editor.owl.ui.frame.OWLFrameObject;
 import org.protege.editor.owl.ui.frame.OWLFrameSection;
 import org.protege.editor.owl.ui.frame.OWLFrameSectionRow;
+import org.protege.editor.owl.ui.frame.cls.OWLSubClassAxiomFrameSectionRow;
 import org.protege.editor.owl.ui.preferences.GeneralPreferencesPanel;
 import org.protege.editor.owl.ui.renderer.LinkedObjectComponent;
 import org.protege.editor.owl.ui.renderer.LinkedObjectComponentMediator;
@@ -83,6 +84,7 @@ import org.protege.editor.owl.ui.view.Copyable;
 import org.protege.editor.owl.ui.view.Cuttable;
 import org.protege.editor.owl.ui.view.Deleteable;
 import org.protege.editor.owl.ui.view.Pasteable;
+import org.semanticweb.owlapi.model.AddAxiom;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLEntity;
 import org.semanticweb.owlapi.model.OWLObject;
@@ -139,7 +141,9 @@ public class OWLFrameList<R> extends MList implements LinkedObjectComponent, Dro
 
     private LinkedObjectComponentMediator mediator;
 
-    private List<MListButton> inferredRowButtons;
+    private MListButton explainButton;
+    
+    private MListButton makeAssertedButton;
 
     private AxiomAnnotationButton axiomAnnotationButton;
 
@@ -192,8 +196,11 @@ public class OWLFrameList<R> extends MList implements LinkedObjectComponent, Dro
 
         createPopupMenu();
 
-        inferredRowButtons = new ArrayList<>();
-        inferredRowButtons.add(new ExplainButton(e -> invokeExplanationHandler()));
+        
+        
+        explainButton = new ExplainButton(e -> invokeExplanationHandler());
+        makeAssertedButton = new MakeAssertedButton(e -> this.makeAssertionHandler());
+        
 
         axiomAnnotationButton = new AxiomAnnotationButton(event -> invokeAxiomAnnotationHandler());
 
@@ -250,21 +257,26 @@ public class OWLFrameList<R> extends MList implements LinkedObjectComponent, Dro
         return border;
     }
 
-    protected List<MListButton> getButtons(Object value) {
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+	protected List<MListButton> getButtons(Object value) {
     	List<MListButton> buttons = new ArrayList<MListButton>();
     	if (read_only) {
 
     	} else {
     		buttons = new ArrayList<>(super.getButtons(value));
     		if (value instanceof OWLFrameSectionRow) {
-    			if (((OWLFrameSectionRow) value).isEditable()) {
-    				OWLFrameSectionRow<?,?,?> frameRow = (OWLFrameSectionRow<?,?,?>) value;
+    			OWLFrameSectionRow<?,?,?> frameRow = (OWLFrameSectionRow<?,?,?>) value;
+    			if (((OWLFrameSectionRow) value).isEditable()) {    				
     				buttons.add(axiomAnnotationButton);
-    				axiomAnnotationButton.setAnnotationPresent(isAnnotationPresent(frameRow));
-
-    				if (getExplanationManager().hasExplanation(frameRow.getAxiom())) {
-    					buttons.addAll(inferredRowButtons);
+    				axiomAnnotationButton.setAnnotationPresent(isAnnotationPresent(frameRow));    				
+    			}
+    			if (getExplanationManager().hasExplanation(frameRow.getAxiom())) {					
+    				if (value instanceof OWLSubClassAxiomFrameSectionRow) {
+    					if (((OWLFrameSectionRow) value).isInferred()) {
+    						buttons.add(makeAssertedButton);
+    					}
     				}
+    				buttons.add(explainButton);
     			}
     		}
     		if (value instanceof AbstractOWLFrameSectionRow) {
@@ -282,7 +294,8 @@ public class OWLFrameList<R> extends MList implements LinkedObjectComponent, Dro
     }
 
 
-    protected String getRowName(Object rowObject) {
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+	protected String getRowName(Object rowObject) {
         if (rowObject instanceof OWLFrameSectionRow) {
             return ((OWLFrameSectionRow) rowObject).getFrameSection().getRowLabel((OWLFrameSectionRow) rowObject);
         }
@@ -576,6 +589,20 @@ public class OWLFrameList<R> extends MList implements LinkedObjectComponent, Dro
             JFrame frame = ProtegeManager.getInstance().getFrame(editorKit.getWorkspace());
             getExplanationManager().handleExplain(frame, ax);
         }
+
+    }
+    
+    protected void makeAssertionHandler() {
+        Object obj = getSelectedValue();
+        if (!(obj instanceof OWLFrameSectionRow)) {
+            return;
+        }
+        OWLFrameSectionRow row = (OWLFrameSectionRow) obj;
+        OWLAxiom ax = row.getAxiom();
+        
+        List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
+        changes.add(new AddAxiom(editorKit.getOWLModelManager().getActiveOntology(), ax));
+        editorKit.getOWLModelManager().applyChanges(changes);
 
     }
 
