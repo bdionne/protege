@@ -94,17 +94,17 @@ public class InferredAxiomsFrameSection extends AbstractOWLFrameSection<OWLOntol
     		return;
     	}
     	if (isInconsistent(row.getAxiom())) {
-    		row.setEditingHint(" - needs repair");
+    		row.setEditingHint(" - needs_repair");
     		addInferredRowIfNontrivial(row);
     	} else {
-    		row.setEditingHint(" - Add Axiom");
+    		row.setEditingHint(" - Add_Axiom");
     		addInferredRowIfNontrivial(row);
     		// now possibly make a new remove axiom for each redudant link
     		List<OWLAxiom> supsToRemove = findCommonParents(row.getAxiom());
     		for (OWLAxiom ax : supsToRemove) {
     			InferredAxiomsFrameSectionRow remRow = 
     					new InferredAxiomsFrameSectionRow(getOWLEditorKit(), this, null, getRootObject(), ax);
-    			remRow.setEditingHint(" - Remove Axiom");
+    			remRow.setEditingHint(" - Remove_Axiom");
     			addInferredRowIfNontrivial(remRow);
     		}
     	}
