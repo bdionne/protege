@@ -63,6 +63,7 @@ public class InferredAxiomsFrameSection extends AbstractOWLFrameSection<OWLOntol
     @SuppressWarnings("rawtypes")
 	protected void refillInferred() {
     	try {
+    		long now = System.currentTimeMillis();
             OWLOntologyManager man = OWLManager.createOWLOntologyManager();
             OWLOntology inferredOnt = man.createOntology(IRI.create("http://another.com/ontology" + System.currentTimeMillis()));
             InferredOntologyGenerator ontGen = new InferredOntologyGenerator(getOWLModelManager().getReasoner(), new ArrayList<>());
@@ -77,11 +78,17 @@ public class InferredAxiomsFrameSection extends AbstractOWLFrameSection<OWLOntol
                 	add = false;
                 }
                 
+                if (this.isVacuousOrRootAxiom(ax)) {
+                	add = false;
+                }
+                
+                
                 if (add) {
                 	doctorAndAdd(new InferredAxiomsFrameSectionRow(getOWLEditorKit(), this, null, getRootObject(), ax));
                 	
                 }
             }
+            System.out.println("Finished building infepred pane in: " + (System.currentTimeMillis() - now));
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -89,10 +96,6 @@ public class InferredAxiomsFrameSection extends AbstractOWLFrameSection<OWLOntol
     }
     
     private void doctorAndAdd(InferredAxiomsFrameSectionRow row) {
-    	if (row.isInferred() && 
-    			(VacuousAxiomVisitor.isVacuousAxiom(row.getAxiom()) || VacuousAxiomVisitor.involvesInverseSquared(row.getAxiom()))) {
-    		return;
-    	}
     	if (isInconsistent(row.getAxiom())) {
     		row.setEditingHint(" - needs_repair");
     		addInferredRowIfNontrivial(row);
@@ -114,6 +117,17 @@ public class InferredAxiomsFrameSection extends AbstractOWLFrameSection<OWLOntol
     	if (ax.isOfType(AxiomType.SUBCLASS_OF)) {
     		OWLSubClassOfAxiom subax = (OWLSubClassOfAxiom) ax;
     		return subax.getSuperClass().isOWLNothing();    
+    	}
+    	return false;
+    }
+    
+    private boolean isVacuousOrRootAxiom(OWLAxiom ax) {
+    	if (ax.isOfType(AxiomType.SUBCLASS_OF)) {
+    		OWLSubClassOfAxiom subax = (OWLSubClassOfAxiom) ax;
+    		if (subax.getSuperClass().isOWLThing() ||
+    				subax.getSubClass().isOWLNothing()) {
+    			return true;
+    		}
     	}
     	return false;
     }

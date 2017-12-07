@@ -32,7 +32,7 @@ public class InferredAxiomsViewComponent extends AbstractActiveOntologyViewCompo
 
     private OWLModelManagerListener listener = event -> {
         if(event.isType(EventType.ONTOLOGY_CLASSIFIED)) {
-            if(isSynchronizing()) {
+            if(isSynchronizing() && isShowing()) {
                 try {
                         updateView(getOWLModelManager().getActiveOntology());
                 }
@@ -54,16 +54,17 @@ public class InferredAxiomsViewComponent extends AbstractActiveOntologyViewCompo
         setLayout(new BorderLayout());
         frame = new InferredAxiomsFrame(getOWLEditorKit());
         frameList = new OWLFrameList<>(getOWLEditorKit(), frame);
+        getOWLModelManager().removeListener(frameList.getModelListener());
         frameList.setRootObject(getOWLModelManager().getActiveOntology());
         return new JScrollPane(frameList);
     }
 
 
-    protected void updateView(OWLOntology activeOntology) throws Exception {
-        if (isSynchronizing()) {
-            frameList.setRootObject(activeOntology);
-            updateHeader();
-        }
+    protected void updateView(OWLOntology activeOntology) throws Exception {    	
+    	if (isSynchronizing()) {
+    		frameList.setRootObject(activeOntology);
+    		updateHeader();
+    	}    	
     }
 
 

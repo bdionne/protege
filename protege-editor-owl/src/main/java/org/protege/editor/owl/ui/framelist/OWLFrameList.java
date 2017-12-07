@@ -132,6 +132,10 @@ public class OWLFrameList<R> extends MList implements LinkedObjectComponent, Dro
     public static final int BUTTON_MARGIN = 3;
 
     private final OWLModelManagerListener modelManagerListener;
+    
+    public OWLModelManagerListener getModelListener() {
+    	return this.modelManagerListener;
+    }
 
     private OWLEditorKit editorKit;
 
