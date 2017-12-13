@@ -35,7 +35,7 @@ public abstract class TabbedWorkspace extends Workspace {
 
     private final JTabbedPane tabbedPane = new JTabbedPane();
 
-    private final Set<WorkspaceTab> workspaceTabs = new HashSet<>();
+    private final List<WorkspaceTab> workspaceTabs = new ArrayList<>();
     
     private TabViewable checkPermissionLevel;
     
@@ -234,6 +234,10 @@ public abstract class TabbedWorkspace extends Workspace {
     public void setSelectedTab(int index) {
         tabbedPane.setSelectedIndex(index);
     }
+    
+    public void setSelectedTab(String tabId) {
+    	tabbedPane.setSelectedComponent(getWorkspaceTab(tabId));
+    }
 
 
     private JComponent createErrorPanel(Exception e) {
@@ -263,8 +267,8 @@ public abstract class TabbedWorkspace extends Workspace {
     }
 
 
-    public Set<WorkspaceTab> getWorkspaceTabs() {
-        return Collections.unmodifiableSet(workspaceTabs);
+    public List<WorkspaceTab> getWorkspaceTabs() {
+        return Collections.unmodifiableList(workspaceTabs);
     }
 
 
