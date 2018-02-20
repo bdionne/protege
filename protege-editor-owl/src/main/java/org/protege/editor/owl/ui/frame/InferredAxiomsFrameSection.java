@@ -88,7 +88,7 @@ public class InferredAxiomsFrameSection extends AbstractOWLFrameSection<OWLOntol
                 	
                 }
             }
-            System.out.println("Finished building infepred pane in: " + (System.currentTimeMillis() - now));
+            System.out.println("Finished building inferred pane in: " + (System.currentTimeMillis() - now));
         }
         catch (Exception e) {
             e.printStackTrace();
