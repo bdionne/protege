@@ -51,12 +51,12 @@ public abstract class FocusedComponentAction<C extends ActionTarget> extends Pro
         }
         // By default text components are pasteable
         if (c instanceof TextComponent) {
-            setEnabled(true);
+            setEnabled(false);
             return;
         }
 
         if(c instanceof JTable) {
-            setEnabled(true);
+            setEnabled(false);
             return;
         }
 
