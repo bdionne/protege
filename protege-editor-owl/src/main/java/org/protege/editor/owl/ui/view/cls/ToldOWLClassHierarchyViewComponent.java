@@ -213,14 +213,24 @@ public class ToldOWLClassHierarchyViewComponent extends AbstractOWLClassHierarch
 
 
     public boolean canCreateNewChild() {
-        return isInAssertedMode() &&
-                !getSelectedEntities().isEmpty();
+    	if (((TabbedWorkspace) getWorkspace()).isReadOnly(this.getView().getPlugin())) {
+    		return false;
+
+    	} else {
+    		return isInAssertedMode() &&
+    				!getSelectedEntities().isEmpty();
+    	}
     }
 
     public boolean canCreateNewSibling() {
-        return isInAssertedMode() &&
-                !getSelectedEntities().isEmpty() &&
-                !getSelectedEntity().equals(getOWLModelManager().getOWLDataFactory().getOWLThing());
+    	if (((TabbedWorkspace) getWorkspace()).isReadOnly(this.getView().getPlugin())) {
+    		return false;
+
+    	} else {
+    		return isInAssertedMode() &&
+    				!getSelectedEntities().isEmpty() &&
+    				!getSelectedEntity().equals(getOWLModelManager().getOWLDataFactory().getOWLThing());
+    	}
     }
 
 
@@ -306,5 +316,16 @@ public class ToldOWLClassHierarchyViewComponent extends AbstractOWLClassHierarch
 	protected UserRendering getUserRenderer() {
 		// TODO Auto-generated method stub
 		return null;
+	}
+	
+	
+	@Override
+	public boolean canDelete() {
+		if (((TabbedWorkspace) getWorkspace()).isReadOnly(this.getView().getPlugin())) {
+			return false;
+
+    	} else {
+    		return super.canDelete();
+    	}
 	}
 }

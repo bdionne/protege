@@ -34,8 +34,9 @@ public class OWLObjectPropertyHierarchyViewComponent
 
     	} else {
     		super.performExtraInitialisation();
+    		getAssertedTree().setPopupMenuId(new PopupMenuId("[AssertedObjectPropertyHierarchy]"));
     	}
-        getAssertedTree().setPopupMenuId(new PopupMenuId("[AssertedObjectPropertyHierarchy]"));
+        
     }
 
     protected boolean isOWLObjectPropertyView() {
@@ -96,5 +97,32 @@ public class OWLObjectPropertyHierarchyViewComponent
 	protected UserRendering getUserRenderer() {
 		// TODO Auto-generated method stub
 		return null;
+	}
+	
+	@Override
+    public boolean canDelete() {
+		if (((TabbedWorkspace) getWorkspace()).isReadOnly(this.getView().getPlugin())) {
+			return false;
+
+    	}
+        return true;
+    }
+	
+	@Override
+	public boolean canCreateNewChild() {
+		if (((TabbedWorkspace) getWorkspace()).isReadOnly(this.getView().getPlugin())) {
+			return false;
+
+    	}
+        return true;
+	}
+	
+	@Override
+	public boolean canCreateNewSibling() {
+		if (((TabbedWorkspace) getWorkspace()).isReadOnly(this.getView().getPlugin())) {
+			return false;
+
+    	}
+        return true;
 	}
 }

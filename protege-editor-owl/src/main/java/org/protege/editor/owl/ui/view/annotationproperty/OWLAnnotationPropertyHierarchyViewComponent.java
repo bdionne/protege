@@ -87,9 +87,21 @@ public class OWLAnnotationPropertyHierarchyViewComponent extends AbstractOWLEnti
     public List<OWLAnnotationProperty> find(String match) {
         return new ArrayList<>(getOWLModelManager().getOWLEntityFinder().getMatchingOWLAnnotationProperties(match));
     }
+    
+    public boolean canDelete() {
+		if (((TabbedWorkspace) getWorkspace()).isReadOnly(this.getView().getPlugin())) {
+			return false;
+
+    	}
+        return true;
+    }
 
 
     public boolean canCreateNewChild() {
+    	if (((TabbedWorkspace) getWorkspace()).isReadOnly(this.getView().getPlugin())) {
+			return false;
+
+    	}
         return true;
     }
 
@@ -112,7 +124,11 @@ public class OWLAnnotationPropertyHierarchyViewComponent extends AbstractOWLEnti
 
 
     public boolean canCreateNewSibling() {
-        return getSelectedEntity() != null;
+    	
+    	if (((TabbedWorkspace) getWorkspace()).isReadOnly(this.getView().getPlugin())) {
+    		return false;
+    	}
+    	return getSelectedEntity() != null;
     }
 
 
@@ -189,4 +205,6 @@ public class OWLAnnotationPropertyHierarchyViewComponent extends AbstractOWLEnti
 		// TODO Auto-generated method stub
 		return null;
 	}
+	
+	
 }

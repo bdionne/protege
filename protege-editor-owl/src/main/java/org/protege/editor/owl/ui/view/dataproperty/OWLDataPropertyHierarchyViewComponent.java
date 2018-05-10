@@ -39,8 +39,9 @@ public class OWLDataPropertyHierarchyViewComponent
     	boolean read_only = ((TabbedWorkspace) getWorkspace()).isReadOnly(this.getView().getPlugin());
     	if (!read_only) {
     		super.performExtraInitialisation();
+    		getAssertedTree().setPopupMenuId(new PopupMenuId("[AssertedDataPropertyHierarchy]"));
     	}
-        getAssertedTree().setPopupMenuId(new PopupMenuId("[AssertedDataPropertyHierarchy]"));
+        
     }
 
     protected OWLObjectHierarchyProvider<OWLDataProperty> getHierarchyProvider() {
@@ -96,5 +97,35 @@ public class OWLDataPropertyHierarchyViewComponent
 	protected UserRendering getUserRenderer() {
 		// TODO Auto-generated method stub
 		return null;
+	}
+	
+	@Override
+	public boolean canCreateNewSibling() {
+		if (((TabbedWorkspace) getWorkspace()).isReadOnly(this.getView().getPlugin())) {
+			return false;
+
+    	} else {
+    		return super.canCreateNewSibling();
+    	}
+	}
+	
+	@Override
+	public boolean canCreateNewChild() {
+		if (((TabbedWorkspace) getWorkspace()).isReadOnly(this.getView().getPlugin())) {
+			return false;
+
+    	} else {
+    		return super.canCreateNewChild();
+    	}
+	}
+	
+	@Override
+	public boolean canDelete() {
+		if (((TabbedWorkspace) getWorkspace()).isReadOnly(this.getView().getPlugin())) {
+			return false;
+
+    	} else {
+    		return super.canDelete();
+    	}
 	}
 }
