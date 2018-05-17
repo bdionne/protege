@@ -125,9 +125,10 @@ public class CopyAction extends ProtegeOWLAction {
                 else {
                 	if (value != null) {
                 		stringValue = value.toString();
+                		sb.append(stringValue);
                 	}
                 }
-                sb.append(stringValue);
+                
                 sb.append("\t");
             }
             sb.append("\n");
