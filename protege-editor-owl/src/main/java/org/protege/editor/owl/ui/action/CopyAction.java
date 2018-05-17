@@ -118,12 +118,14 @@ public class CopyAction extends ProtegeOWLAction {
                 Object value = table.getValueAt(row, col);
                 TableCellRenderer cellRenderer = table.getCellRenderer(row, col);
                 Component renderer = cellRenderer.getTableCellRendererComponent(table, value, false, false, row, col);
-                String stringValue;
+                String stringValue = null;
                 if (renderer instanceof JLabel) {
                     stringValue = ((JLabel) renderer).getText();
                 }
                 else {
-                    stringValue = value.toString();
+                	if (value != null) {
+                		stringValue = value.toString();
+                	}
                 }
                 sb.append(stringValue);
                 sb.append("\t");
