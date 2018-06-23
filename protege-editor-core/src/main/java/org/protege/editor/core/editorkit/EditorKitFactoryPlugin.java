@@ -56,8 +56,8 @@ public class EditorKitFactoryPlugin {
 
     public EditorKitFactory newInstance() {
         try {
-            Bundle b = PluginUtilities.getInstance().getBundle(extension);
-            b.start();
+          //  Bundle b = PluginUtilities.getInstance().getBundle(extension);
+          //  b.start();
             ExtensionInstantiator<EditorKitFactory> instantiator = new ExtensionInstantiator<>(extension);
             return instantiator.instantiate();
         }

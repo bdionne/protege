@@ -2,6 +2,7 @@ package org.protege.editor.core.plugin;
 
 
 import org.eclipse.core.runtime.*;
+import org.eclipse.equinox.nonosgi.registry.RegistryFactoryHelper;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Version;
@@ -70,7 +71,7 @@ public class PluginUtilities {
      * plugin utilities.  Users should <b>not</b> call this method.
      */
     public void initialise(BundleContext context) {
-        this.context = context;
+       // this.context = context;
     }
     
     public Bundle getBundle(IExtension extension) {
@@ -87,19 +88,23 @@ public class PluginUtilities {
     }
     
     public Bundle getBundle(IContributor contributor) {
-        String name = contributor.getName();
+       // return null;
+    	String name = contributor.getName();
         PackageAdmin admin = getPackageAdmin();
         Bundle[]  bundles = admin.getBundles(name, null);
         if (bundles == null || bundles.length == 0) return null;
         return bundles[0];  // if there is more than one we need more work...
+        
     }
     
     public IExtensionRegistry getExtensionRegistry() {
-        if (registryServiceTracker == null) {
+       /* if (registryServiceTracker == null) {
             registryServiceTracker = new ServiceTracker(context, IExtensionRegistry.class.getName(), null);
             registryServiceTracker.open();
         }
-        return (IExtensionRegistry) registryServiceTracker.getService();
+        return (IExtensionRegistry) registryServiceTracker.getService();*/
+    	
+    	return RegistryFactoryHelper.getRegistry();
     }
     
     public PackageAdmin getPackageAdmin() {
@@ -107,6 +112,7 @@ public class PluginUtilities {
             packageServiceTracker = new ServiceTracker(context, PackageAdmin.class.getName(), null);
             packageServiceTracker.open();
         }
+       // return null;
         return (PackageAdmin) packageServiceTracker.getService();
     }
     
@@ -125,8 +131,9 @@ public class PluginUtilities {
     }
     
     public Object getExtensionObject(IExtension ext, String property) throws InstantiationException, IllegalAccessException, ClassNotFoundException {
-        Bundle b = getBundle(ext);
-        return b.loadClass(getAttribute(ext, property)).newInstance();
+       // Bundle b = getBundle(ext);
+       // return b.loadClass(getAttribute(ext, property)).newInstance();
+    	return Class.forName(getAttribute(ext, property)).newInstance();
         // return config.createExecutableExtension(property);
     }
     

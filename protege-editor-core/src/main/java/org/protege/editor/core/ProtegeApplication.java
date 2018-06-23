@@ -23,6 +23,7 @@ import org.protege.editor.core.ui.util.ErrorMessage;
 import org.protege.editor.core.ui.util.ProtegePlasticTheme;
 import org.protege.editor.core.ui.workspace.Workspace;
 import org.protege.editor.core.update.PluginManager;
+import org.protege.osgi.framework.Launcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -113,7 +114,43 @@ public class ProtegeApplication implements BundleActivator {
             logger.error("Exception caught starting Protege", t);
         }
     }
+    
+    public void startapp() {
+    	logManager.bind();
+    	try {
+    	displayPlatform();
+        initApplication();
 
+
+        if (OSUtils.isOSX()) {
+            ProtegeAppleApplication.getInstance();
+        }
+
+        ProtegeManager.getInstance().initialise(this);
+        startApplication();
+    	} catch (Throwable t) {
+            logger.error("Exception caught starting Protege", t);
+        }
+    
+    }
+    
+    public static void main(String[] args) throws Exception {
+       
+    	ProtegeApplication app = new ProtegeApplication();
+    	app.startapp();
+    	
+    	/* setArguments(args);
+        String config = System.getProperty(LAUNCH_LOCATION_PROPERTY, DEFAULT_CONFIG_XML_FILE_PATH_NAME);
+        File configFile;
+        if (PROTEGE_DIR != null) {
+            configFile = new File(PROTEGE_DIR, config);
+        }
+        else {
+            configFile = new File(config);
+        }
+        Launcher launcher = new Launcher(configFile);
+        launcher.start(true);*/
+    }
 
     // Called when the application is finally completely shutting down
     public void stop(BundleContext context) throws Exception {
@@ -136,24 +173,24 @@ public class ProtegeApplication implements BundleActivator {
     // If this isn't liked info can be replaced with debug.
     // It helps with diagnosing problems with the FaCT++ plugin.
     private void displayPlatform() {
-        Bundle thisBundle = context.getBundle();
-        Version v = PluginUtilities.getBundleVersion(thisBundle);
+      //  Bundle thisBundle = context.getBundle();
+       // Version v = PluginUtilities.getBundleVersion(thisBundle);
 
         logger.info(LogBanner.start("Protege"));
         logger.info("Protege Desktop");
-        logger.info("Version {}.{}.{}, Build {}", v.getMajor(), v.getMinor(), v.getMicro(), v.getQualifier());
+       // logger.info("Version {}.{}.{}, Build {}", v.getMajor(), v.getMinor(), v.getMicro(), v.getQualifier());
         logger.info("");
         logger.info("");
         logger.info(LogBanner.start("Platform"));
         logger.info("Java: JVM {}  Memory: {}M", System.getProperty("java.runtime.version"), getMaxMemoryInMegaBytes());
         logger.info("Language: {}, Country: {}", getLang(), getCountry());
-        logger.info("Framework: {} ({}) ", getFramework(), getFrameworkVersion());
-        logger.info("OS: {} ({})", getOsName(), getOsVersion());
-        logger.info("Processor: {}\n", getProcessor());
+       // logger.info("Framework: {} ({}) ", getFramework(), getFrameworkVersion());
+       // logger.info("OS: {} ({})", getOsName(), getOsVersion());
+       // logger.info("Processor: {}\n", getProcessor());
         logger.info(LogBanner.end());
         logger.info(LogBanner.start("Plugins"));
         int pluginCount = 0;
-        for (Bundle plugin : context.getBundles()) {
+      /*  for (Bundle plugin : context.getBundles()) {
             if (isPlugin(plugin)) {
                 if (isActive(plugin)) {
                     logger.info("Plugin: {} ({})", getNiceBundleName(plugin), plugin.getVersion());
@@ -164,16 +201,16 @@ public class ProtegeApplication implements BundleActivator {
                             "Please see the Protégé log for more details.", getNiceBundleName(plugin), plugin.getVersion());
                 }
             }
-        }
+        }*/
         if (pluginCount == 0) {
             logger.info("No plugins installed");
         }
         logger.info(LogBanner.end());
-        for (Bundle plugin : context.getBundles()) {
+       /* for (Bundle plugin : context.getBundles()) {
             if (isPlugin(plugin)) {
                 pluginSanityCheck(plugin);
             }
-        }
+        }*/
     }
 
     private static String getProcessor() {
@@ -189,11 +226,13 @@ public class ProtegeApplication implements BundleActivator {
     }
 
     private static String getFrameworkVersion() {
-        return context.getProperty(Constants.FRAMEWORK_VERSION);
+        return "No Framework version";
+    	//return context.getProperty(Constants.FRAMEWORK_VERSION);
     }
 
     private static String getFramework() {
-        return context.getProperty(Constants.FRAMEWORK_VENDOR);
+       return "Non OSGi"; 
+    	//return context.getProperty(Constants.FRAMEWORK_VENDOR);
     }
 
     private static String getCountry() {
@@ -447,13 +486,13 @@ public class ProtegeApplication implements BundleActivator {
             }
             logger.info("Auto-update has not been performed today.  Running it.");
             PluginManager.getInstance().runAutoUpdate();
-            context.addFrameworkListener(new FrameworkListener() {
+          /*  context.addFrameworkListener(new FrameworkListener() {
                 public void frameworkEvent(FrameworkEvent event) {
                     if (event.getType() == FrameworkEvent.STARTED) {
                         context.removeFrameworkListener(this);
                     }
                 }
-            });
+            });*/
         } finally {
             logger.info(LogBanner.end());
         }
@@ -554,9 +593,10 @@ public class ProtegeApplication implements BundleActivator {
                 return false;
             }
         }
-        try {
+        System.exit(0);
+       /* try {
             boolean forceExit = !OSGi.systemExitHandledByLauncher(); // this call fails after context.getBundle(0).stop()
-            context.getBundle(0).stop();
+            //context.getBundle(0).stop();
             // Danger, Will Robinson!  Weird territory here - the class loader is no longer working!
             //  java.lang.IllegalStateException: zip file closed
             //     at java.util.zip.ZipFile.ensureOpen(ZipFile.java:403)
@@ -575,7 +615,7 @@ public class ProtegeApplication implements BundleActivator {
             }
         } catch (Throwable t) {
             logger.error("An error occurred when shutting down Protégé.", t);
-        }
+        }*/
         return true;
     }
 

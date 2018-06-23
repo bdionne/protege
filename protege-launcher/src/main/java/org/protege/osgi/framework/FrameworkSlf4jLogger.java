@@ -15,7 +15,7 @@ public class FrameworkSlf4jLogger extends Logger {
     private final org.slf4j.Logger logger = LoggerFactory.getLogger(FrameworkSlf4jLogger.class);
 
     @Override
-    protected void doLog(Bundle bundle, ServiceReference sr, int level, String msg, Throwable throwable) {
+    protected void doLog(Bundle bundle, @SuppressWarnings("rawtypes") ServiceReference sr, int level, String msg, Throwable throwable) {
         if(level == LOG_ERROR) {
             logger.error(msg, throwable);
         }

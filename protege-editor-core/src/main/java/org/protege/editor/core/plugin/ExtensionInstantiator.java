@@ -56,5 +56,6 @@ public class ExtensionInstantiator<E> {
     public E instantiate() throws ClassCastException, InstantiationException, IllegalAccessException, ClassNotFoundException {
         Object o = PluginUtilities.getInstance().getExtensionObject(extension, PluginProperties.CLASS_PARAM_NAME);
         return (E) o;
+    	//return (E)extension;
     }
 }

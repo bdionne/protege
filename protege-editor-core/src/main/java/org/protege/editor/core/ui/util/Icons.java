@@ -3,6 +3,7 @@ package org.protege.editor.core.ui.util;
 
 import org.osgi.framework.Bundle;
 import org.protege.editor.core.plugin.PluginUtilities;
+import org.protege.editor.core.ui.workspace.WorkspaceTabPluginJPFImpl;
 
 import javax.swing.*;
 import java.net.URL;
@@ -54,13 +55,16 @@ public class Icons {
         if(fileName == null) {
             return null;
         }
-        Bundle b = PluginUtilities.getInstance().getApplicationBundle();
-        URL url = b.getResource(fileName);
+     //   Bundle b = PluginUtilities.getInstance().getApplicationBundle();
+       // URL url = b.getResource(fileName);
+        ClassLoader loader = Icons.class.getClassLoader();
+        URL url = loader.getResource(fileName);
         if(url != null) {
             return url;
         }
         if(!isNameAbsolute(fileName)) {
-            return b.getResource(ALTERNATIVE_ICONS_PATH + fileName);
+          //  return b.getResource(ALTERNATIVE_ICONS_PATH + fileName);
+         return	loader.getResource(ALTERNATIVE_ICONS_PATH + fileName);
         }
         return null;
     }

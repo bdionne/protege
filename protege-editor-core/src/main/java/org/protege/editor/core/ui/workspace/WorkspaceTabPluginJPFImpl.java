@@ -7,6 +7,7 @@ import org.protege.editor.core.plugin.ExtensionInstantiator;
 import org.protege.editor.core.plugin.JPFUtil;
 import org.protege.editor.core.plugin.PluginProperties;
 import org.protege.editor.core.plugin.PluginUtilities;
+//import org.protege.editor.owl.ui.OWLIcons;
 
 import javax.swing.*;
 import java.net.URL;
@@ -116,11 +117,13 @@ public class WorkspaceTabPluginJPFImpl implements WorkspaceTabPlugin {
 
 
     public URL getDefaultViewConfigFile() {
-        PluginUtilities util = PluginUtilities.getInstance();
-        Bundle contributor = util.getBundle(extension);
+       // PluginUtilities util = PluginUtilities.getInstance();
+       // Bundle contributor = util.getBundle(extension);
         String resource = PluginProperties.getParameterValue(extension, DEFAULT_VIEW_CONFIG_FILE_NAME_PARAM, null);
         if (resource != null) {
-            return contributor.getResource(resource);
+        	ClassLoader loader = WorkspaceTabPluginJPFImpl.class.getClassLoader();
+            return loader.getResource(resource);
+        	//return contributor.getResource(resource);
         }
         else {
             return null;
