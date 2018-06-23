@@ -101,8 +101,9 @@ public class OWLEditorKit extends AbstractEditorKit<OWLEditorKitFactory> {
 
 
         loadIOListenerPlugins();
-
-        registration = ProtegeOWL.getBundleContext().registerService(EditorKit.class.getCanonicalName(), this, new Hashtable<>());
+        registration = null;
+      
+        //  registration = ProtegeOWL.getBundleContext().registerService(EditorKit.class.getCanonicalName(), this, new Hashtable<>());
 
         // Finally load the UI
         workspace.initialise();
@@ -441,7 +442,7 @@ public class OWLEditorKit extends AbstractEditorKit<OWLEditorKitFactory> {
         } catch (Exception e) {
             ErrorLogPanel.showErrorDialog(e);
         }
-        registration.unregister();
+      //  registration.unregister();
         logger.info(LogBanner.end());
     }
 

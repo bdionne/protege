@@ -16,6 +16,11 @@
 	<name>protege-editor-core</name>
     <description>Core ontology editing infrastructure used by the Protege desktop application.</description>
     
+    <properties>
+        <lucene.version>7.1.0</lucene.version>
+        <protege-server.version>3.0.0-SNAPSHOT</protege-server.version>
+    </properties>
+    
 	<dependencies>
 
 		<dependency>
@@ -24,7 +29,54 @@
 			<version>${project.parent.version}</version>
 			<scope>provided</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.eclipse.equinox</groupId>
+			<artifactId>org.eclipse.equinox.nonosgi.registry</artifactId>
+			<version>1.0.0</version>
+		</dependency>
+		
+		<dependency>
+            <groupId>org.imgscalr</groupId>
+            <artifactId>imgscalr-lib</artifactId>
+            <version>4.2</version>
+        </dependency>
+        
+		<dependency>
+			<groupId>edu.stanford.protege</groupId>
+			<artifactId>org.protege.xmlcatalog</artifactId>
+		</dependency>
+		
+		<dependency>
+            <groupId>edu.stanford.protege</groupId>
+            <artifactId>metaproject</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
+        </dependency>
+        
+        
+		
+		<dependency>
+            <groupId>org.apache.lucene</groupId>
+            <artifactId>lucene-core</artifactId>
+            <version>${lucene.version}</version>
+        </dependency>
+		<dependency>
+            <groupId>org.apache.lucene</groupId>
+            <artifactId>lucene-analyzers-common</artifactId>
+            <version>${lucene.version}</version>
+        </dependency>
 
+        <dependency>
+            <groupId>org.apache.lucene</groupId>
+            <artifactId>lucene-queryparser</artifactId>
+            <version>${lucene.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.lucene</groupId>
+            <artifactId>lucene-analyzers-phonetic</artifactId>
+            <version>${lucene.version}</version>
+        </dependency>
+        
 		<dependency>
 			<groupId>com.googlecode.mdock</groupId>
 			<artifactId>mdock</artifactId>
