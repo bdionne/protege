@@ -189,7 +189,7 @@ public class ProtegeApplication implements BundleActivator {
        // logger.info("Processor: {}\n", getProcessor());
         logger.info(LogBanner.end());
         logger.info(LogBanner.start("Plugins"));
-        int pluginCount = 0;
+      //  int pluginCount = 0;
       /*  for (Bundle plugin : context.getBundles()) {
             if (isPlugin(plugin)) {
                 if (isActive(plugin)) {
@@ -201,10 +201,10 @@ public class ProtegeApplication implements BundleActivator {
                             "Please see the Protégé log for more details.", getNiceBundleName(plugin), plugin.getVersion());
                 }
             }
-        }*/
+        }
         if (pluginCount == 0) {
             logger.info("No plugins installed");
-        }
+        }*/
         logger.info(LogBanner.end());
        /* for (Bundle plugin : context.getBundles()) {
             if (isPlugin(plugin)) {
