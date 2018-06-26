@@ -1,5 +1,7 @@
 package org.protege.osgi.framework;
 
+import org.protege.editor.core.ProtegeApplication;
+
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
@@ -19,7 +21,8 @@ import java.util.Map.Entry;
 import java.util.prefs.Preferences;
 
 
-public class Launcher {
+public class Launcher
+{
 
     public static final String ARG_PROPERTY = "command.line.arg.";
 
@@ -33,9 +36,9 @@ public class Launcher {
 
     private final Logger logger = LoggerFactory.getLogger(Launcher.class.getCanonicalName());
 
-    private final Map<String, String> frameworkProperties = new HashMap<>();
+    private static final Map<String, String> frameworkProperties = new HashMap<>();
 
-    private final List<BundleSearchPath> searchPaths = new ArrayList<>();
+    private static final List<BundleSearchPath> searchPaths = new ArrayList<>();
 
     private final File frameworkDir;
 
@@ -58,13 +61,13 @@ public class Launcher {
         return framework;
     }
 
-    private void parseConfig(File config) throws ParserConfigurationException, SAXException, IOException {
+    private static void parseConfig(File config) throws ParserConfigurationException, SAXException, IOException {
         Parser p = new Parser();
         p.parse(config);
         setSystemProperties(p);
         setLogger(frameworkProperties);
         searchPaths.addAll(p.getSearchPaths());
-        frameworkProperties.putAll(p.getFrameworkProperties());
+      // frameworkProperties.putAll(p.getFrameworkProperties());
     }
 
     private static String locateOSGi() throws IOException {
@@ -75,7 +78,7 @@ public class Launcher {
         }
     }
 
-    private void setSystemProperties(Parser p) {
+    private static void setSystemProperties(Parser p) {
         Map<String, String> systemProperties = p.getSystemProperties();
         System.setProperty("org.protege.osgi.launcherHandlesExit", "True");
         for (Entry<String, String> entry : systemProperties.entrySet()) {
@@ -246,8 +249,15 @@ public class Launcher {
         else {
             configFile = new File(config);
         }
-        Launcher launcher = new Launcher(configFile);
-        launcher.start(true);
+       // Launcher launcher = new Launcher(configFile);
+       // launcher.start(true);
+        
+        Preferences.userRoot();
+        parseConfig(configFile);
+        
+        ProtegeApplication protegeApp = new ProtegeApplication();
+        
+        protegeApp.startapp();
     }
 
 
