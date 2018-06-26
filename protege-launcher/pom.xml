@@ -18,6 +18,12 @@
 	
 	<dependencies>
 		<dependency>
+            <groupId>edu.stanford.protege</groupId>
+            <artifactId>protege-editor-core</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+		<dependency>
+		
 			<groupId>net.sourceforge.owlapi</groupId>
 			<artifactId>owlapi-osgidistribution</artifactId>
 		</dependency>
