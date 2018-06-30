@@ -31,11 +31,7 @@
 			<scope>provided</scope>
 		</dependency>
 		 -->
-		<dependency>
 		
-			<groupId>net.sourceforge.owlapi</groupId>
-			<artifactId>owlapi-osgidistribution</artifactId>
-		</dependency>
 		<dependency>
 			<groupId>org.apache.felix</groupId>
 			<artifactId>org.apache.felix.main</artifactId>

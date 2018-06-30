@@ -1,7 +1,6 @@
 package org.protege.osgi.framework;
 
 import org.protege.editor.core.ProtegeApplication;
-
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
@@ -16,249 +15,339 @@ import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
+import java.lang.reflect.Method;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 import java.util.prefs.Preferences;
+import java.util.zip.ZipEntry;
 
+public class Launcher {
 
-public class Launcher
-{
+	public static final String ARG_PROPERTY = "command.line.arg.";
 
-    public static final String ARG_PROPERTY = "command.line.arg.";
+	public static final String LAUNCH_LOCATION_PROPERTY = "org.protege.launch.config";
 
-    public static final String LAUNCH_LOCATION_PROPERTY = "org.protege.launch.config";
+	public static final String PROTEGE_DIR_PROPERTY = "protege.dir";
 
-    public static final String PROTEGE_DIR_PROPERTY = "protege.dir";
+	public static final String DEFAULT_CONFIG_XML_FILE_PATH_NAME = "conf/config.xml";
 
-    public static final String DEFAULT_CONFIG_XML_FILE_PATH_NAME = "conf/config.xml";
+	public static String PROTEGE_DIR = System.getProperty(PROTEGE_DIR_PROPERTY);
 
-    public static String PROTEGE_DIR = System.getProperty(PROTEGE_DIR_PROPERTY);
+	private static final Logger logger = LoggerFactory.getLogger(Launcher.class.getCanonicalName());
 
-    private final Logger logger = LoggerFactory.getLogger(Launcher.class.getCanonicalName());
+	private static final Map<String, String> frameworkProperties = new HashMap<>();
 
-    private static final Map<String, String> frameworkProperties = new HashMap<>();
+	private static final List<BundleSearchPath> searchPaths = new ArrayList<>();
 
-    private static final List<BundleSearchPath> searchPaths = new ArrayList<>();
+	private final File frameworkDir;
 
-    private final File frameworkDir;
+	private final String factoryClass;
 
-    private final String factoryClass;
+	private Framework framework;
 
-    private Framework framework;
+	public Launcher(File config) throws IOException, ParserConfigurationException, SAXException {
+		// call preferences userRoot() to force factory to load before OSGI
+		Preferences.userRoot();
+		parseConfig(config);
+		factoryClass = locateOSGi();
+		frameworkDir = new File(System.getProperty("java.io.tmpdir"), "ProtegeCache-" + UUID.randomUUID().toString());
+		frameworkProperties.put(Constants.FRAMEWORK_STORAGE, frameworkDir.getCanonicalPath());
+		frameworkProperties.put(Constants.FRAMEWORK_BEGINNING_STARTLEVEL, Integer.toString(searchPaths.size()));
+	}
 
+	public Framework getFramework() {
+		return framework;
+	}
 
-    public Launcher(File config) throws IOException, ParserConfigurationException, SAXException {
-    	// call preferences userRoot() to force factory to load before OSGI
-    	Preferences.userRoot();
-        parseConfig(config);
-        factoryClass = locateOSGi();
-        frameworkDir = new File(System.getProperty("java.io.tmpdir"), "ProtegeCache-" + UUID.randomUUID().toString());
-        frameworkProperties.put(Constants.FRAMEWORK_STORAGE, frameworkDir.getCanonicalPath());
-        frameworkProperties.put(Constants.FRAMEWORK_BEGINNING_STARTLEVEL, Integer.toString(searchPaths.size()));
-    }
+	private static void parseConfig(File config) throws ParserConfigurationException, SAXException, IOException {
+		Parser p = new Parser();
+		p.parse(config);
+		setSystemProperties(p);
+		setLogger(frameworkProperties);
+		searchPaths.addAll(p.getSearchPaths());
+		// frameworkProperties.putAll(p.getFrameworkProperties());
+	}
 
-    public Framework getFramework() {
-        return framework;
-    }
+	private static String locateOSGi() throws IOException {
+		InputStream frameworkFactory = Launcher.class.getClassLoader()
+				.getResourceAsStream("META-INF/services/org.osgi.framework.launch.FrameworkFactory");
+		try (BufferedReader factoryReader = new BufferedReader(new InputStreamReader(frameworkFactory))) {
+			return factoryReader.readLine().trim();
+		}
+	}
 
-    private static void parseConfig(File config) throws ParserConfigurationException, SAXException, IOException {
-        Parser p = new Parser();
-        p.parse(config);
-        setSystemProperties(p);
-        setLogger(frameworkProperties);
-        searchPaths.addAll(p.getSearchPaths());
-      // frameworkProperties.putAll(p.getFrameworkProperties());
-    }
+	private static void setSystemProperties(Parser p) {
+		Map<String, String> systemProperties = p.getSystemProperties();
+		System.setProperty("org.protege.osgi.launcherHandlesExit", "True");
+		for (Entry<String, String> entry : systemProperties.entrySet()) {
+			System.setProperty(entry.getKey(), entry.getValue());
+		}
+	}
 
-    private static String locateOSGi() throws IOException {
-        InputStream frameworkFactory = Launcher.class.getClassLoader()
-                .getResourceAsStream("META-INF/services/org.osgi.framework.launch.FrameworkFactory");
-        try (BufferedReader factoryReader = new BufferedReader(new InputStreamReader(frameworkFactory))) {
-            return factoryReader.readLine().trim();
-        }
-    }
+	/**
+	 * Sets the default felix logger so that logging output is redirected to SLF4J
+	 * instead of stderr and stdout
+	 * 
+	 * @param configurationMap
+	 *            The configuration map. Note that the framework factory
+	 *            newFramework method expects a map that maps Strings to Strings.
+	 *            However, the documentation for the Felix configuration properties
+	 *            specifies that the config value of the felix.log.logger property
+	 *            must be an instance of Logger. This method therefore makes an
+	 *            unchecked call to Map.put(), which works.
+	 */
+	@SuppressWarnings("unchecked")
+	private static void setLogger(Map configurationMap) {
+		FrameworkSlf4jLogger logger = new FrameworkSlf4jLogger();
+		configurationMap.put("felix.log.logger", logger);
+	}
 
-    private static void setSystemProperties(Parser p) {
-        Map<String, String> systemProperties = p.getSystemProperties();
-        System.setProperty("org.protege.osgi.launcherHandlesExit", "True");
-        for (Entry<String, String> entry : systemProperties.entrySet()) {
-            System.setProperty(entry.getKey(), entry.getValue());
-        }
-    }
+	public void start(final boolean exitOnOSGiShutDown) throws InstantiationException, IllegalAccessException,
+			ClassNotFoundException, BundleException, IOException, InterruptedException {
+		printBanner();
+		logger.info("----------------- Initialising and Starting the OSGi Framework -----------------");
+		logger.info("FrameworkFactory Class: {}", factoryClass);
+		logger.info("");
 
-    /**
-     * Sets the default felix logger so that logging output is redirected to SLF4J instead of stderr and stdout
-     * @param configurationMap The configuration map.  Note that the framework factory newFramework method expects
-     *                         a map that maps Strings to Strings.  However, the documentation for the Felix
-     *                         configuration properties specifies that the config value of the felix.log.logger
-     *                         property must be an instance of Logger.  This method therefore makes an unchecked
-     *                         call to Map.put(), which works.
-     */
-    @SuppressWarnings("unchecked")
-    private static void setLogger(Map configurationMap) {
-        FrameworkSlf4jLogger logger = new FrameworkSlf4jLogger();
-        configurationMap.put("felix.log.logger", logger);
-    }
+		FrameworkFactory factory = (FrameworkFactory) Class.forName(factoryClass).newInstance();
 
-    public void start(final boolean exitOnOSGiShutDown) throws InstantiationException, IllegalAccessException, ClassNotFoundException, BundleException, IOException, InterruptedException {
-        printBanner();
-        logger.info("----------------- Initialising and Starting the OSGi Framework -----------------");
-        logger.info("FrameworkFactory Class: {}", factoryClass);
-        logger.info("");
-        
-        FrameworkFactory factory = (FrameworkFactory) Class.forName(factoryClass).newInstance();
+		framework = factory.newFramework(frameworkProperties);
+		framework.init();
+		logger.info("The OSGi framework has been initialised");
+		BundleContext context = framework.getBundleContext();
+		List<Bundle> bundles = new ArrayList<>();
+		int startLevel = 1;
+		for (BundleSearchPath searchPath : searchPaths) {
+			bundles.addAll(installBundles(context, searchPath, startLevel++));
+		}
+		startBundles(bundles);
+		try {
+			framework.start();
+			logger.info("The OSGi framework has been started");
+			logger.info("");
+		} catch (BundleException e) {
+			logger.error("An error occurred when starting the OSGi framework: {}", e.getMessage(), e);
+		}
+		addShutdownHook();
+		addCleanupOnExit(exitOnOSGiShutDown);
 
-        framework = factory.newFramework(frameworkProperties);
-        framework.init();
-        logger.info("The OSGi framework has been initialised");
-        BundleContext context = framework.getBundleContext();
-        List<Bundle> bundles = new ArrayList<>();
-        int startLevel = 1;
-        for (BundleSearchPath searchPath : searchPaths) {
-            bundles.addAll(installBundles(context, searchPath, startLevel++));
-        }
-        startBundles(bundles);
-        try {
-            framework.start();
-            logger.info("The OSGi framework has been started");
-            logger.info("");
-        } catch (BundleException e) {
-            logger.error("An error occurred when starting the OSGi framework: {}", e.getMessage(), e);
-        }
-        addShutdownHook();
-        addCleanupOnExit(exitOnOSGiShutDown);
+	}
 
-    }
+	private void addShutdownHook() {
+		Thread hook = new Thread(() -> {
+			try {
+				logger.info("----------------------- Shutting down Protege -----------------------");
+				if (framework.getState() == Bundle.ACTIVE) {
+					framework.stop();
+					framework.waitForStop(0);
+				}
+				// Give the prefs file a chance to close :)
+				Thread.sleep(2000);
+				cleanup();
+			} catch (Throwable t) {
+				logger.error("Error shutting down OSGi session: {}", t.getMessage(), t);
+			}
+		}, "Close OSGi Session");
+		Runtime.getRuntime().addShutdownHook(hook);
+	}
 
+	private void addCleanupOnExit(final boolean exitOnOSGiShutDown) {
+		Thread shutdownThread = new Thread(() -> {
+			try {
+				framework.waitForStop(0);
+				if (exitOnOSGiShutDown) {
+					System.exit(0);
+				}
+			} catch (Throwable t) {
+				logger.error("Error on shutdown: {}", t.getMessage(), t);
+			}
+		}, "OSGi Shutdown Thread");
+		shutdownThread.start();
+	}
 
+	private List<Bundle> installBundles(BundleContext context, BundleSearchPath searchPath, int startLevel)
+			throws BundleException {
+		Collection<File> bundles = searchPath.search();
+		List<Bundle> core = new ArrayList<>();
+		for (File bundleFile : bundles) {
+			try {
+				String bundleURI = bundleFile.getAbsoluteFile().toURI().toString();
+				logger.debug("Installing bundle.  StartLevel: {}; Bundle: {}", startLevel,
+						bundleFile.getAbsolutePath());
+				Bundle newBundle = context.installBundle(bundleURI);
+				// the cast to BundleStartLevel is not needed in Java 6 but it is in Java 7
+				((BundleStartLevel) newBundle.adapt(BundleStartLevel.class)).setStartLevel(startLevel);
+				core.add(newBundle);
+			} catch (Throwable t) {
+				logger.warn("Bundle {} failed to install: {}", bundleFile, t);
+			}
+		}
+		return core;
+	}
 
-    private void addShutdownHook() {
-        Thread hook = new Thread(() -> {
-            try {
-                logger.info("----------------------- Shutting down Protege -----------------------");
-                if (framework.getState() == Bundle.ACTIVE) {
-                    framework.stop();
-                    framework.waitForStop(0);
-                }
-                // Give the prefs file a chance to close :)
-                Thread.sleep(2000);
-                cleanup();
-            } catch (Throwable t) {
-                logger.error("Error shutting down OSGi session: {}", t.getMessage(), t);
-            }
-        }, "Close OSGi Session");
-        Runtime.getRuntime().addShutdownHook(hook);
-    }
+	private void startBundles(List<Bundle> bundles) throws BundleException {
+		logger.info("------------------------------- Starting Bundles -------------------------------");
+		for (Bundle b : bundles) {
+			try {
+				if (!isFragmentBundle(b)) {
+					b.start();
+					logger.info("Starting bundle {}", b.getSymbolicName());
+				} else {
+					logger.info("Not starting bundle {} explicitly because it is a fragment bundle.",
+							b.getSymbolicName());
+				}
+			} catch (Throwable t) {
+				logger.error("Core Bundle {} failed to start: {}", b.getBundleId(), t);
+			}
+		}
+		logger.debug("-------------------------------------------------------------------------------");
+	}
 
-    private void addCleanupOnExit(final boolean exitOnOSGiShutDown) {
-        Thread shutdownThread = new Thread(() -> {
-            try {
-                framework.waitForStop(0);
-                if (exitOnOSGiShutDown) {
-                    System.exit(0);
-                }
-            } catch (Throwable t) {
-                logger.error("Error on shutdown: {}", t.getMessage(), t);
-            }
-        }, "OSGi Shutdown Thread");
-        shutdownThread.start();
-    }
+	private static boolean isFragmentBundle(Bundle b) {
+		return (b.adapt(BundleRevision.class).getTypes() & BundleRevision.TYPE_FRAGMENT) != 0;
+	}
 
-    private List<Bundle> installBundles(BundleContext context, BundleSearchPath searchPath, int startLevel) throws BundleException {
-        Collection<File> bundles = searchPath.search();
-        List<Bundle> core = new ArrayList<>();
-        for (File bundleFile : bundles) {
-            try {
-                String bundleURI = bundleFile.getAbsoluteFile().toURI().toString();
-                logger.debug("Installing bundle.  StartLevel: {}; Bundle: {}", startLevel, bundleFile.getAbsolutePath());
-                Bundle newBundle = context.installBundle(bundleURI);
-                // the cast to BundleStartLevel is not needed in Java 6 but it is in Java 7
-                ((BundleStartLevel) newBundle.adapt(BundleStartLevel.class)).setStartLevel(startLevel);
-                core.add(newBundle);
-            } catch (Throwable t) {
-                logger.warn("Bundle {} failed to install: {}", bundleFile, t);
-            }
-        }
-        return core;
-    }
+	protected void cleanup() {
+		logger.info("Cleaning up temporary directories");
+		delete(frameworkDir);
+	}
 
-    private void startBundles(List<Bundle> bundles) throws BundleException {
-        logger.info("------------------------------- Starting Bundles -------------------------------");
-        for (Bundle b : bundles) {
-            try {
-                if (!isFragmentBundle(b)) {
-                    b.start();
-                    logger.info("Starting bundle {}", b.getSymbolicName());
-                }
-                else {
-                    logger.info("Not starting bundle {} explicitly because it is a fragment bundle.", b.getSymbolicName());
-                }
-            } catch (Throwable t) {
-                logger.error("Core Bundle {} failed to start: {}", b.getBundleId(), t);
-            }
-        }
-        logger.debug("-------------------------------------------------------------------------------");
-    }
+	private void delete(File f) {
+		if (f.isDirectory()) {
+			File[] files = f.listFiles();
+			if (files != null) {
+				for (File child : files) {
+					delete(child);
+				}
+			}
+		}
+		if (!f.delete()) {
+			logger.warn("File could not be deleted ({})", f.getAbsolutePath());
+		}
+	}
 
-    private static boolean isFragmentBundle(Bundle b) {
-        return (b.adapt(BundleRevision.class).getTypes() & BundleRevision.TYPE_FRAGMENT) != 0;
-    }
+	public static void setArguments(String... args) {
+		if (args != null) {
+			int counter = 0;
+			for (String arg : args) {
+				System.setProperty(ARG_PROPERTY + (counter++), arg);
+			}
+		}
+	}
 
-    protected void cleanup() {
-        logger.info("Cleaning up temporary directories");
-        delete(frameworkDir);
-    }
+	private void printBanner() {
+		logger.info("********************************************************************************");
+		logger.info("**                                  Protege                                   **");
+		logger.info("********************************************************************************");
+		logger.info("");
+	}
 
-    private void delete(File f) {
-        if (f.isDirectory()) {
-            File[] files = f.listFiles();
-            if (files != null) {
-                for (File child : files) {
-                    delete(child);
-                }
-            }
-        }
-        if (!f.delete()) {
-            logger.warn("File could not be deleted ({})", f.getAbsolutePath());
-        }
-    }
+	public static void main(String[] args) throws Exception {
 
-    public static void setArguments(String... args) {
-        if (args != null) {
-            int counter = 0;
-            for (String arg : args) {
-                System.setProperty(ARG_PROPERTY + (counter++), arg);
-            }
-        }
-    }
+		setArguments(args);
+		String config = System.getProperty(LAUNCH_LOCATION_PROPERTY, DEFAULT_CONFIG_XML_FILE_PATH_NAME);
+		File configFile;
+		if (PROTEGE_DIR != null) {
+			configFile = new File(PROTEGE_DIR, config);
+		} else {
+			configFile = new File(config);
+		}
+		// Launcher launcher = new Launcher(configFile);
+		// launcher.start(true);
 
-    private void printBanner() {
-        logger.info("********************************************************************************");
-        logger.info("**                                  Protege                                   **");
-        logger.info("********************************************************************************");
-        logger.info("");
-    }
+		Preferences.userRoot();
+		parseConfig(configFile);
 
-    public static void main(String[] args) throws Exception {
-        setArguments(args);
-        String config = System.getProperty(LAUNCH_LOCATION_PROPERTY, DEFAULT_CONFIG_XML_FILE_PATH_NAME);
-        File configFile;
-        if (PROTEGE_DIR != null) {
-            configFile = new File(PROTEGE_DIR, config);
-        }
-        else {
-            configFile = new File(config);
-        }
-       // Launcher launcher = new Launcher(configFile);
-       // launcher.start(true);
-        
-        Preferences.userRoot();
-        parseConfig(configFile);
-        
-        ProtegeApplication protegeApp = new ProtegeApplication();
-        
-        protegeApp.startapp();
-    }
+		setClasspathForPlugins();
+		ProtegeApplication protegeApp = new ProtegeApplication();
 
+		protegeApp.startapp();
+	}
 
+	private static void setClasspathForPlugins() {
+		ArrayList<String> pluginPath = new ArrayList<String>();
+
+		for (BundleSearchPath path : searchPaths) {
+			List<File> directories = path.getPath();
+			for (File file : directories) {
+				// System.out.println("Search Path: " + file.getAbsolutePath());
+				if (file.isDirectory()) {
+					File[] files = file.listFiles((dir, name) -> {
+						if (name.toLowerCase().endsWith(".jar")) {
+							return true;
+						}
+						return false;
+
+					});
+					for (File f : files) {
+						if (f.getPath().contains("plugins") && !pluginPath.contains(f.getAbsolutePath())) {
+							pluginPath.add(f.getAbsolutePath());
+							continue;
+						}
+						try {
+							JarFile jarFile = new JarFile(f);
+
+							JarEntry jarentry = jarFile.getJarEntry("plugin.xml");
+							if (jarentry != null && !pluginPath.contains(f.getAbsolutePath())) {
+								pluginPath.add(f.getAbsolutePath());
+								// System.out.println("Jar file contains plugin.xml: " + f.getAbsolutePath());
+							}
+
+							jarFile.close();
+						} catch (Exception e) {
+							logger.error("failed to locate plugin.xml: {}", e);
+						}
+					}
+
+				}
+			}
+		}
+
+		// String classpath = System.getProperty("java.class.path") +
+		// File.pathSeparator;
+
+		for (String path : pluginPath) {
+			// classpath += path + File.pathSeparator;
+			try {
+				addFile(path);
+			} catch (Exception e) {
+				logger.error("Error in addFile method", e);
+			}
+		}
+	}
+
+	public static void addFile(String s) throws IOException {
+		File f = new File(s);
+		addFile(f);
+	}
+
+	public static void addFile(File f) throws IOException {
+		addURL(f.toURI().toURL());
+	}
+
+	public static void addURL(URL u) throws IOException {
+
+		URLClassLoader sysLoader = (URLClassLoader) ClassLoader.getSystemClassLoader();
+		URL urls[] = sysLoader.getURLs();
+		for (int i = 0; i < urls.length; i++) {
+			if (urls[i].toString().equalsIgnoreCase(u.toString())) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("URL " + u + " is already in the CLASSPATH");
+				}
+				return;
+			}
+		}
+		Class sysclass = URLClassLoader.class;
+		try {
+			Method method = sysclass.getDeclaredMethod("addURL", new Class[] { URL.class });
+			method.setAccessible(true);
+			method.invoke(sysLoader, new Object[] { u });
+		} catch (Throwable t) {
+			logger.error("Error, could not add URL to system classloader", t);
+		}
+	}
 }
