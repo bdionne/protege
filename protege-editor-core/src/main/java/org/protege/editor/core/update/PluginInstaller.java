@@ -6,6 +6,8 @@ import org.osgi.framework.BundleException;
 import org.protege.editor.core.FileUtils;
 import org.protege.editor.core.ProtegeApplication;
 import org.protege.editor.core.log.LogBanner;
+import org.protege.editor.core.plugin.JPFUtil;
+import org.protege.editor.core.plugin.PluginUtilities;
 import org.protege.editor.core.ui.progress.BackgroundTask;
 import org.protege.editor.core.ui.util.ErrorMessage;
 import org.protege.editor.core.util.ProtegeDirectories;
@@ -188,7 +190,7 @@ public class PluginInstaller {
     private static Optional<File> copyPluginToInstallLocation(File downloadedPlugin, PluginInfo info) throws URISyntaxException {
 
         final Optional<File> backupFileName = moveExistingPluginToBackupLocation(info);
-        final File pluginsFolder = new File(System.getProperty(ProtegeApplication.BUNDLE_DIR_PROP));
+        final File pluginsFolder = new File(System.getProperty(ProtegeApplication.PLUGIN_DIR_PROP));
         final String destinationFileName = String.format("%s-%s.jar", info.getId(), info.getAvailableVersion());
         final File downloadedPluginDestination = new File(pluginsFolder, destinationFileName);
 
@@ -293,13 +295,15 @@ public class PluginInstaller {
     private boolean installPlugin(File pluginLocation, PluginInfo info) {
         if (info.getPluginDescriptor() == null) {  // download not an update...
             logger.info("Installing the {} plugin", info.getLabel());
-            BundleContext context = ProtegeApplication.getContext();
+           // BundleContext context = ProtegeApplication.getContext();
             try {
-                Bundle b = context.installBundle("file:" + pluginLocation.getPath());
-                b.start();
-                return true;
-            } catch (BundleException e) {
-                logger.info("The {} plugin requires a restart of Protégé (Reason: {})", info.getLabel(), e.getMessage());
+               // Bundle b = context.installBundle("file:" + pluginLocation.getPath());
+              // b.start();
+            	JPFUtil.setClasspathForPlugins();
+            	PluginUtilities.getInstance().getExtensionRegistry();
+                return  true;
+            } catch (Exception e) {
+               logger.info("The {} plugin requires a restart of Protégé (Reason: {})", info.getLabel(), e.getMessage());
                 return false;
             }
         }

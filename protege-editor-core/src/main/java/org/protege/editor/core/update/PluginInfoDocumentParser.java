@@ -5,6 +5,7 @@ import org.osgi.framework.Version;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.util.Optional;
 import java.util.Properties;
@@ -95,6 +96,51 @@ public class PluginInfoDocumentParser {
                                 updateFileLocation
                         )
                 );
+            }
+
+            URL downloadURL = new URL(downloadURLStr);
+
+            PluginInfo info = new PluginInfo(id, version, downloadURL);
+
+            final String readmeStr = properties.getProperty(DOC_PROPERTY_NAME);
+            if (readmeStr != null){
+                info.setReadmeURI(new URL(readmeStr));
+            }
+            info.setLicense(properties.getProperty(LICENSE_PROPERTY_NAME));
+            info.setAuthor(properties.getProperty(AUTHOR_PROPERTY_NAME));
+            info.setLabel(properties.getProperty(LABEL_PROPERTY_NAME));
+
+            return info;
+        } catch (IOException e) {
+            throw new PluginDocumentParseException("The plugin document could not be loaded due to a network error: " + e.getClass().getSimpleName() + ", " + e.getMessage(), e);
+        }
+    }
+    public static PluginInfo parseUpdateProperties(InputStream inputStream) throws PluginDocumentParseException {
+        try {
+            Properties properties = new Properties();
+            properties.load(inputStream);
+            inputStream.close();
+
+            String id = properties.getProperty(ID_PROPERTY_NAME);
+            
+
+            final String versionString = properties.getProperty(VERSION_PROPERTY_NAME);
+            
+            final Version version;
+            try {
+                   version = new Version(versionString);
+            } catch (IllegalArgumentException e) {
+                    throw new PluginDocumentParseException(
+                            String.format(
+                                    "The plugin update document contains an illegal version string (%s).",
+                                    versionString),
+                            e
+                    );
+            }
+
+            final String downloadURLStr = properties.getProperty(DOWNLOAD_PROPERTY_NAME);
+            if(downloadURLStr == null) {
+                throw new PluginDocumentParseException("The plugin update document does not contain a download URL");
             }
 
             URL downloadURL = new URL(downloadURLStr);

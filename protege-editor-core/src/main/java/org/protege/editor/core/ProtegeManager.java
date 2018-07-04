@@ -362,7 +362,7 @@ public class ProtegeManager {
     }
 
     private void setupRepositories() {
-            /*OntologyRepositoryFactoryPluginLoader loader = new OntologyRepositoryFactoryPluginLoader();
+            OntologyRepositoryFactoryPluginLoader loader = new OntologyRepositoryFactoryPluginLoader();
             for(OntologyRepositoryFactoryPlugin plugin : loader.getPlugins()) {
                 try {
                     OntologyRepositoryFactory factory = plugin.newInstance();
@@ -374,6 +374,6 @@ public class ProtegeManager {
                     logger.warn("An error occurred whilst attempting to load an ontology repository.  " +
                             "Ontology Repository Plugin: ", plugin.getId(), e);
                 }
-            }*/
+            }
     }
 }

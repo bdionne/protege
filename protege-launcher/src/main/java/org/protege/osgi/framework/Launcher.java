@@ -1,6 +1,7 @@
 package org.protege.osgi.framework;
 
 import org.protege.editor.core.ProtegeApplication;
+import org.protege.editor.core.plugin.JPFUtil;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
@@ -15,15 +16,9 @@ import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
-import java.lang.reflect.Method;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.util.*;
 import java.util.Map.Entry;
-import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
 import java.util.prefs.Preferences;
-import java.util.zip.ZipEntry;
 
 public class Launcher {
 
@@ -261,93 +256,12 @@ public class Launcher {
 
 		Preferences.userRoot();
 		parseConfig(configFile);
-
-		setClasspathForPlugins();
+		
+		JPFUtil.setClasspathForPlugins();
 		ProtegeApplication protegeApp = new ProtegeApplication();
 
 		protegeApp.startapp();
 	}
-
-	private static void setClasspathForPlugins() {
-		ArrayList<String> pluginPath = new ArrayList<String>();
-
-		for (BundleSearchPath path : searchPaths) {
-			List<File> directories = path.getPath();
-			for (File file : directories) {
-				// System.out.println("Search Path: " + file.getAbsolutePath());
-				if (file.isDirectory()) {
-					File[] files = file.listFiles((dir, name) -> {
-						if (name.toLowerCase().endsWith(".jar")) {
-							return true;
-						}
-						return false;
-
-					});
-					for (File f : files) {
-						if (f.getPath().contains("plugins") && !pluginPath.contains(f.getAbsolutePath())) {
-							pluginPath.add(f.getAbsolutePath());
-							continue;
-						}
-						try {
-							JarFile jarFile = new JarFile(f);
-
-							JarEntry jarentry = jarFile.getJarEntry("plugin.xml");
-							if (jarentry != null && !pluginPath.contains(f.getAbsolutePath())) {
-								pluginPath.add(f.getAbsolutePath());
-								// System.out.println("Jar file contains plugin.xml: " + f.getAbsolutePath());
-							}
-
-							jarFile.close();
-						} catch (Exception e) {
-							logger.error("failed to locate plugin.xml: {}", e);
-						}
-					}
-
-				}
-			}
-		}
-
-		// String classpath = System.getProperty("java.class.path") +
-		// File.pathSeparator;
-
-		for (String path : pluginPath) {
-			// classpath += path + File.pathSeparator;
-			try {
-				addFile(path);
-			} catch (Exception e) {
-				logger.error("Error in addFile method", e);
-			}
-		}
-	}
-
-	public static void addFile(String s) throws IOException {
-		File f = new File(s);
-		addFile(f);
-	}
-
-	public static void addFile(File f) throws IOException {
-		addURL(f.toURI().toURL());
-	}
-
-	public static void addURL(URL u) throws IOException {
-
-		URLClassLoader sysLoader = (URLClassLoader) ClassLoader.getSystemClassLoader();
-		URL urls[] = sysLoader.getURLs();
-		for (int i = 0; i < urls.length; i++) {
-			if (urls[i].toString().equalsIgnoreCase(u.toString())) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("URL " + u + " is already in the CLASSPATH");
-				}
-				return;
-			}
-		}
-		Class sysclass = URLClassLoader.class;
-		try {
-			Method method = sysclass.getDeclaredMethod("addURL", new Class[] { URL.class });
-			method.setAccessible(true);
-			method.invoke(sysLoader, new Object[] { u });
-		} catch (Throwable t) {
-			logger.error("Error, could not add URL to system classloader", t);
-		}
-	}
+	
+	
 }
