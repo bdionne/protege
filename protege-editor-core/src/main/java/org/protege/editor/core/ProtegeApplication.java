@@ -62,7 +62,8 @@ public class ProtegeApplication implements BundleActivator {
 
     public static final String BUNDLE_WITHOUT_PLUGIN_XML = "No-Plugin-XML";
 
-    public static final String BUNDLE_DIR_PROP = "org.protege.plugin.dir";
+    public static final String BUNDLE_DIR_PROP = "org.protege.bundle.dir";
+    public static final String PLUGIN_DIR_PROP = "org.protege.plugin.dir";
 
     public static final String RUN_ONCE = "PROTEGE_OSGI_RUN_ONCE";
 
@@ -503,7 +504,10 @@ public class ProtegeApplication implements BundleActivator {
         Date lastRun = PluginManager.getInstance().getLastAutoUpdateDate();
         logger.info("Auto-update last performed: {}", lastRun);
         Date startOfToday = getStartOfToday();
-        return lastRun.after(startOfToday);
+       // return lastRun.after(startOfToday);
+        
+        //Temporarily return false for testing
+        return false;
     }
 
     private static Date getStartOfToday() {

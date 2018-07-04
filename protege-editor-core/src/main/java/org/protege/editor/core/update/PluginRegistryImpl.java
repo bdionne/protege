@@ -2,6 +2,8 @@ package org.protege.editor.core.update;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Version;
+import org.protege.editor.core.ProtegeApplication;
 import org.protege.editor.core.log.LogBanner;
 import org.protege.editor.core.plugin.PluginUtilities;
 import org.slf4j.Logger;
@@ -11,7 +13,9 @@ import org.slf4j.MarkerFactory;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -22,6 +26,9 @@ import java.util.*;
 *
 *
 */
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
+import java.util.zip.ZipEntry;
 
 /**
  * Author: drummond<br>
@@ -80,6 +87,7 @@ public class PluginRegistryImpl implements PluginRegistry {
         private BundleContext context = PluginUtilities.getInstance().getApplicationContext();
 
         private Map<String, Bundle> bundleByIds = new HashMap<>();
+        private Map<String, PluginInfo> PluginByIds = new HashMap<>();
 
         private Set<URL> visitedURLs = new HashSet<>();
 
@@ -96,7 +104,8 @@ public class PluginRegistryImpl implements PluginRegistry {
         public void run() {
             logger.info(LogBanner.start("Running Auto-update"));
             logger.info("");
-            mapIdsToBundles();
+          //  mapIdsToBundles();
+            mapIdsToPluginInfo();
             searchForAvailablePlugins(root);
             sortPlugins(availablePlugins);
             logger.info(LogBanner.end());
@@ -112,6 +121,41 @@ public class PluginRegistryImpl implements PluginRegistry {
                 bundleByIds.put(bundle.getSymbolicName(), bundle);
             }
         }
+        
+		private void mapIdsToPluginInfo() {
+			File pluginsFolder = new File(System.getProperty(ProtegeApplication.PLUGIN_DIR_PROP));
+			File[] files = pluginsFolder.listFiles((dir, name) -> {
+				if (name.toLowerCase().endsWith(".jar")) {
+					return true;
+				}
+				return false;
+
+			});
+			for (File f : files) {
+
+				try {
+					JarFile jarFile = new JarFile(f);
+
+					ZipEntry zipentry = jarFile.getEntry("update.properties");
+
+					if (zipentry != null) {
+						InputStream in = jarFile.getInputStream(zipentry);
+
+						PluginInfo info = PluginInfoDocumentParser.parseUpdateProperties(in);
+
+						logger.debug(AUTO_UPDATE, "Existing plugin: {}", info.getId());
+						PluginByIds.put(info.getId(), info);
+
+					}
+
+					jarFile.close();
+				} catch (Exception e) {
+					logger.error("failed to locate update.properties: {}", e);
+				}
+			}
+
+		}
+
 
         private void searchForAvailablePlugins(URL root) {
             logger.info("--- Searching for plugins ---");
@@ -133,12 +177,13 @@ public class PluginRegistryImpl implements PluginRegistry {
                     if (parsedInfo.isPresent()) {
                         PluginInfo info = parsedInfo.get();
                         logger.debug(AUTO_UPDATE, "{}URL {} has valid plugin info: {}", pad(depth), node, info.getId());
-                        Bundle bundle = bundleByIds.get(info.getId());
+                      //  Bundle bundle = bundleByIds.get(info.getId());
+                        PluginInfo bundle = PluginByIds.get(info.getId());
                         if (bundle != null) {
                             // Only list it if it is newer than the current version
-                            boolean newer = bundle.getVersion().compareTo(info.getAvailableVersion()) < 0;
+                            boolean newer = bundle.getAvailableVersion().compareTo(info.getAvailableVersion()) < 0;
                             if(newer) {
-                                info.setPluginDescriptor(bundle);
+                               //info.setPluginDescriptor(bundle);
                                 logger.debug(AUTO_UPDATE, "{}URL {} is an update", pad(depth), node);
                                 availablePlugins.add(info);
                             }
