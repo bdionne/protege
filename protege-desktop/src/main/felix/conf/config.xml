@@ -6,6 +6,7 @@
     <property name="apple.laf.useScreenMenuBar" value="true"/>
     <property name="com.apple.mrj.application.growbox.intrudes" value="true"/>
     <property name="org.protege.plugin.dir" value="plugins"/>
+    <property name="org.protege.bundle.dir" value="bundles"/>
   </systemProperties>
   <frameworkProperties>
     <property name="org.osgi.framework.bootdelegation" value="sun.*,com.sun.*,apple.*,com.apple.*"/>
