@@ -17,7 +17,7 @@ public class Server {
      */
     public static void main(String[] args) throws Exception {
         Launcher.setArguments(args);
-        new Launcher(new File("server.xml")).start(true);
+        //new Launcher(new File("server.xml")).start(true);
         System.exit(0);
     }
 

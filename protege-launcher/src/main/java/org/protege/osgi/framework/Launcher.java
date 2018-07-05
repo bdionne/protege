@@ -1,15 +1,18 @@
 package org.protege.osgi.framework;
 
 import org.protege.editor.core.ProtegeApplication;
+
 import org.protege.editor.core.plugin.JPFUtil;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.BundleException;
-import org.osgi.framework.Constants;
-import org.osgi.framework.launch.Framework;
-import org.osgi.framework.launch.FrameworkFactory;
-import org.osgi.framework.startlevel.BundleStartLevel;
-import org.osgi.framework.wiring.BundleRevision;
+
+//import org.osgi.framework.Bundle;
+//import org.osgi.framework.BundleContext;
+//import org.osgi.framework.BundleException;
+//import org.osgi.framework.Constants;
+//import org.osgi.framework.launch.Framework;
+//import org.osgi.framework.launch.FrameworkFactory;
+//import org.osgi.framework.startlevel.BundleStartLevel;
+//import org.osgi.framework.wiring.BundleRevision;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
@@ -19,6 +22,9 @@ import java.io.*;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.prefs.Preferences;
+
+//import java.util.zip.ZipEntry;
+
 
 public class Launcher {
 
@@ -38,25 +44,25 @@ public class Launcher {
 
 	private static final List<BundleSearchPath> searchPaths = new ArrayList<>();
 
-	private final File frameworkDir;
+	//private final File frameworkDir;
 
-	private final String factoryClass;
+	//private final String factoryClass;
 
-	private Framework framework;
+	//private Framework framework;
 
 	public Launcher(File config) throws IOException, ParserConfigurationException, SAXException {
 		// call preferences userRoot() to force factory to load before OSGI
 		Preferences.userRoot();
 		parseConfig(config);
-		factoryClass = locateOSGi();
-		frameworkDir = new File(System.getProperty("java.io.tmpdir"), "ProtegeCache-" + UUID.randomUUID().toString());
-		frameworkProperties.put(Constants.FRAMEWORK_STORAGE, frameworkDir.getCanonicalPath());
-		frameworkProperties.put(Constants.FRAMEWORK_BEGINNING_STARTLEVEL, Integer.toString(searchPaths.size()));
+		//factoryClass = locateOSGi();
+		//frameworkDir = new File(System.getProperty("java.io.tmpdir"), "ProtegeCache-" + UUID.randomUUID().toString());
+		//frameworkProperties.put(Constants.FRAMEWORK_STORAGE, frameworkDir.getCanonicalPath());
+		//rameworkProperties.put(Constants.FRAMEWORK_BEGINNING_STARTLEVEL, Integer.toString(searchPaths.size()));
 	}
 
-	public Framework getFramework() {
-		return framework;
-	}
+	//public Framework getFramework() {
+		//return framework;
+	//}
 
 	private static void parseConfig(File config) throws ParserConfigurationException, SAXException, IOException {
 		Parser p = new Parser();
@@ -101,27 +107,28 @@ public class Launcher {
 		configurationMap.put("felix.log.logger", logger);
 	}
 
+	/**
 	public void start(final boolean exitOnOSGiShutDown) throws InstantiationException, IllegalAccessException,
-			ClassNotFoundException, BundleException, IOException, InterruptedException {
+			ClassNotFoundException, IOException, InterruptedException {
 		printBanner();
 		logger.info("----------------- Initialising and Starting the OSGi Framework -----------------");
 		logger.info("FrameworkFactory Class: {}", factoryClass);
 		logger.info("");
 
-		FrameworkFactory factory = (FrameworkFactory) Class.forName(factoryClass).newInstance();
+		//FrameworkFactory factory = (FrameworkFactory) Class.forName(factoryClass).newInstance();
 
-		framework = factory.newFramework(frameworkProperties);
-		framework.init();
+		//framework = factory.newFramework(frameworkProperties);
+		//framework.init();
 		logger.info("The OSGi framework has been initialised");
-		BundleContext context = framework.getBundleContext();
-		List<Bundle> bundles = new ArrayList<>();
+		//BundleContext context = framework.getBundleContext();
+		//List<Bundle> bundles = new ArrayList<>();
 		int startLevel = 1;
 		for (BundleSearchPath searchPath : searchPaths) {
-			bundles.addAll(installBundles(context, searchPath, startLevel++));
+			//bundles.addAll(installBundles(context, searchPath, startLevel++));
 		}
-		startBundles(bundles);
+		//startBundles(bundles);
 		try {
-			framework.start();
+			//framework.start();
 			logger.info("The OSGi framework has been started");
 			logger.info("");
 		} catch (BundleException e) {
@@ -131,6 +138,7 @@ public class Launcher {
 		addCleanupOnExit(exitOnOSGiShutDown);
 
 	}
+	
 
 	private void addShutdownHook() {
 		Thread hook = new Thread(() -> {
@@ -149,6 +157,7 @@ public class Launcher {
 		}, "Close OSGi Session");
 		Runtime.getRuntime().addShutdownHook(hook);
 	}
+	
 
 	private void addCleanupOnExit(final boolean exitOnOSGiShutDown) {
 		Thread shutdownThread = new Thread(() -> {
@@ -163,6 +172,7 @@ public class Launcher {
 		}, "OSGi Shutdown Thread");
 		shutdownThread.start();
 	}
+	
 
 	private List<Bundle> installBundles(BundleContext context, BundleSearchPath searchPath, int startLevel)
 			throws BundleException {
@@ -210,6 +220,7 @@ public class Launcher {
 		logger.info("Cleaning up temporary directories");
 		delete(frameworkDir);
 	}
+	**/
 
 	private void delete(File f) {
 		if (f.isDirectory()) {
