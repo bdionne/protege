@@ -5,14 +5,21 @@ import org.eclipse.core.runtime.*;
 import org.eclipse.equinox.nonosgi.registry.RegistryFactoryHelper;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
 import org.osgi.framework.Version;
 import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.util.tracker.ServiceTracker;
+import org.protege.editor.core.ProtegeApplication;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.jar.Attributes;
+import java.util.jar.JarInputStream;
+import java.util.jar.Manifest;
 
 
 /**
@@ -157,6 +164,37 @@ public class PluginUtilities {
     public String getDocumentation(IExtension extension) {
         logger.error("Don't know how to get documentation yet");
         return "";
+    }
+    
+    public static Version getApplicationVersion() {
+    	File pluginsFolder = new File(System.getProperty(ProtegeApplication.BUNDLE_DIR_PROP));
+				
+		if (pluginsFolder.isDirectory()) {
+			File[] files = pluginsFolder.listFiles((dir, name) -> {
+				if (name.toLowerCase().startsWith("protege-editor-core") && name.toLowerCase().endsWith(".jar")) {
+					return true;
+				}
+				return false;
+
+			});
+			if ( files.length != 0) {
+				try (JarInputStream is = new JarInputStream(new FileInputStream(files[0]))) {
+		            Manifest mf = is.getManifest();
+		            if(mf == null) {
+		            	throw new RuntimeException("Programmer error - missed menifest file in jar");
+		            }
+		            Attributes attributes = mf.getMainAttributes();
+		            
+		            String versionString = attributes.getValue(Constants.BUNDLE_VERSION);
+		            return  new Version(versionString);
+		        } catch (Exception e) {
+		        	throw new RuntimeException("Programmer error - " + e.getMessage());
+		        }
+			}
+
+		}
+     return null;
+     
     }
     
 }
