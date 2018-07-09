@@ -29,13 +29,18 @@ public class AboutPanel extends JPanel {
     public AboutPanel() {
         setLayout(new BorderLayout());
 
-        BundleContext applicationContext = PluginUtilities.getInstance().getApplicationContext();
-        Bundle application = applicationContext.getBundle();
-        Version v = PluginUtilities.getBundleVersion(application);
-        String versionString = String.format("%d.%d.%d", v.getMajor(), v.getMinor(), v.getMicro());
-        if(!v.getQualifier().isEmpty()) {
-            versionString += " Build " + v.getQualifier();
-        }
+       // BundleContext applicationContext = PluginUtilities.getInstance().getApplicationContext();
+       // Bundle application = applicationContext.getBundle();
+       // Version v = PluginUtilities.getBundleVersion(application);
+        Version v = PluginUtilities.getApplicationVersion();
+        String versionString = "";
+		if (v != null) {
+			versionString = String.format("%d.%d.%d", v.getMajor(), v.getMinor(), v.getMicro());
+
+			if (!v.getQualifier().isEmpty()) {
+				versionString += " Build " + v.getQualifier();
+			}
+		}
 
         Runtime runtime = Runtime.getRuntime();
         long maxMemMB = runtime.maxMemory() / (1024 * 1024);
