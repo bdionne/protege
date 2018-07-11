@@ -79,7 +79,7 @@
                     <instructions>
                         <Bundle-Activator>org.protege.editor.owl.ProtegeOWL</Bundle-Activator>
                         <Bundle-SymbolicName>org.protege.editor.owl;singleton:=true</Bundle-SymbolicName>
-                        <Embed-Dependency>*;scope=!provided;scope=compile|runtime;inline=false</Embed-Dependency>
+                        <!--  Embed-Dependency>*;scope=!provided;scope=compile|runtime;inline=false</Embed-Dependency -->
                         <Export-Package>
                             org.protege.editor.owl.*;version=${project.version},
                             org.protege.owlapi.inference.*;version=${project.version}

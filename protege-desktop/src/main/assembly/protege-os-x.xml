@@ -11,6 +11,46 @@
 
 
     <dependencySets>
+    	<dependencySet>
+            <outputDirectory>${osx.bundle.name}/Contents/Java/lib</outputDirectory>
+            <includes>
+                <include>com.jgoodies:jgoodies-looks:jar</include>
+                <include>com.jgoodies:jgoodies-common:jar</include>
+                <include>org.eclipse.equinox:org.eclipse.equinox.nonosgi.registry:jar</include>
+                <include>org.eclipse.osgi:org.eclipse.osgi:jar</include>
+                <include>edu.stanford.protege:org.protege.xmlcatalog:jar</include>
+                <include>org.tukaani:xz:jar</include>
+                <include>com.googlecode.mdock:mdock:jar</include>
+                <include>org.apache.lucene:lucene-core:jar</include>
+                <include>org.apache.lucene:lucene-analyzers-common:jar</include>
+                <include>org.apache.lucene:lucene-queryparser:jar</include>
+                <include>org.apache.lucene:lucene-queries:jar</include>
+                <include>org.apache.lucene:lucene-sandbox:jar</include>
+                <include>org.apache.lucene:lucene-analyzers-phonetic:jar</include>
+                <include>net.sf.trove4j:trove4j:jar</include>
+                <include>org.apache.felix:org.apache.felix.framework:jar</include>
+                <include>org.imgscalr:imgscalr-lib:jar</include>
+                <include>org.openrdf.sesame:sesame-model:jar</include>
+                <include>org.openrdf.sesame:sesame-rio-api:jar</include>
+                <include>org.openrdf.sesame:sesame-rio-languages:jar</include>
+                <include>org.openrdf.sesame:sesame-rio-datatypes:jar</include>
+                <include>org.openrdf.sesame:sesame-rio-binary:jar</include>
+                <include>org.openrdf.sesame:sesame-rio-n3:jar</include>
+                <include>org.openrdf.sesame:sesame-rio-nquads:jar</include>
+                <include>org.openrdf.sesame:sesame-rio-ntriples:jar</include>
+                <include>org.openrdf.sesame:sesame-rio-rdfjson:jar</include>
+                <include>org.openrdf.sesame:sesame-rio-rdfxml:jar</include>
+                <include>org.openrdf.sesame:sesame-rio-trix:jar</include>
+                <include>org.openrdf.sesame:sesame-rio-turtle:jar</include>
+                <include>org.openrdf.sesame:sesame-rio-trig:jar</include>
+                <include>org.openrdf.sesame:sesame-util:jar</include>
+                <include>xml-resolver:xml-resolver:jar</include>
+                <include>com.google.code.gson:gson:jar</include>
+            </includes>
+            <useStrictFiltering>true</useStrictFiltering>
+            <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
+        </dependencySet>
+    	
 
         <dependencySet>
             <outputDirectory>${osx.bundle.name}/Contents/Java/bin</outputDirectory>
