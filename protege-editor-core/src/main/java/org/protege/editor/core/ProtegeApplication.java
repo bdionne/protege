@@ -504,10 +504,10 @@ public class ProtegeApplication implements BundleActivator {
         Date lastRun = PluginManager.getInstance().getLastAutoUpdateDate();
         logger.info("Auto-update last performed: {}", lastRun);
         Date startOfToday = getStartOfToday();
-       // return lastRun.after(startOfToday);
+        return lastRun.after(startOfToday);
         
         //Temporarily return false for testing
-        return false;
+       //return false;
     }
 
     private static Date getStartOfToday() {

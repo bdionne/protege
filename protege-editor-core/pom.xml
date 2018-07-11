@@ -152,7 +152,7 @@
 					<instructions>
 						<Bundle-Activator>org.protege.editor.core.ProtegeApplication</Bundle-Activator>						
 						<Bundle-SymbolicName>org.protege.editor.core.application;singleton:=true</Bundle-SymbolicName>
-						<Embed-Dependency>*;scope=!provided;scope=compile|runtime;inline=false</Embed-Dependency>
+						<!--  Embed-Dependency>*;scope=!provided;scope=compile|runtime;inline=false</Embed-Dependency-->
 						<Export-Package>
 							org.protege.editor.core.*,
 						</Export-Package>
@@ -170,7 +170,7 @@
 				</configuration>
 			</plugin>
 		</plugins>
-	</build>
+	</build >
 
 	<profiles>
 		<profile>
