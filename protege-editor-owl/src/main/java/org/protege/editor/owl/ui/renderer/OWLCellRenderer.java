@@ -830,43 +830,22 @@ public class OWLCellRenderer implements TableCellRenderer, TreeCellRenderer, Lis
         try {
             Rectangle startRect = textPane.modelToView(tokenStartIndex);
             Rectangle endRect = textPane.modelToView(tokenStartIndex + tokenLength);
-            
             if (startRect != null && endRect != null) {
-            	int width = 0;
-            	int height = 0;
-            	if (startRect.y == endRect.y) {
-            		width = endRect.x - startRect.x;
-            		height = startRect.height;
-            	} else {
-            		width = textPane.getWidth() - startRect.x;
-            		height = startRect.height;
-            	}
-            	int lineCount = endRect.y/startRect.height;
-            	List<Rectangle> tokenRects = new ArrayList<Rectangle>();
-                Rectangle tokenRect = new Rectangle(startRect.x, startRect.y, width, height);
+                int width = endRect.x - startRect.x;
+                int heght = startRect.height;
+
+                Rectangle tokenRect = new Rectangle(startRect.x, startRect.y, width, heght);
                 tokenRect.grow(0, -2);
-            	tokenRects.add(tokenRect);
-            	
-            	for (int i = 1; i <= lineCount; i++) {
-            		if ( i < lineCount) {
-            			tokenRect = new Rectangle(0, i * height, textPane.getWidth(), height);
-            		} else {
-            			tokenRect = new Rectangle(0, i * height, endRect.x, height);
-            		}
-            		tokenRects.add(tokenRect);
-            	}
                 if (linkedObjectComponent.getMouseCellLocation() != null) {
                     Point mouseCellLocation = linkedObjectComponent.getMouseCellLocation();
                     if (mouseCellLocation != null) {
                         mouseCellLocation = SwingUtilities.convertPoint(renderingComponent,
                                                                         mouseCellLocation,
                                                                         textPane);
-                        for (Rectangle rec : tokenRects) {
-	                        if (rec.contains(mouseCellLocation)) {
-	                            doc.setCharacterAttributes(tokenStartIndex, tokenLength, linkStyle, false);
-	                            linkedObjectComponent.setLinkedObject(curEntity);
-	                            linkRendered = true;
-	                        }
+                        if (tokenRect.contains(mouseCellLocation)) {
+                            doc.setCharacterAttributes(tokenStartIndex, tokenLength, linkStyle, false);
+                            linkedObjectComponent.setLinkedObject(curEntity);
+                            linkRendered = true;
                         }
                     }
                 }
