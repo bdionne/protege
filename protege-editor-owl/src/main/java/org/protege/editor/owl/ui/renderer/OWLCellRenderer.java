@@ -716,6 +716,7 @@ public class OWLCellRenderer implements TableCellRenderer, TreeCellRenderer, Lis
     protected void highlightText(StyledDocument doc, boolean selected) {
         // Highlight text
         StringTokenizer tokenizer = new StringTokenizer(textPane.getText(), " []{}(),\n\t'", true);
+        
         linkRendered = false;
         annotURIRendered = false;
         int tokenStartIndex = 0;
@@ -732,9 +733,11 @@ public class OWLCellRenderer implements TableCellRenderer, TreeCellRenderer, Lis
                     }
                 }
             }
-            renderToken(curToken, tokenStartIndex, doc, selected);
+            
+            renderToken(curToken, tokenStartIndex, doc, selected, textPane.getText().contains("\n"));
 
             tokenStartIndex += curToken.length();
+            
         }
         if (renderLinks && !linkRendered) {
             linkedObjectComponent.setLinkedObject(null);
@@ -746,7 +749,7 @@ public class OWLCellRenderer implements TableCellRenderer, TreeCellRenderer, Lis
     private boolean linkRendered = false;
     private boolean parenthesisRendered = false;
 
-    protected void renderToken(final String curToken, final int tokenStartIndex, final StyledDocument doc, boolean selected) {
+    protected void renderToken(final String curToken, final int tokenStartIndex, final StyledDocument doc, boolean selected, boolean multiline) {
 
         boolean enclosedByBracket = false;
         if (parenthesisRendered){
@@ -807,7 +810,7 @@ public class OWLCellRenderer implements TableCellRenderer, TreeCellRenderer, Lis
                 strikeoutEntityIfCrossedOut(curEntity, doc, tokenStartIndex, tokenLength);
 
                 if (renderLinks) {
-                    renderHyperlink(curEntity, tokenStartIndex, tokenLength, doc);
+                    renderHyperlink(curEntity, tokenStartIndex, tokenLength, doc, multiline);
                 }
             }
             else {
@@ -826,26 +829,54 @@ public class OWLCellRenderer implements TableCellRenderer, TreeCellRenderer, Lis
     }
 
 
-    private void renderHyperlink(OWLEntity curEntity, int tokenStartIndex, int tokenLength, StyledDocument doc) {
+    private void renderHyperlink(OWLEntity curEntity, int tokenStartIndex, int tokenLength, StyledDocument doc, boolean inMultiline) {
         try {
             Rectangle startRect = textPane.modelToView(tokenStartIndex);
             Rectangle endRect = textPane.modelToView(tokenStartIndex + tokenLength);
+            
+            boolean wrappedToken = false;
             if (startRect != null && endRect != null) {
-                int width = endRect.x - startRect.x;
-                int heght = startRect.height;
-
-                Rectangle tokenRect = new Rectangle(startRect.x, startRect.y, width, heght);
+            	int width = 0;
+            	int height = 0;
+            	if (startRect.y == endRect.y) {
+            		width = endRect.x - startRect.x;
+            		height = startRect.height;
+            	} else {
+            		wrappedToken = true;
+            		width = textPane.getWidth() - startRect.x;
+            		height = startRect.height;
+            	}
+            	
+            	int lineCount = endRect.y/startRect.height;
+            	
+            	List<Rectangle> tokenRects = new ArrayList<Rectangle>();
+                Rectangle tokenRect = new Rectangle(startRect.x, startRect.y, width, height);
                 tokenRect.grow(0, -2);
+            	tokenRects.add(tokenRect);
+            	
+				if (wrappedToken && !inMultiline) {
+					for (int i = 1; i <= lineCount; i++) {
+						if (i < lineCount) {
+							tokenRect = new Rectangle(0, i * height, textPane.getWidth(), height);
+						} else {
+							tokenRect = new Rectangle(0, i * height, endRect.x, height);
+						}
+						tokenRects.add(tokenRect);
+					}
+				}
+				
                 if (linkedObjectComponent.getMouseCellLocation() != null) {
                     Point mouseCellLocation = linkedObjectComponent.getMouseCellLocation();
                     if (mouseCellLocation != null) {
                         mouseCellLocation = SwingUtilities.convertPoint(renderingComponent,
                                                                         mouseCellLocation,
                                                                         textPane);
-                        if (tokenRect.contains(mouseCellLocation)) {
-                            doc.setCharacterAttributes(tokenStartIndex, tokenLength, linkStyle, false);
-                            linkedObjectComponent.setLinkedObject(curEntity);
-                            linkRendered = true;
+                        for (Rectangle rec : tokenRects) {
+	                        if (rec.contains(mouseCellLocation)) {
+	                        	doc.setCharacterAttributes(tokenStartIndex, tokenLength, linkStyle, false);
+	                            linkedObjectComponent.setLinkedObject(curEntity);
+	                            linkRendered = true;
+	                        }
                         }
                     }
                 }
