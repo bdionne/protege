@@ -715,7 +715,7 @@ public class OWLCellRenderer implements TableCellRenderer, TreeCellRenderer, Lis
 
     protected void highlightText(StyledDocument doc, boolean selected) {
         // Highlight text
-        StringTokenizer tokenizer = new StringTokenizer(textPane.getText(), " []{}(),\n\t'", true);
+        StringTokenizer tokenizer = new StringTokenizer(textPane.getText(), " []{}()\n\t", true);
         
         linkRendered = false;
         annotURIRendered = false;
@@ -724,13 +724,13 @@ public class OWLCellRenderer implements TableCellRenderer, TreeCellRenderer, Lis
             // Get the token and determine if it is a keyword or
             // entity (or delimeter)
             String curToken = tokenizer.nextToken();
-            if (curToken.equals("'")) {
+            if (curToken.startsWith("'")) {
                 while (tokenizer.hasMoreTokens()) {
                     String s = tokenizer.nextToken();
                     curToken += s;
-                    if (s.equals("'")) {
+                    if (s.endsWith("'") && !s.startsWith("'")) {
                         break;
-                    }
+                    }                    
                 }
             }
             
