@@ -33,6 +33,8 @@
                 <include>org.openrdf.sesame:sesame-rio-turtle:jar</include>
                 <include>org.openrdf.sesame:sesame-rio-trig:jar</include>
                 <include>org.openrdf.sesame:sesame-util:jar</include>
+                <include>org.openrdf.sesame:sesame-queryparser-serql:jar</include>
+                <include>org.openrdf.sesame:sesame-queryparser-sparql:jar</include>
                 <include>xml-resolver:xml-resolver:jar</include>
                 <include>com.google.code.gson:gson:jar</include>
             </includes>
