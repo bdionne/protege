@@ -48,7 +48,7 @@ public class JPFUtil {
 		File pluginsFolder = new File(System.getProperty(ProtegeApplication.PLUGIN_DIR_PROP));
 		File bundlesFolder = new File(System.getProperty(ProtegeApplication.BUNDLE_DIR_PROP));
 				
-		for (File file : new File[] { pluginsFolder, bundlesFolder }) {
+		for (File file : new File[] { pluginsFolder, bundlesFolder, new File("lib") }) {
 			// System.out.println("Search Path: " + file.getAbsolutePath());
 			if (file.isDirectory()) {
 				File[] files = file.listFiles((dir, name) -> {
@@ -63,6 +63,12 @@ public class JPFUtil {
 						pluginPath.add(f.getAbsolutePath());
 						continue;
 					}
+					
+					if (f.getPath().contains("sesame-queryparser") && !pluginPath.contains(f.getAbsolutePath())) {
+						pluginPath.add(f.getAbsolutePath());
+						continue;
+					}
+					
 					try {
 						JarFile jarFile = new JarFile(f);
 
