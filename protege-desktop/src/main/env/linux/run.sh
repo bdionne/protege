@@ -15,7 +15,7 @@ jre/bin/java -Xmx${conf.mem.xmx}M -Xms${conf.mem.xms}M \
      -Dfile.encoding=UTF-8 \
      -Djava.util.prefs.PreferencesFactory=org.protege.prefs.FileBackingStorePrefsFactory \
      ${conf.extra.args} \
-     -classpath "lib/*";"bundles/*";"plugins/*";"bin/*" \
+     -classpath "lib/*":"bundles/*":"plugins/*":"bin/*" \
      $CMD_OPTIONS org.protege.osgi.framework.Launcher $1
 
 

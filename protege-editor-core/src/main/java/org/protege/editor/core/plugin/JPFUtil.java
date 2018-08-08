@@ -63,11 +63,13 @@ public class JPFUtil {
 						pluginPath.add(f.getAbsolutePath());
 						continue;
 					}
+					/**
 					
 					if (f.getPath().contains("sesame-queryparser") && !pluginPath.contains(f.getAbsolutePath())) {
 						pluginPath.add(f.getAbsolutePath());
 						continue;
 					}
+					**/
 					
 					try {
 						JarFile jarFile = new JarFile(f);
