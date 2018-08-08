@@ -26,7 +26,7 @@ public class PrefixMapperTables extends JPanel {
 	private TableModelListener editListener = new TableModelListener() {
 		
 		public void tableChanged(TableModelEvent e) {
-			if (table != null && table.getModel().commitPrefixes()) {
+			if (table != null && table.getModel().commitPrefixes(ontology)) {
 				modelManager.setDirty(ontology);
 				OWLModelManagerEntityRenderer renderer = modelManager.getOWLEntityRenderer();
 				if (renderer instanceof PrefixBasedRenderer) {

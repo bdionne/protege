@@ -1,6 +1,7 @@
 package org.protege.editor.owl.ui.prefix;
 
 import org.semanticweb.owlapi.formats.PrefixDocumentFormat;
+import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.util.DefaultPrefixManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -91,7 +92,7 @@ public class PrefixMapperTableModel extends AbstractTableModel {
 	    fireTableDataChanged();
 	}
 
-	public boolean commitPrefixes() {
+	public boolean commitPrefixes(OWLOntology ont) {
     	if (changed) {
     		if (logger.isDebugEnabled()) {
     			logger.debug("committing prefix changes and clearing changed flag");
@@ -106,6 +107,7 @@ public class PrefixMapperTableModel extends AbstractTableModel {
     			}
     		}
     		changed = false;
+    		ont.getOWLOntologyManager().setOntologyFormat(ont, prefixManager);
     		return true;
     	}
     	return false;

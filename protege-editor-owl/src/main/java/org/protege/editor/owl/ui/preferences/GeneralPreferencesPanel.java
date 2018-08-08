@@ -31,6 +31,12 @@ public class GeneralPreferencesPanel extends OWLPreferencesPanel {
 
     public static final String DIALOGS_ALWAYS_CENTRED = "DIALOGS_ALWAYS_CENTRED";
     
+    public static final String ANON_ANCESTORS_DISPLAY = "ANON_ANCESTORS_DISPLAY";
+    
+    public static final String AnonDispNone = "none";
+    public static final String AnonDispAll = "all";
+    public static final String AnonDispOne = "one";
+    
     private JSpinner checkDelaySpinner;
 
     private static final String SECOND_TOOL_TIP = "1000 = 1 second";
@@ -42,6 +48,10 @@ public class GeneralPreferencesPanel extends OWLPreferencesPanel {
     private JRadioButton addFreshAxiomsToActiveOntologyRadioButton;
 
     private JRadioButton addFreshAxiomsToSubjectDefiningOntology;
+    
+    private JRadioButton dispAnonNone;
+    private JRadioButton dispAnonAll;
+    private JRadioButton dispAnonOne;
 
 
     private JCheckBox autoExpandEnabledCheckBox;
@@ -62,8 +72,21 @@ public class GeneralPreferencesPanel extends OWLPreferencesPanel {
         ExpressionEditorPreferences.getInstance().setCheckDelay((Integer) checkDelaySpinner.getModel().getValue());
 
         Preferences appPrefs = PreferencesManager.getInstance().getApplicationPreferences(ProtegeApplication.ID);
+        
         appPrefs.putBoolean(DIALOGS_ALWAYS_CENTRED, alwaysCentreDialogsCheckbox.isSelected());
         appPrefs.putBoolean(View.DETACHED_WINDOWS_FLOAT, detachedWindowsFloat.isSelected());
+        
+        if (dispAnonNone.isSelected()) {
+        	appPrefs.putString(ANON_ANCESTORS_DISPLAY, AnonDispNone);
+        }
+        
+        if (dispAnonAll.isSelected()) {
+        	appPrefs.putString(ANON_ANCESTORS_DISPLAY, AnonDispAll);
+        }
+        
+        if (dispAnonOne.isSelected()) {
+        	appPrefs.putString(ANON_ANCESTORS_DISPLAY, AnonDispOne);
+        }
 
         FreshAxiomLocationPreferences axiomPrefs = FreshAxiomLocationPreferences.getPreferences();
         if(addFreshAxiomsToActiveOntologyRadioButton.isSelected()) {
@@ -142,7 +165,25 @@ public class GeneralPreferencesPanel extends OWLPreferencesPanel {
         panel.addVerticalPadding();
         panel.addGroupComponent(dragAndDropEnabled);
         panel.addGroupComponent(paintLinesCheckBox);
+        
+        // inherited axioms
+        panel.addSeparator();
+        axiomButtonGroup = new ButtonGroup();
+        dispAnonNone = new JRadioButton("Don't display originating class of anonymous ancestors", 
+        		(appPrefs.getString(ANON_ANCESTORS_DISPLAY, AnonDispNone) == AnonDispNone));
+        dispAnonAll = new JRadioButton("Display originating class of anonymous ancestors", 
+        		(appPrefs.getString(ANON_ANCESTORS_DISPLAY, AnonDispNone) == AnonDispAll));
+        dispAnonOne = new JRadioButton("Display only one originating class of anonymous ancestors", 
+        		(appPrefs.getString(ANON_ANCESTORS_DISPLAY, AnonDispNone) == AnonDispOne));
+        		
+        axiomButtonGroup.add(dispAnonNone);
+        axiomButtonGroup.add(dispAnonAll);
+        axiomButtonGroup.add(dispAnonOne);
 
+        panel.addGroup("Anonymous Ancestors Display");
+        panel.addGroupComponent(dispAnonNone);
+        panel.addGroupComponent(dispAnonAll);
+        panel.addGroupComponent(dispAnonOne);
         // Search
 
         panel.addSeparator();
