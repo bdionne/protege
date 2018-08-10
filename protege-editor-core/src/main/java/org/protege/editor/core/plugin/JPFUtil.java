@@ -1,13 +1,18 @@
 package org.protege.editor.core.plugin;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.util.jar.Pack200;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.jar.JarEntry;
+import java.util.Enumeration;
+import java.util.jar.JarEntry; 
 import java.util.jar.JarFile;
+import java.util.jar.JarOutputStream;
 
 import org.eclipse.core.runtime.IExtension;
 import org.protege.editor.core.ProtegeApplication;
@@ -44,11 +49,13 @@ public class JPFUtil {
     
     public static void setClasspathForPlugins() throws Exception{
 		ArrayList<String> pluginPath = new ArrayList<String>();
-
+		
+		String nestedFolder = "lib" + File.separator;
+		
 		File pluginsFolder = new File(System.getProperty(ProtegeApplication.PLUGIN_DIR_PROP));
 		File bundlesFolder = new File(System.getProperty(ProtegeApplication.BUNDLE_DIR_PROP));
 				
-		for (File file : new File[] { pluginsFolder, bundlesFolder, new File("lib") }) {
+		for (File file : new File[] { pluginsFolder, bundlesFolder }) {
 			// System.out.println("Search Path: " + file.getAbsolutePath());
 			if (file.isDirectory()) {
 				File[] files = file.listFiles((dir, name) -> {
@@ -61,15 +68,38 @@ public class JPFUtil {
 				for (File f : files) {
 					if (f.getPath().contains("plugins") && !pluginPath.contains(f.getAbsolutePath())) {
 						pluginPath.add(f.getAbsolutePath());
+						
+						//add nested jars path
+						JarFile jar = new JarFile(f);
+						
+						Enumeration<JarEntry> entries = jar.entries();
+						
+						while(entries.hasMoreElements()){
+						    JarEntry e = entries.nextElement();
+						    String name = e.getName();
+						    
+						    if(name.endsWith(".jar")) {
+						    	
+						    	File lib = new File(nestedFolder + name);
+						    	String nestedPath = Paths.get("").toAbsolutePath() + File.separator + lib.getPath();
+								File nestedFile = new File(nestedPath);
+								if (!nestedFile.exists()) {
+									JarOutputStream jos = new JarOutputStream(
+											new FileOutputStream(new File(nestedFolder + name)));
+									Pack200.newUnpacker().unpack(jar.getInputStream(jar.getEntry(name)), jos);
+									jos.close();
+
+									if (!pluginPath.contains(nestedPath)) {
+										pluginPath.add(nestedPath);
+									}
+								}
+						    }
+						}
+						
+						jar.close();
 						continue;
 					}
-					/**
 					
-					if (f.getPath().contains("sesame-queryparser") && !pluginPath.contains(f.getAbsolutePath())) {
-						pluginPath.add(f.getAbsolutePath());
-						continue;
-					}
-					**/
 					
 					try {
 						JarFile jarFile = new JarFile(f);
@@ -100,6 +130,7 @@ public class JPFUtil {
 				logger.error("Error in addFile method", e);
 			}
 		}
+		
 	}
 
 		
@@ -112,7 +143,7 @@ public class JPFUtil {
 		addURL(f.toURI().toURL());
 	}
 
-	private static void addURL(URL u) throws IOException {
+	public static void addURL(URL u) throws IOException {
 
 		URLClassLoader sysLoader = (URLClassLoader) ClassLoader.getSystemClassLoader();
 		URL urls[] = sysLoader.getURLs();
