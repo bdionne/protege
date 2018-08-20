@@ -366,7 +366,7 @@ public class InferredOWLClassHierarchyProvider2 extends AbstractOWLObjectHierarc
         }
     }
 
-
+/**
     public Set<OWLClass> getEquivalents(OWLClass object) {
 //    	getReadLock().lock();
         ontologySetReadLock.lock();
@@ -395,5 +395,27 @@ public class InferredOWLClassHierarchyProvider2 extends AbstractOWLObjectHierarc
 //    		getReadLock().unlock();
         }
     }
+    **/
+    
+    protected OWLReasoner getReasoner() {
+        return owlModelManager.getOWLReasonerManager().getCurrentReasoner();
+    }
+
+    
+    public Set<OWLClass> getEquivalents(OWLClass object) {
+//      getReadLock().lock();
+      try {
+          if(!getReasoner().isConsistent()) {
+              return Collections.emptySet();
+          }
+          if (!getReasoner().isSatisfiable(object)) {
+              return Collections.emptySet();
+          }
+          return getReasoner().getEquivalentClasses(object).getEntitiesMinus(object);
+      }
+      finally {
+//          getReadLock().unlock();
+      }
+  }
 
 }
