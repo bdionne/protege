@@ -170,11 +170,11 @@ public class GeneralPreferencesPanel extends OWLPreferencesPanel {
         panel.addSeparator();
         axiomButtonGroup = new ButtonGroup();
         dispAnonNone = new JRadioButton("Don't display originating class of anonymous ancestors", 
-        		(appPrefs.getString(ANON_ANCESTORS_DISPLAY, AnonDispNone) == AnonDispNone));
+        		(appPrefs.getString(ANON_ANCESTORS_DISPLAY, AnonDispNone).equalsIgnoreCase(AnonDispNone)));
         dispAnonAll = new JRadioButton("Display originating class of anonymous ancestors", 
-        		(appPrefs.getString(ANON_ANCESTORS_DISPLAY, AnonDispNone) == AnonDispAll));
+        		(appPrefs.getString(ANON_ANCESTORS_DISPLAY, AnonDispNone).equalsIgnoreCase(AnonDispAll)));
         dispAnonOne = new JRadioButton("Display only one originating class of anonymous ancestors", 
-        		(appPrefs.getString(ANON_ANCESTORS_DISPLAY, AnonDispNone) == AnonDispOne));
+        		(appPrefs.getString(ANON_ANCESTORS_DISPLAY, AnonDispNone).equalsIgnoreCase(AnonDispOne)));
         		
         axiomButtonGroup.add(dispAnonNone);
         axiomButtonGroup.add(dispAnonAll);
