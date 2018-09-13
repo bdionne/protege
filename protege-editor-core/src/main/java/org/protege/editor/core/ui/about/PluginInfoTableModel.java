@@ -12,9 +12,8 @@ import java.util.jar.Manifest;
 
 import javax.swing.table.AbstractTableModel;
 
-import org.osgi.framework.Constants;
-import org.osgi.framework.Version;
 import org.protege.editor.core.ProtegeApplication;
+import org.protege.editor.core.util.Version;
 
 
 /**
@@ -105,9 +104,9 @@ public class PluginInfoTableModel extends AbstractTableModel {
 			            	throw new RuntimeException("Programmer error - missed menifest file in jar");
 			            }
 			            Attributes attributes = mf.getMainAttributes();
-			            String name = attributes.getValue(Constants.BUNDLE_NAME);
+			            String name = attributes.getValue("Bundle-Name");
 			            
-			            String versionString = attributes.getValue(Constants.BUNDLE_VERSION);
+			            String versionString = attributes.getValue("Bundle-Version");
 			            list.add(new PluginVersion(name,new Version(versionString)));
 			        } catch (Exception e) {
 			        	throw new RuntimeException("Programmer error - " + e.getMessage());

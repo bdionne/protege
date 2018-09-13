@@ -1,8 +1,23 @@
 package org.protege.editor.core.update;
 
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.BundleException;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.URLConnection;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+
+import javax.swing.JOptionPane;
+
 import org.protege.editor.core.FileUtils;
 import org.protege.editor.core.ProtegeApplication;
 import org.protege.editor.core.log.LogBanner;
@@ -13,17 +28,6 @@ import org.protege.editor.core.ui.util.ErrorMessage;
 import org.protege.editor.core.util.ProtegeDirectories;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.swing.*;
-import java.io.*;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.net.URLConnection;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
 
 /**
@@ -153,22 +157,18 @@ public class PluginInstaller {
     }
 
     private static Optional<File> getPluginFileName(PluginInfo info) {
-        Bundle pluginDescriptor = info.getPluginDescriptor();
-        if (pluginDescriptor == null) {
+        PluginInfo old = info.getPluginInfo();
+        if (old == null) {
             return Optional.empty();
         }
-        final String locationURL = pluginDescriptor.getLocation();
-        File existingPluginLocation = new File(locationURL.substring(locationURL.indexOf(":") + 1, locationURL.length()));
-        return Optional.of(existingPluginLocation);
+        File plugins = new File(System.getProperty(ProtegeApplication.PLUGIN_DIR_PROP));
+        String fileName = String.format("%s-%s.jar", old.getId(), old.getAvailableVersion());
+        String destinationFileName = (new File(plugins, fileName)).getAbsolutePath();
+        return Optional.of(new File(destinationFileName));
+        
+        
     }
-//
-//    private static void movePluginToOldPluginFileName(File pluginLocation) {
-//        checkNotNull(pluginLocation);
-//        File pluginLocationDestination = getPluginBackupFileName(pluginLocation);
-//        pluginLocation.renameTo(pluginLocationDestination);
-//
-//    }
-
+    
     private static File getPluginBackupFileName(File pluginFileName) {
         return new File(pluginFileName.getAbsolutePath() + ".old");
     }
@@ -179,12 +179,15 @@ public class PluginInstaller {
             return Optional.empty();
         }
         File backupFileName = getPluginBackupFileName(existingPluginFileName.get());
-        if(existingPluginFileName.get().renameTo(backupFileName)) {
-            return Optional.of(backupFileName);
-        }
-        else {
-            return Optional.empty();
-        }
+        try {
+			java.nio.file.Files.move(existingPluginFileName.get().toPath(), 
+					backupFileName.toPath());
+			return Optional.of(backupFileName);
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+			return Optional.empty();
+		}
     }
 
     private static Optional<File> copyPluginToInstallLocation(File downloadedPlugin, PluginInfo info) throws URISyntaxException {
@@ -293,12 +296,9 @@ public class PluginInstaller {
     }
 
     private boolean installPlugin(File pluginLocation, PluginInfo info) {
-        if (info.getPluginDescriptor() == null) {  // download not an update...
+        if (info.getPluginInfo() == null) {  // download not an update...
             logger.info("Installing the {} plugin", info.getLabel());
-           // BundleContext context = ProtegeApplication.getContext();
             try {
-               // Bundle b = context.installBundle("file:" + pluginLocation.getPath());
-              // b.start();
             	JPFUtil.setClasspathForPlugins();
             	PluginUtilities.getInstance().getExtensionRegistry();
                 return  true;

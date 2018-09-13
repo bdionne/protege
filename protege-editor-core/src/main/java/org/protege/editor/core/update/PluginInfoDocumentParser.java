@@ -1,7 +1,6 @@
 package org.protege.editor.core.update;
 
-import org.osgi.framework.Bundle;
-import org.osgi.framework.Version;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
@@ -10,7 +9,9 @@ import java.net.URL;
 import java.util.Optional;
 import java.util.Properties;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import org.protege.editor.core.util.Version;
+
+//import org.osgi.framework.Version;
 
 /**
  * Author: Matthew Horridge<br>
@@ -44,7 +45,7 @@ public class PluginInfoDocumentParser {
         this.updateFileLocation = checkNotNull(updateFileLocation);
     }
 
-    public PluginInfo parseDocument(Optional<Bundle> bundle) throws PluginDocumentParseException {
+    public PluginInfo parseDocument(Optional<PluginInfo> bundle) throws PluginDocumentParseException {
         try {
             Properties properties = new Properties();
             BufferedInputStream inputStream = new BufferedInputStream(updateFileLocation.openStream());
@@ -58,12 +59,12 @@ public class PluginInfoDocumentParser {
                 );
             }
 
-            if(bundle.isPresent() && !id.equals(bundle.get().getSymbolicName())) {
+            if(bundle.isPresent() && !id.equals(bundle.get().getId())) {
                 throw new PluginDocumentParseException(
                         String.format("The plugin update document at %s has a plugin id (%s) that does not match the expected id (%s)",
                                 updateFileLocation,
                                 id,
-                                bundle.get().getSymbolicName())
+                                bundle.get().getId())
                 );
             }
 

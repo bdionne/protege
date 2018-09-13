@@ -4,15 +4,6 @@ import org.protege.editor.core.ProtegeApplication;
 
 import org.protege.editor.core.plugin.JPFUtil;
 
-//import org.osgi.framework.Bundle;
-//import org.osgi.framework.BundleContext;
-//import org.osgi.framework.BundleException;
-//import org.osgi.framework.Constants;
-//import org.osgi.framework.launch.Framework;
-//import org.osgi.framework.launch.FrameworkFactory;
-//import org.osgi.framework.startlevel.BundleStartLevel;
-//import org.osgi.framework.wiring.BundleRevision;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
@@ -22,9 +13,6 @@ import java.io.*;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.prefs.Preferences;
-
-//import java.util.zip.ZipEntry;
-
 
 public class Launcher {
 
@@ -44,20 +32,10 @@ public class Launcher {
 
 	private static final List<BundleSearchPath> searchPaths = new ArrayList<>();
 
-	//private final File frameworkDir;
-
-	//private final String factoryClass;
-
-	//private Framework framework;
-
 	public Launcher(File config) throws IOException, ParserConfigurationException, SAXException {
 		// call preferences userRoot() to force factory to load before OSGI
 		Preferences.userRoot();
 		parseConfig(config);
-		//factoryClass = locateOSGi();
-		//frameworkDir = new File(System.getProperty("java.io.tmpdir"), "ProtegeCache-" + UUID.randomUUID().toString());
-		//frameworkProperties.put(Constants.FRAMEWORK_STORAGE, frameworkDir.getCanonicalPath());
-		//rameworkProperties.put(Constants.FRAMEWORK_BEGINNING_STARTLEVEL, Integer.toString(searchPaths.size()));
 	}
 
 	//public Framework getFramework() {
@@ -70,15 +48,6 @@ public class Launcher {
 		setSystemProperties(p);
 		setLogger(frameworkProperties);
 		searchPaths.addAll(p.getSearchPaths());
-		// frameworkProperties.putAll(p.getFrameworkProperties());
-	}
-
-	private static String locateOSGi() throws IOException {
-		InputStream frameworkFactory = Launcher.class.getClassLoader()
-				.getResourceAsStream("META-INF/services/org.osgi.framework.launch.FrameworkFactory");
-		try (BufferedReader factoryReader = new BufferedReader(new InputStreamReader(frameworkFactory))) {
-			return factoryReader.readLine().trim();
-		}
 	}
 
 	private static void setSystemProperties(Parser p) {
@@ -107,135 +76,6 @@ public class Launcher {
 		configurationMap.put("felix.log.logger", logger);
 	}
 
-	/**
-	public void start(final boolean exitOnOSGiShutDown) throws InstantiationException, IllegalAccessException,
-			ClassNotFoundException, IOException, InterruptedException {
-		printBanner();
-		logger.info("----------------- Initialising and Starting the OSGi Framework -----------------");
-		logger.info("FrameworkFactory Class: {}", factoryClass);
-		logger.info("");
-
-		//FrameworkFactory factory = (FrameworkFactory) Class.forName(factoryClass).newInstance();
-
-		//framework = factory.newFramework(frameworkProperties);
-		//framework.init();
-		logger.info("The OSGi framework has been initialised");
-		//BundleContext context = framework.getBundleContext();
-		//List<Bundle> bundles = new ArrayList<>();
-		int startLevel = 1;
-		for (BundleSearchPath searchPath : searchPaths) {
-			//bundles.addAll(installBundles(context, searchPath, startLevel++));
-		}
-		//startBundles(bundles);
-		try {
-			//framework.start();
-			logger.info("The OSGi framework has been started");
-			logger.info("");
-		} catch (BundleException e) {
-			logger.error("An error occurred when starting the OSGi framework: {}", e.getMessage(), e);
-		}
-		addShutdownHook();
-		addCleanupOnExit(exitOnOSGiShutDown);
-
-	}
-	
-
-	private void addShutdownHook() {
-		Thread hook = new Thread(() -> {
-			try {
-				logger.info("----------------------- Shutting down Protege -----------------------");
-				if (framework.getState() == Bundle.ACTIVE) {
-					framework.stop();
-					framework.waitForStop(0);
-				}
-				// Give the prefs file a chance to close :)
-				Thread.sleep(2000);
-				cleanup();
-			} catch (Throwable t) {
-				logger.error("Error shutting down OSGi session: {}", t.getMessage(), t);
-			}
-		}, "Close OSGi Session");
-		Runtime.getRuntime().addShutdownHook(hook);
-	}
-	
-
-	private void addCleanupOnExit(final boolean exitOnOSGiShutDown) {
-		Thread shutdownThread = new Thread(() -> {
-			try {
-				framework.waitForStop(0);
-				if (exitOnOSGiShutDown) {
-					System.exit(0);
-				}
-			} catch (Throwable t) {
-				logger.error("Error on shutdown: {}", t.getMessage(), t);
-			}
-		}, "OSGi Shutdown Thread");
-		shutdownThread.start();
-	}
-	
-
-	private List<Bundle> installBundles(BundleContext context, BundleSearchPath searchPath, int startLevel)
-			throws BundleException {
-		Collection<File> bundles = searchPath.search();
-		List<Bundle> core = new ArrayList<>();
-		for (File bundleFile : bundles) {
-			try {
-				String bundleURI = bundleFile.getAbsoluteFile().toURI().toString();
-				logger.debug("Installing bundle.  StartLevel: {}; Bundle: {}", startLevel,
-						bundleFile.getAbsolutePath());
-				Bundle newBundle = context.installBundle(bundleURI);
-				// the cast to BundleStartLevel is not needed in Java 6 but it is in Java 7
-				((BundleStartLevel) newBundle.adapt(BundleStartLevel.class)).setStartLevel(startLevel);
-				core.add(newBundle);
-			} catch (Throwable t) {
-				logger.warn("Bundle {} failed to install: {}", bundleFile, t);
-			}
-		}
-		return core;
-	}
-
-	private void startBundles(List<Bundle> bundles) throws BundleException {
-		logger.info("------------------------------- Starting Bundles -------------------------------");
-		for (Bundle b : bundles) {
-			try {
-				if (!isFragmentBundle(b)) {
-					b.start();
-					logger.info("Starting bundle {}", b.getSymbolicName());
-				} else {
-					logger.info("Not starting bundle {} explicitly because it is a fragment bundle.",
-							b.getSymbolicName());
-				}
-			} catch (Throwable t) {
-				logger.error("Core Bundle {} failed to start: {}", b.getBundleId(), t);
-			}
-		}
-		logger.debug("-------------------------------------------------------------------------------");
-	}
-
-	private static boolean isFragmentBundle(Bundle b) {
-		return (b.adapt(BundleRevision.class).getTypes() & BundleRevision.TYPE_FRAGMENT) != 0;
-	}
-
-	protected void cleanup() {
-		logger.info("Cleaning up temporary directories");
-		delete(frameworkDir);
-	}
-	**/
-
-	private void delete(File f) {
-		if (f.isDirectory()) {
-			File[] files = f.listFiles();
-			if (files != null) {
-				for (File child : files) {
-					delete(child);
-				}
-			}
-		}
-		if (!f.delete()) {
-			logger.warn("File could not be deleted ({})", f.getAbsolutePath());
-		}
-	}
-
 	public static void setArguments(String... args) {
 		if (args != null) {
 			int counter = 0;
@@ -243,13 +83,6 @@ public class Launcher {
 				System.setProperty(ARG_PROPERTY + (counter++), arg);
 			}
 		}
-	}
-
-	private void printBanner() {
-		logger.info("********************************************************************************");
-		logger.info("**                                  Protege                                   **");
-		logger.info("********************************************************************************");
-		logger.info("");
 	}
 
 	public static void main(String[] args) throws Exception {
@@ -262,9 +95,6 @@ public class Launcher {
 		} else {
 			configFile = new File(config);
 		}
-		// Launcher launcher = new Launcher(configFile);
-		// launcher.start(true);
-
 		Preferences.userRoot();
 		parseConfig(configFile);
 		

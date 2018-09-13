@@ -1,14 +1,14 @@
 package org.protege.editor.core.update;
 
 
-import org.osgi.framework.Bundle;
-import org.osgi.framework.Version;
-import org.protege.editor.core.plugin.PluginUtilities;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.net.URL;
 import java.util.Optional;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import org.protege.editor.core.util.Version;
+
+//import org.osgi.framework.Version;
 
 
 /**
@@ -21,7 +21,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public class PluginInfo {
 
-    private Bundle b;
+    private PluginInfo old;
 
 
     private final String id;
@@ -46,8 +46,8 @@ public class PluginInfo {
     }
 
 
-    public void setPluginDescriptor(Bundle b) {
-        this.b = b;
+    public void setPluginInfo(PluginInfo o) {
+    	old = o;
     }
 
 
@@ -71,21 +71,13 @@ public class PluginInfo {
     }
 
 
-    public Optional<Version> getCurrentVersion() {
-        if(b == null) {
-            return Optional.empty();
-        }
-        return Optional.ofNullable(PluginUtilities.getBundleVersion(b));
-    }
-
-
     public URL getDownloadURL() {
         return downloadURL;
     }
 
 
-    public Bundle getPluginDescriptor() {
-        return b;
+    public PluginInfo getPluginInfo() {
+    	return old;
     }
 
 

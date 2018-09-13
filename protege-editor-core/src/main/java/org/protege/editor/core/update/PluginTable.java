@@ -1,15 +1,8 @@
 package org.protege.editor.core.update;
 
-import org.osgi.framework.Bundle;
-import org.osgi.framework.Version;
-import org.protege.editor.core.plugin.PluginUtilities;
-import org.protege.editor.core.ui.util.Icons;
-import org.protege.editor.core.ui.util.TableUtils;
-
-import javax.swing.*;
-import javax.swing.event.ListSelectionListener;
-import javax.swing.table.AbstractTableModel;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.util.ArrayList;
@@ -20,6 +13,20 @@ import java.util.List;
 *
 *
 */
+
+import javax.swing.BorderFactory;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.table.AbstractTableModel;
+
+import org.protege.editor.core.ui.util.Icons;
+import org.protege.editor.core.ui.util.TableUtils;
+import org.protege.editor.core.util.Version;
 
 /**
  * Author: drummond<br>
@@ -156,10 +163,6 @@ public class PluginTable extends JPanel {
             return install;
         }
 
-//        public List<PluginInfo> getUpdateInfoList() {
-//            return new ArrayList<>(plugins);
-//        }
-
 
         public PluginInfo getUpdateInfoAt(int index) {
             return plugins.get(index);
@@ -204,16 +207,17 @@ public class PluginTable extends JPanel {
             else {
                 final PluginInfo info = plugins.get(rowIndex);
                 if (columnIndex == 1) {
-                    if (info.getPluginDescriptor() != null){
-                        return info.getPluginDescriptor().getHeaders().get("Bundle-Name");
+                    if (info.getPluginInfo() != null){
+                        return info.getPluginInfo().getLabel();
                     }
                     return info.getLabel();
                 }
                 else if (columnIndex == 2) {
-                    Bundle bundle = info.getPluginDescriptor();
+                    PluginInfo bundle = info.getPluginInfo();
                     StringBuilder versionString = new StringBuilder();
+                    
                     if (bundle != null){
-                        Version version = PluginUtilities.getBundleVersion(bundle);
+                        Version version = bundle.getAvailableVersion();
                         versionString.append(version.getMajor());
                         versionString.append(".");
                         versionString.append(version.getMinor());

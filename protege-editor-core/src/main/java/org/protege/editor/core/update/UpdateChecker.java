@@ -1,12 +1,9 @@
 package org.protege.editor.core.update;
 
-import org.osgi.framework.Bundle;
-import org.protege.editor.core.plugin.PluginUtilities;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.net.URL;
 import java.util.Optional;
-
-import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Author: Matthew Horridge<br>
@@ -21,10 +18,10 @@ public class UpdateChecker {
 
     private final URL url;
 
-    private final Optional<Bundle> b;
+    private final Optional<PluginInfo> b;
 
 
-    public UpdateChecker(URL updateFileURL, Optional<Bundle> pluginDescriptor) {
+    public UpdateChecker(URL updateFileURL, Optional<PluginInfo> pluginDescriptor) {
         this.url = checkNotNull(updateFileURL);
         this.b = checkNotNull(pluginDescriptor);
     }
@@ -34,12 +31,12 @@ public class UpdateChecker {
         final PluginInfoDocumentParser pluginInfoDocumentParser = new PluginInfoDocumentParser(url);
         PluginInfo info = pluginInfoDocumentParser.parseDocument(b);
         if(!b.isPresent()) {
-            info.setPluginDescriptor(null);
+            info.setPluginInfo(null);
             return Optional.of(info);
         }
-        if (info.getAvailableVersion().compareTo(PluginUtilities.getBundleVersion(b.get())) > 0) {
+        if (info.getAvailableVersion().compareTo(b.get().getAvailableVersion()) > 0) {
             // New version available!
-            info.setPluginDescriptor(b.get());
+            info.setPluginInfo(b.get());
             return Optional.of(info);
         }
         return Optional.empty();
