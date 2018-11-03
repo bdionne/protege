@@ -3,18 +3,17 @@ package org.protege.editor.core.ui.workspace;
 import java.awt.BorderLayout;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 
+import org.protege.editor.core.prefs.Preferences;
+import org.protege.editor.core.prefs.PreferencesManager;
 import org.protege.editor.core.ui.tabbedpane.CloseableTabbedPaneUI;
 import org.protege.editor.core.ui.tabbedpane.WorkspaceTabCloseHandler;
 import org.protege.editor.core.ui.util.ComponentFactory;
-import org.protege.editor.core.ui.view.ViewComponent;
 import org.protege.editor.core.ui.view.ViewComponentPlugin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,6 +37,10 @@ public abstract class TabbedWorkspace extends Workspace {
     private final List<WorkspaceTab> workspaceTabs = new ArrayList<>();
     
     private TabViewable checkPermissionLevel;
+    
+    private static final String CLIENT_PREFERENCES = "org.protege.editor.owl.client";
+    
+    private static final String PREF_TAB_NAMES = "PREFERRED_TAB_NAMES";
     
     public void setCheckLevel(TabViewable tvw) {
     	checkPermissionLevel = tvw;
@@ -172,10 +175,15 @@ public abstract class TabbedWorkspace extends Workspace {
             // Save out tabs
             TabbedWorkspaceStateManager man = new TabbedWorkspaceStateManager(this);
             man.save();
+            List<String> prefTabNames = new ArrayList<String>();
+            
             for (WorkspaceTab tab : getWorkspaceTabs()){
                 tab.save();
+                prefTabNames.add(tab.getLabel());
                 logger.info("Saved tab state for '{}' tab", tab.getLabel());
             }
+            Preferences prefs = PreferencesManager.getInstance().getApplicationPreferences(CLIENT_PREFERENCES);
+            prefs.putStringList(PREF_TAB_NAMES, prefTabNames);
             logger.info("Saved workspace");
         }
         catch (Exception e) {
