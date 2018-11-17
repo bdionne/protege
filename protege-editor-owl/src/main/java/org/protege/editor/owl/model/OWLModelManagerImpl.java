@@ -207,9 +207,9 @@ public class OWLModelManagerImpl extends AbstractModelManager implements OWLMode
 
         // Name and shame plugins that do not (or can't be bothered to) clean up
         // their listeners!
-        modelManagerListenerManager.dumpWarningForAllListeners(logger, "(Listeners should be removed in the plugin dispose method!)");
+        //modelManagerListenerManager.dumpWarningForAllListeners(logger, "(Listeners should be removed in the plugin dispose method!)");
 
-        changeListenerManager.dumpWarningForAllListeners(logger, "(Listeners should be removed in the plugin dispose method!)");
+        //changeListenerManager.dumpWarningForAllListeners(logger, "(Listeners should be removed in the plugin dispose method!)");
     }
 
 
