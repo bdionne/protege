@@ -1,5 +1,11 @@
 <component>
     <dependencySets>
+    <dependencySet>
+      <outputDirectory>/lib</outputDirectory>
+      <unpack>false</unpack>
+      <scope>runtime</scope>
+    </dependencySet>
+    <!-- dependencySets>
     	<dependencySet>
             <outputDirectory>lib</outputDirectory>
             <includes>
@@ -12,7 +18,7 @@
                 <include>org.apache.lucene:lucene-queries:jar</include>
                 <include>org.apache.lucene:lucene-sandbox:jar</include>
                 <include>org.apache.felix:org.apache.felix.framework:jar</include>
-                <!-- <include>org.openrdf.sesame:sesame-model:jar</include>
+                <include>org.openrdf.sesame:sesame-model:jar</include>
                 <include>org.openrdf.sesame:sesame-rio-api:jar</include>
                 <include>org.openrdf.sesame:sesame-rio-languages:jar</include>
                 <include>org.openrdf.sesame:sesame-rio-datatypes:jar</include>
@@ -25,13 +31,13 @@
                 <include>org.openrdf.sesame:sesame-rio-trix:jar</include>
                 <include>org.openrdf.sesame:sesame-rio-turtle:jar</include>
                 <include>org.openrdf.sesame:sesame-rio-trig:jar</include>
-                <include>org.openrdf.sesame:sesame-util:jar</include> -->
+                <include>org.openrdf.sesame:sesame-util:jar</include>
                 <include>xml-resolver:xml-resolver:jar</include>
                 <include>com.google.code.gson:gson:jar</include>
             </includes>
             <useStrictFiltering>true</useStrictFiltering>
             <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
-        </dependencySet>
+        </dependencySet -->
 
         <dependencySet>
             <outputDirectory>bin</outputDirectory>
@@ -44,7 +50,7 @@
             <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
         </dependencySet>
 
-        <dependencySet>
+        <!-- dependencySet>
             <outputDirectory>bundles</outputDirectory>
             <includes>
                 <include>edu.stanford.protege:protege-common:jar</include>
@@ -62,15 +68,15 @@
                 <include>org.slf4j:log4j-over-slf4j:jar</include>
                 <include>org.slf4j:jul-to-slf4j:jar</include>
                 <include>commons-io:commons-io:jar</include>
-                <!-- <include>com.google.inject:guice:jar</include>
+                <include>com.google.inject:guice:jar</include>
                 <include>com.google.inject.extensions:guice-assistedinject:jar</include>
-                <include>com.google.inject.extensions:guice-multibindings:jar</include> -->
+                <include>com.google.inject.extensions:guice-multibindings:jar</include>
                 <include>org.apache.servicemix.bundles:org.apache.servicemix.bundles.javax-inject:jar</include>
                 <include>org.apache.servicemix.bundles:org.apache.servicemix.bundles.aopalliance:jar</include>
             </includes>
             <useStrictFiltering>true</useStrictFiltering>
             <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
-        </dependencySet>
+        </dependencySet -->
 
     </dependencySets>
 </component>
