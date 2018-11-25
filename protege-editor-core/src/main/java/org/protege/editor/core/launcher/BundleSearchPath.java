@@ -1,4 +1,4 @@
-package org.protege.osgi.framework;
+package org.protege.editor.core.launcher;
 
 import com.google.common.base.MoreObjects;
 import org.osgi.framework.Constants;

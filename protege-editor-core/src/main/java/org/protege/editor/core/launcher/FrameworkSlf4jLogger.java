@@ -1,4 +1,4 @@
-package org.protege.osgi.framework;
+package org.protege.editor.core.launcher;
 
 import org.apache.felix.framework.Logger;
 import org.osgi.framework.Bundle;

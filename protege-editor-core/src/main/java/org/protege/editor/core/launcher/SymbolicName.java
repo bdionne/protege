@@ -1,4 +1,4 @@
-package org.protege.osgi.framework;
+package org.protege.editor.core.launcher;
 
 import static com.google.common.base.MoreObjects.toStringHelper;
 import static com.google.common.base.Preconditions.checkNotNull;

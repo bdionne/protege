@@ -1,4 +1,4 @@
-package org.protege.prefs;
+package org.protege.editor.core.prefs;
 
 import java.io.File;
 import java.util.prefs.Preferences;

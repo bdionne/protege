@@ -1,4 +1,4 @@
-package org.protege.osgi.framework;
+package org.protege.editor.core.launcher;
 
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.*;

@@ -1,18 +1,45 @@
 package org.protege.editor.core;
 
-import com.jgoodies.looks.plastic.PlasticLookAndFeel;
-import org.osgi.framework.*;
+import java.awt.Color;
+import java.io.File;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Map.Entry;
+
+
+import javax.swing.BorderFactory;
+import javax.swing.LookAndFeel;
+import javax.swing.SwingUtilities;
+import javax.swing.UIDefaults;
+import javax.swing.UIManager;
+import javax.swing.border.MatteBorder;
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
+import org.osgi.framework.FrameworkEvent;
 import org.protege.editor.core.editorkit.EditorKit;
 import org.protege.editor.core.editorkit.EditorKitFactoryPlugin;
 import org.protege.editor.core.editorkit.EditorKitManager;
 import org.protege.editor.core.editorkit.RecentEditorKitManager;
+import org.protege.editor.core.launcher.Parser;
 import org.protege.editor.core.log.LogBanner;
 import org.protege.editor.core.log.LogManager;
 import org.protege.editor.core.log.LogViewImpl;
-//import org.protege.editor.core.platform.OSGi;
 import org.protege.editor.core.platform.OSUtils;
 import org.protege.editor.core.platform.PlatformArguments;
 import org.protege.editor.core.platform.apple.ProtegeAppleApplication;
+import org.protege.editor.core.plugin.JPFUtil;
 import org.protege.editor.core.plugin.PluginUtilities;
 import org.protege.editor.core.prefs.Preferences;
 import org.protege.editor.core.prefs.PreferencesManager;
@@ -23,19 +50,11 @@ import org.protege.editor.core.ui.util.ErrorMessage;
 import org.protege.editor.core.ui.util.ProtegePlasticTheme;
 import org.protege.editor.core.ui.workspace.Workspace;
 import org.protege.editor.core.update.PluginManager;
-//import org.protege.osgi.framework.Launcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xml.sax.SAXException;
 
-import javax.swing.*;
-import javax.swing.border.MatteBorder;
-//import javax.swing.plaf.basic.BasicTreeUI;
-import java.awt.*;
-import java.io.File;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.*;
-import java.util.List;
+import com.jgoodies.looks.plastic.PlasticLookAndFeel;
 
 /*
  * Copyright (C) 2007, University of Manchester
@@ -72,6 +91,20 @@ public class ProtegeApplication implements BundleActivator {
     public static final String LOOK_AND_FEEL_KEY = "LOOK_AND_FEEL_KEY";
 
     public static final String LOOK_AND_FEEL_CLASS_NAME = "LOOK_AND_FEEL_CLASS_NAME";
+    
+    public static final String ARG_PROPERTY = "command.line.arg.";
+
+	public static final String LAUNCH_LOCATION_PROPERTY = "org.protege.launch.config";
+
+	public static final String PROTEGE_DIR_PROPERTY = "protege.dir";
+
+	public static final String DEFAULT_CONFIG_XML_FILE_PATH_NAME = "conf/config.xml";
+
+	public static String PROTEGE_DIR = System.getProperty(PROTEGE_DIR_PROPERTY);
+	
+	private static final Map<String, String> frameworkProperties = new HashMap<>();
+
+	private static final List<org.protege.editor.core.launcher.BundleSearchPath> searchPaths = new ArrayList<>();
 
     private static BundleContext context;
 
@@ -84,6 +117,8 @@ public class ProtegeApplication implements BundleActivator {
     private static LogManager logManager = new LogManager(new LogViewImpl());
 
     private boolean initialized = false;
+    
+    
 
     public void start(final BundleContext context) {
         logManager.bind();
@@ -136,22 +171,56 @@ public class ProtegeApplication implements BundleActivator {
     }
     
     public static void main(String[] args) throws Exception {
-       
-    	ProtegeApplication app = new ProtegeApplication();
-    	app.startapp();
     	
-    	/* setArguments(args);
-        String config = System.getProperty(LAUNCH_LOCATION_PROPERTY, DEFAULT_CONFIG_XML_FILE_PATH_NAME);
-        File configFile;
-        if (PROTEGE_DIR != null) {
-            configFile = new File(PROTEGE_DIR, config);
-        }
-        else {
-            configFile = new File(config);
-        }
-        Launcher launcher = new Launcher(configFile);
-        launcher.start(true);*/
+    	setArguments(args);
+		String config = System.getProperty(LAUNCH_LOCATION_PROPERTY, DEFAULT_CONFIG_XML_FILE_PATH_NAME);
+		File configFile;
+		if (PROTEGE_DIR != null) {
+			configFile = new File(PROTEGE_DIR, config);
+		} else {
+			configFile = new File(config);
+		}
+		java.util.prefs.Preferences.userRoot();
+		parseConfig(configFile);
+		
+		JPFUtil.setClasspathForPlugins();
+		
+		ProtegeApplication protegeApp = new ProtegeApplication();
+		protegeApp.startapp();
+    	
     }
+    
+    private static void setSystemProperties(Parser p) {
+		Map<String, String> systemProperties = p.getSystemProperties();
+		System.setProperty("org.protege.osgi.launcherHandlesExit", "True");
+		for (Entry<String, String> entry : systemProperties.entrySet()) {
+			System.setProperty(entry.getKey(), entry.getValue());
+		}
+	}
+    
+    @SuppressWarnings("unchecked")
+	private static void setLogger(Map configurationMap) {
+		org.protege.editor.core.launcher.FrameworkSlf4jLogger logger = new org.protege.editor.core.launcher.FrameworkSlf4jLogger();
+		configurationMap.put("felix.log.logger", logger);
+	}
+    
+    private static void parseConfig(File config) throws ParserConfigurationException, SAXException, IOException {
+		Parser p = new Parser();
+		p.parse(config);
+		setSystemProperties(p);
+		setLogger(frameworkProperties);
+		searchPaths.addAll(p.getSearchPaths());
+	}
+
+    
+    public static void setArguments(String... args) {
+		if (args != null) {
+			int counter = 0;
+			for (String arg : args) {
+				System.setProperty(ARG_PROPERTY + (counter++), arg);
+			}
+		}
+	}
 
     // Called when the application is finally completely shutting down
     public void stop(BundleContext context) throws Exception {
