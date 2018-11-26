@@ -13,10 +13,10 @@ jre/bin/java -Xmx${conf.mem.xmx}M -Xms${conf.mem.xms}M \
      -DentityExpansionLimit=100000000 \
      -Dlogback.configurationFile=conf/logback.xml \
      -Dfile.encoding=UTF-8 \
-     -Djava.util.prefs.PreferencesFactory=org.protege.prefs.FileBackingStorePrefsFactory \
+     -Djava.util.prefs.PreferencesFactory=org.protege.editor.core.prefs.FileBackingStorePrefsFactory \
      ${conf.extra.args} \
      -classpath "lib/*":"bundles/*":"plugins/*":"bin/*" \
-     $CMD_OPTIONS org.protege.osgi.framework.Launcher $1
+     $CMD_OPTIONS org.protege.editor.core.ProtegeApplication $1
 
 
 

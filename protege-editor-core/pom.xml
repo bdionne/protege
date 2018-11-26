@@ -29,14 +29,6 @@
     </repositories>
 	<dependencies>
 
-		<!--
-		<dependency>
-			<groupId>edu.stanford.protege</groupId>
-			<artifactId>protege-launcher</artifactId>
-			<version>${project.parent.version}</version>
-			<scope>provided</scope>
-		</dependency>
-		 -->
 		
 		<dependency>
 			<groupId>org.apache.felix</groupId>

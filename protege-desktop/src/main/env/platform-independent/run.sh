@@ -13,10 +13,10 @@ java -Xmx5000M -Xms2000M \
      -Dlogback.configurationFile=conf/logback.xml \
      -DentityExpansionLimit=100000000 \
      -Dfile.encoding=UTF-8 \
-     -Djava.util.prefs.PreferencesFactory=org.protege.prefs.FileBackingStorePrefsFactory \
+     -Djava.util.prefs.PreferencesFactory=org.protege.editor.core.prefs.FileBackingStorePrefsFactory \
      -XX:CompileCommand=exclude,javax/swing/text/GlyphView,getBreakSpot \
      -classpath lib/*:bundles/*:plugins/*:bin/* \
-     $CMD_OPTIONS org.protege.osgi.framework.Launcher $1
+     $CMD_OPTIONS org.protege.editor.core.ProtegeApplication $1
 
 
 
