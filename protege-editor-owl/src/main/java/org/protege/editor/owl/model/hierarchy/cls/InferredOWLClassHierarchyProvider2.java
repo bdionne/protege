@@ -13,6 +13,7 @@ import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.model.parameters.Imports;
 import org.semanticweb.owlapi.reasoner.OWLReasoner;
 import org.semanticweb.owlapi.search.EntitySearcher;
+import org.semanticweb.owlapi.util.BatchInferredSubClassAxiomGenerator;
 import org.semanticweb.owlapi.util.InferredOntologyGenerator;
 import org.semanticweb.owlapi.util.InferredSubClassAxiomGenerator;
 
@@ -289,7 +290,7 @@ public class InferredOWLClassHierarchyProvider2 extends AbstractOWLObjectHierarc
 		}
 
 		InferredOntologyGenerator ontGen = new InferredOntologyGenerator(reasoner, new ArrayList<>());
-		ontGen.addGenerator(new InferredSubClassAxiomGenerator());
+		ontGen.addGenerator(new BatchInferredSubClassAxiomGenerator());
 
 		ontGen.fillOntology(this.owlOntologyManager.getOWLDataFactory(), inferredOnt);
 
