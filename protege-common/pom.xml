@@ -17,15 +17,18 @@
 	<description>Core Protege Libraries</description>
 
 	<dependencies>
-
+	
 		<dependency>
-			<groupId>edu.stanford.protege</groupId>
-			<artifactId>protege-launcher</artifactId>
-			<version>${project.parent.version}</version>
-			<scope>provided</scope>
+			<groupId>org.apache.felix</groupId>
+			<artifactId>org.apache.felix.main</artifactId>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
 		</dependency>
 
-        <dependency>
+		<dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
             <scope>test</scope>
