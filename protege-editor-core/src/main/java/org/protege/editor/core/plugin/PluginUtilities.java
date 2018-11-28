@@ -39,9 +39,9 @@ public class PluginUtilities {
     
     private BundleContext context;
     
-    private ServiceTracker registryServiceTracker;
+    private ServiceTracker<?, ?> registryServiceTracker;
     
-    private ServiceTracker packageServiceTracker;
+    private ServiceTracker<?, ?> packageServiceTracker;
 
 
     private PluginUtilities() {
@@ -105,21 +105,15 @@ public class PluginUtilities {
     }
     
     public IExtensionRegistry getExtensionRegistry() {
-       /* if (registryServiceTracker == null) {
-            registryServiceTracker = new ServiceTracker(context, IExtensionRegistry.class.getName(), null);
-            registryServiceTracker.open();
-        }
-        return (IExtensionRegistry) registryServiceTracker.getService();*/
     	
     	return RegistryFactoryHelper.getRegistry();
     }
     
     public PackageAdmin getPackageAdmin() {
         if (packageServiceTracker == null) {
-            packageServiceTracker = new ServiceTracker(context, PackageAdmin.class.getName(), null);
+            packageServiceTracker = new ServiceTracker<Object, Object>(context, PackageAdmin.class.getName(), null);
             packageServiceTracker.open();
         }
-       // return null;
         return (PackageAdmin) packageServiceTracker.getService();
     }
     
@@ -138,10 +132,8 @@ public class PluginUtilities {
     }
     
     public Object getExtensionObject(IExtension ext, String property) throws InstantiationException, IllegalAccessException, ClassNotFoundException {
-       // Bundle b = getBundle(ext);
-       // return b.loadClass(getAttribute(ext, property)).newInstance();
+      
     	return Class.forName(getAttribute(ext, property)).newInstance();
-        // return config.createExecutableExtension(property);
     }
     
     /*
@@ -167,7 +159,7 @@ public class PluginUtilities {
     }
     
     public static Version getApplicationVersion() {
-    	File pluginsFolder = new File(System.getProperty(ProtegeApplication.BUNDLE_DIR_PROP));
+    	File pluginsFolder = new File("./lib");
 				
 		if (pluginsFolder.isDirectory()) {
 			File[] files = pluginsFolder.listFiles((dir, name) -> {

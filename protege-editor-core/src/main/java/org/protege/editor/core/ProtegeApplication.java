@@ -81,7 +81,7 @@ public class ProtegeApplication implements BundleActivator {
 
     public static final String BUNDLE_WITHOUT_PLUGIN_XML = "No-Plugin-XML";
 
-    public static final String BUNDLE_DIR_PROP = "org.protege.bundle.dir";
+    //public static final String BUNDLE_DIR_PROP = "org.protege.bundle.dir";
     public static final String PLUGIN_DIR_PROP = "org.protege.plugin.dir";
 
     public static final String RUN_ONCE = "PROTEGE_OSGI_RUN_ONCE";

@@ -53,10 +53,7 @@ public class JPFUtil {
 		String nestedFolder = "lib" + File.separator;
 		
 		File pluginsFolder = new File(System.getProperty(ProtegeApplication.PLUGIN_DIR_PROP));
-		File bundlesFolder = new File(System.getProperty(ProtegeApplication.BUNDLE_DIR_PROP));
-				
-		for (File file : new File[] { pluginsFolder, bundlesFolder }) {
-			// System.out.println("Search Path: " + file.getAbsolutePath());
+		for (File file : new File[] { pluginsFolder }) {
 			if (file.isDirectory()) {
 				File[] files = file.listFiles((dir, name) -> {
 					if (name.toLowerCase().endsWith(".jar")) {
@@ -107,7 +104,6 @@ public class JPFUtil {
 						JarEntry jarentry = jarFile.getJarEntry("plugin.xml");
 						if (jarentry != null && !pluginPath.contains(f.getAbsolutePath())) {
 							pluginPath.add(f.getAbsolutePath());
-							// System.out.println("Jar file contains plugin.xml: " + f.getAbsolutePath());
 						}
 
 						jarFile.close();
@@ -155,7 +151,7 @@ public class JPFUtil {
 				return;
 			}
 		}
-		Class sysclass = URLClassLoader.class;
+		Class<URLClassLoader> sysclass = URLClassLoader.class;
 		try {
 			Method method = sysclass.getDeclaredMethod("addURL", new Class[] { URL.class });
 			method.setAccessible(true);
