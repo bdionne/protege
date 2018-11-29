@@ -14,7 +14,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 
-
 import javax.swing.BorderFactory;
 import javax.swing.LookAndFeel;
 import javax.swing.SwingUtilities;
@@ -24,10 +23,8 @@ import javax.swing.border.MatteBorder;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
-import org.osgi.framework.FrameworkEvent;
 import org.protege.editor.core.editorkit.EditorKit;
 import org.protege.editor.core.editorkit.EditorKitFactoryPlugin;
 import org.protege.editor.core.editorkit.EditorKitManager;
@@ -75,13 +72,12 @@ import com.jgoodies.looks.plastic.PlasticLookAndFeel;
  * The ProtegeApplication is the main entry point to Protege.  The application
  * is actually a plugin to the Java Plugin Framework
  */
-public class ProtegeApplication implements BundleActivator {
+public class ProtegeApplication {
 
     private final static Logger logger = LoggerFactory.getLogger(ProtegeApplication.class);
 
     public static final String BUNDLE_WITHOUT_PLUGIN_XML = "No-Plugin-XML";
-
-    //public static final String BUNDLE_DIR_PROP = "org.protege.bundle.dir";
+    
     public static final String PLUGIN_DIR_PROP = "org.protege.plugin.dir";
 
     public static final String RUN_ONCE = "PROTEGE_OSGI_RUN_ONCE";
@@ -117,40 +113,7 @@ public class ProtegeApplication implements BundleActivator {
     private static LogManager logManager = new LogManager(new LogViewImpl());
 
     private boolean initialized = false;
-    
-    
 
-    public void start(final BundleContext context) {
-        logManager.bind();
-        context.addFrameworkListener(event -> {
-            if (event.getType() == FrameworkEvent.STARTED) {
-                reallyStart(context);
-            }
-
-        });
-
-    }
-
-    public void reallyStart(BundleContext context) {
-        try {
-            ProtegeApplication.context = context;
-            displayPlatform();
-            initApplication();
-
-
-            if (OSUtils.isOSX()) {
-                ProtegeAppleApplication.getInstance();
-            }
-
-            ProtegeManager.getInstance().initialise(this);
-            startApplication();
-
-
-        } catch (Throwable t) {
-            logger.error("Exception caught starting Protege", t);
-        }
-    }
-    
     public void startapp() {
     	logManager.bind();
     	try {
