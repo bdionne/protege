@@ -34,6 +34,8 @@ public interface OWLEntityRenderingCache extends Disposable {
 
 
     OWLEntity getOWLEntity(String rendering);
+    
+    OWLEntity getOWLEntity(String rendering, EntityType entityType);
 
 
     OWLClass getOWLClass(String rendering);

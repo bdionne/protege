@@ -164,6 +164,39 @@ public class OWLEntityRenderingCacheImpl implements OWLEntityRenderingCache {
         return entityRenderingMap.get(owlEntity);
     }
 
+    public OWLEntity getOWLEntity(String rendering, EntityType entityType) {
+    	
+    	if (entityType == null) {
+    		return getOWLEntity(rendering);
+    	}
+    	
+    	OWLEntity entity = null;
+    	
+    	if (entityType == EntityType.CLASS) {
+    		entity = getOWLClass(rendering);
+    	}
+    	
+    	if (entityType == EntityType.OBJECT_PROPERTY) {
+    		entity = getOWLObjectProperty(rendering);
+    	}
+    	
+    	if (entityType == EntityType.DATA_PROPERTY) {
+    		entity = getOWLDataProperty(rendering);
+    	}
+    	
+    	if (entityType == EntityType.NAMED_INDIVIDUAL) {
+    		entity = getOWLIndividual(rendering);
+    	}
+    	
+    	if (entityType == EntityType.DATATYPE) {
+    		entity = getOWLDatatype(rendering);
+    	}
+    	
+    	if (entityType == EntityType.ANNOTATION_PROPERTY) {
+    		entity = getOWLAnnotationProperty(rendering);
+    	}
+    	return entity;
+    }
 
     public OWLEntity getOWLEntity(String rendering) {
         // Examine in the order of class, property, individual

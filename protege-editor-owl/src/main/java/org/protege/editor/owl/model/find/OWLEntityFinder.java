@@ -41,6 +41,8 @@ public interface OWLEntityFinder {
 
 
     OWLEntity getOWLEntity(String rendering);
+    
+    OWLEntity getOWLEntity(String rendering, EntityType entityType);
 
     /**
      * Searches for an entity of the specified type with the specified rendering.

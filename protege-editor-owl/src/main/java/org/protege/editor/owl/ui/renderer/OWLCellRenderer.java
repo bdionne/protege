@@ -470,8 +470,9 @@ public class OWLCellRenderer implements TableCellRenderer, TreeCellRenderer, Lis
             }
         }
 
-
-        prepareTextPane(getRendering(value), isSelected);
+        EntityType entityType = OWLUtilities.getEntityType(value);
+        
+        prepareTextPane(getRendering(value), isSelected, entityType);
 
         if (isSelected) {
             renderingComponent.setBackground(SELECTION_BACKGROUND);
@@ -638,7 +639,7 @@ public class OWLCellRenderer implements TableCellRenderer, TreeCellRenderer, Lis
     }
 
 
-    private void prepareTextPane(Object value, boolean selected) {
+    private void prepareTextPane(Object value, boolean selected, EntityType entityType) {
 
         textPane.setBorder(null);
         String theVal = value.toString();
@@ -704,7 +705,7 @@ public class OWLCellRenderer implements TableCellRenderer, TreeCellRenderer, Lis
             }
         }
 
-        highlightText(doc, selected);
+        highlightText(doc, selected, entityType);
         if(selected) {
             if (selectionForeground != null) {
                 doc.setCharacterAttributes(0, doc.getLength(), selectionForeground, false);
@@ -713,7 +714,7 @@ public class OWLCellRenderer implements TableCellRenderer, TreeCellRenderer, Lis
     }
 
 
-    protected void highlightText(StyledDocument doc, boolean selected) {
+    protected void highlightText(StyledDocument doc, boolean selected, EntityType entityType) {
         // Highlight text
         StringTokenizer tokenizer = new StringTokenizer(textPane.getText(), " []{}()\n\t", true);
         
@@ -734,7 +735,7 @@ public class OWLCellRenderer implements TableCellRenderer, TreeCellRenderer, Lis
                 }
             }
             
-            renderToken(curToken, tokenStartIndex, doc, selected, textPane.getText().contains("\n"));
+            renderToken(curToken, tokenStartIndex, doc, selected, textPane.getText().contains("\n"), entityType);
 
             tokenStartIndex += curToken.length();
             
@@ -749,7 +750,7 @@ public class OWLCellRenderer implements TableCellRenderer, TreeCellRenderer, Lis
     private boolean linkRendered = false;
     private boolean parenthesisRendered = false;
 
-    protected void renderToken(final String curToken, final int tokenStartIndex, final StyledDocument doc, boolean selected, boolean multiline) {
+    protected void renderToken(final String curToken, final int tokenStartIndex, final StyledDocument doc, boolean selected, boolean multiline, EntityType entityType) {
 
         boolean enclosedByBracket = false;
         if (parenthesisRendered){
@@ -767,7 +768,7 @@ public class OWLCellRenderer implements TableCellRenderer, TreeCellRenderer, Lis
         }
         else {
             // Not a keyword, so might be an entity (or delim)
-            final OWLEntity curEntity = getOWLModelManager().getOWLEntityFinder().getOWLEntity(curToken);
+            final OWLEntity curEntity = getOWLModelManager().getOWLEntityFinder().getOWLEntity(curToken, entityType);
             if (curEntity != null) {
                 if (focusedEntity != null && !selected) {
                     if (curEntity.equals(focusedEntity)) {

@@ -40,4 +40,32 @@ public class OWLUtilities {
     	}
 		return false;
 	}
+	
+	public static EntityType getEntityType (Object value) {
+		if (value instanceof OWLClass) {
+			return EntityType.CLASS;
+		}
+		
+		if (value instanceof OWLAnnotationProperty) {
+			return EntityType.ANNOTATION_PROPERTY;
+		}
+		
+		if (value instanceof OWLDataProperty) {
+			return EntityType.DATA_PROPERTY;
+		}
+		
+		if (value instanceof OWLDatatype) {
+			return EntityType.DATATYPE;
+		}
+		
+		if (value instanceof OWLObjectProperty) {
+			return EntityType.OBJECT_PROPERTY;
+		}
+		
+		if (value instanceof OWLNamedIndividual) { 
+			return EntityType.NAMED_INDIVIDUAL;
+		}
+		
+		return null;
+	}
 }

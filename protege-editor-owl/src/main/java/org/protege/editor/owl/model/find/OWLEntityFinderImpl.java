@@ -105,7 +105,14 @@ public class OWLEntityFinderImpl implements OWLEntityFinder {
         return entity;
     }
 
-
+    public OWLEntity getOWLEntity(String rendering, EntityType entityType) {
+    	OWLEntity entity = renderingCache.getOWLEntity(rendering, entityType);
+        if (entity == null && !rendering.startsWith(ESCAPE_CHAR) && !rendering.endsWith(ESCAPE_CHAR)){
+            entity = renderingCache.getOWLEntity(ESCAPE_CHAR + rendering + ESCAPE_CHAR);
+        }
+        return entity;
+    }
+    
     public Set<String> getOWLEntityRenderings() {
         return renderingCache.getOWLEntityRenderings();
     }
