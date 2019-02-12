@@ -84,7 +84,6 @@ public class OWLWorkspaceViewsTab extends WorkspaceViewsTab implements Selection
     		ViewComponentPlugin plugin = getWorkspace().getViewManager().getViewComponentPlugin(view.getId());
     		if (plugin != null) {
     			if (plugin.isEager()) {
-    				System.out.println("Voila");
     				view.createUI();
     			}
     		}

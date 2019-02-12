@@ -28,12 +28,21 @@
             <Pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{0}    %msg%n</Pattern>
         </encoder>
     </appender>
+    
+    <logger name="gov.nih.nci.ui" level="info">
+        <appender-ref ref="stdout"/>
+    	<appender-ref ref="rolling-files"/>
+    </logger>
+    <logger name="org.protege.editor.owl.client.action" level="info">
+        <appender-ref ref="stdout"/>
+    	<appender-ref ref="rolling-files"/>
+    </logger>
 
-
-    <root level="info">
-        <appender-ref ref="stdout" />
+   
+    <root level="${protege.logging.level:-info}">        
         <appender-ref ref="rolling-files"/>
     </root>
+
 
 
 </configuration>
