@@ -1,6 +1,7 @@
 package org.protege.editor.core.plugin;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.util.jar.Pack200;
 import java.io.IOException;
@@ -10,11 +11,19 @@ import java.net.URLClassLoader;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.jar.Attributes;
 import java.util.jar.JarEntry; 
 import java.util.jar.JarFile;
+import java.util.jar.JarInputStream;
 import java.util.jar.JarOutputStream;
+import java.util.jar.Manifest;
 
 import org.eclipse.core.runtime.IExtension;
+import org.osgi.framework.Constants;
+import org.osgi.framework.Version;
 import org.protege.editor.core.ProtegeApplication;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,7 +57,9 @@ public class JPFUtil {
     }
     
     public static void setClasspathForPlugins() throws Exception{
-		ArrayList<String> pluginPath = new ArrayList<String>();
+    	Map<String, String> pluginMap = new HashMap<String, String>();
+		List<String> pluginPath = new ArrayList<String>();
+		List<String> removePluginPath = new ArrayList<String>();
 		
 		String nestedFolder = "lib" + File.separator;
 		
@@ -65,6 +76,7 @@ public class JPFUtil {
 				for (File f : files) {
 					if (f.getPath().contains("plugins") && !pluginPath.contains(f.getAbsolutePath())) {
 						pluginPath.add(f.getAbsolutePath());
+						//pluginPath.add(f);
 						
 						//add nested jars path
 						JarFile jar = new JarFile(f);
@@ -88,10 +100,13 @@ public class JPFUtil {
 
 									if (!pluginPath.contains(nestedPath)) {
 										pluginPath.add(nestedPath);
+										//pluginPath.add(nestedFile);
 									}
 								}
 						    }
 						}
+						
+						loadPluginMap(f, pluginMap, removePluginPath);
 						
 						jar.close();
 						continue;
@@ -104,6 +119,7 @@ public class JPFUtil {
 						JarEntry jarentry = jarFile.getJarEntry("plugin.xml");
 						if (jarentry != null && !pluginPath.contains(f.getAbsolutePath())) {
 							pluginPath.add(f.getAbsolutePath());
+							//pluginPath.add(f);
 						}
 
 						jarFile.close();
@@ -117,8 +133,12 @@ public class JPFUtil {
 			}
 		}
 		
+		for (String rmPath : removePluginPath) {
+			File rmFile = new File(rmPath);
+			rmFile.delete();
+		}
 
-		for (String path : pluginPath) {
+		for (String path : pluginMap.values()) {
 			
 			try {
 				addFile(path);
@@ -129,6 +149,34 @@ public class JPFUtil {
 		
 	}
 
+    private static void loadPluginMap(File f, Map<String, String>pluginMap, List<String>removeFiles) {
+    	try {
+	    	JarInputStream is = new JarInputStream(new FileInputStream(f)); 
+	        Manifest mf = is.getManifest();
+	        if(mf == null) {
+	        	throw new RuntimeException("Programmer error - missed menifest file in jar");
+	        }
+	        Attributes attributes = mf.getMainAttributes();
+	        
+	        String nameString = attributes.getValue(Constants.BUNDLE_NAME);
+	        
+	        String oldPath = pluginMap.get(nameString);
+	
+	        // if list does not exist create it
+	        if(pluginMap.containsKey(nameString)) {
+	        	if(f.getAbsolutePath().compareTo(oldPath) > 0) {
+	        		pluginMap.put(nameString, f.getAbsolutePath());
+	        		removeFiles.add(oldPath);
+	        	}
+	        } else {
+	            pluginMap.put(nameString, f.getAbsolutePath());
+	        }
+	        is.close();
+    	} catch (Exception ex) {
+    		logger.error("Error in loadPluginMap method", ex);
+    	}
+		
+    }
 		
 	public static void addFile(String s) throws IOException {
 		File f = new File(s);

@@ -192,7 +192,7 @@ public class PluginInstaller {
 
     private static Optional<File> copyPluginToInstallLocation(File downloadedPlugin, PluginInfo info) throws URISyntaxException {
 
-        final Optional<File> backupFileName = moveExistingPluginToBackupLocation(info);
+        //final Optional<File> backupFileName = moveExistingPluginToBackupLocation(info);
         final File pluginsFolder = new File(System.getProperty(ProtegeApplication.PLUGIN_DIR_PROP));
         final String destinationFileName = String.format("%s-%s.jar", info.getId(), info.getAvailableVersion());
         final File downloadedPluginDestination = new File(pluginsFolder, destinationFileName);
@@ -200,7 +200,7 @@ public class PluginInstaller {
         try {
             FileUtils.copyFile(downloadedPlugin, downloadedPluginDestination);
             logger.info("Copied the {} plugin to {} in the plugins directory", info.getLabel(), downloadedPluginDestination.getName());
-            deletePluginBackup(backupFileName);
+            //deletePluginBackup(backupFileName);
             return Optional.of(downloadedPluginDestination);
         }
         catch (IOException e) {
@@ -213,7 +213,7 @@ public class PluginInstaller {
                                 "This plugin will only be use-able by the current user.",
                         info.getLabel(),
                         userPluginDirectory);
-                deletePluginBackup(backupFileName);
+                //deletePluginBackup(backupFileName);
                 return Optional.of(userDirectoryPluginFile);
             } catch (IOException ioe) {
                 logger.error("An error occurred whilst attempting to save the plugin: {}", ioe.getMessage(), ioe);
