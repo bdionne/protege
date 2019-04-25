@@ -1,6 +1,9 @@
 package org.protege.editor.owl.model.inference;
 
 import com.google.common.base.Stopwatch;
+
+import uk.ac.manchester.cs.owl.owlapi.OWLOntologyManagerImpl;
+
 import org.protege.editor.core.Disposable;
 import org.protege.editor.core.log.LogBanner;
 import org.protege.editor.core.ui.util.Resettable;
@@ -405,6 +408,9 @@ public class OWLReasonerManagerImpl implements OWLReasonerManager {
                 if (reasonerProgressMonitor instanceof Resettable) {
                     ((Resettable) reasonerProgressMonitor).reset();
                 }
+                OWLOntologyManagerImpl imp = (OWLOntologyManagerImpl) ontology.getOWLOntologyManager();
+                imp.broadcastChanges.set(true);
+                System.out.println("broadcasting again");
                 logger.info(LogBanner.end());
             }
         }

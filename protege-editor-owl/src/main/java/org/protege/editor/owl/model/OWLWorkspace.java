@@ -44,6 +44,7 @@ import org.protege.editor.owl.ui.util.OWLComponentFactory;
 import org.protege.editor.owl.ui.util.OWLComponentFactoryImpl;
 import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.reasoner.BufferingMode;
+import org.semanticweb.owlapi.reasoner.ConsoleProgressMonitor;
 import org.semanticweb.owlapi.search.EntitySearcher;
 import org.semanticweb.owlapi.util.CollectionFactory;
 import org.semanticweb.owlapi.util.OWLEntityCollectingOntologyChangeListener;
@@ -127,7 +128,7 @@ public class OWLWorkspace extends TabbedWorkspace implements SendErrorReportHand
 
     private final ProtegeOWLAction stopReasonerAction = new StopReasonerAction();
     
-    private final ProtegeOWLAction saveStateReasonerAction = new SaveStateReasonerAction();
+    
 
     
     private final ExplainInconsistentOntologyAction explainInconsistentOntologyAction = new ExplainInconsistentOntologyAction();
@@ -549,10 +550,6 @@ public class OWLWorkspace extends TabbedWorkspace implements SendErrorReportHand
         stopReasonerAction.putValue(Action.NAME, REASONER_STOP);
         reasonerMenu.add(stopReasonerAction);
         
-        saveStateReasonerAction.setEditorKit(getOWLEditorKit());
-        saveStateReasonerAction.putValue(Action.NAME, REASONER_SAVE_STATE);
-        reasonerMenu.add(saveStateReasonerAction);
-
         explainInconsistentOntologyAction.setEditorKit(getOWLEditorKit());
         explainInconsistentOntologyAction.putValue(Action.NAME, REASONER_EXPLAIN);
         explainInconsistentOntologyAction.setEnabled(false);
@@ -820,7 +817,6 @@ public class OWLWorkspace extends TabbedWorkspace implements SendErrorReportHand
         startReasonerAction.setEnabled(status.isEnableInitialization());
         startReasonerAction.putValue(Action.SHORT_DESCRIPTION, status.getInitializationTooltip());
         stopReasonerAction.setEnabled(status.isEnableStop());
-        saveStateReasonerAction.setEnabled(status.isEnableStop());
 
         explainInconsistentOntologyAction.setEnabled(status == ReasonerStatus.INCONSISTENT);
 

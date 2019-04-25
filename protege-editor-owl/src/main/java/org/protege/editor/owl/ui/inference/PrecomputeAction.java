@@ -7,6 +7,8 @@ import org.protege.editor.owl.model.inference.ReasonerPreferences;
 import org.protege.editor.owl.ui.action.ProtegeOWLAction;
 import org.semanticweb.owlapi.reasoner.InferenceType;
 
+import uk.ac.manchester.cs.owl.owlapi.OWLOntologyManagerImpl;
+
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.util.Set;
@@ -34,6 +36,8 @@ public class PrecomputeAction extends ProtegeOWLAction {
      * Invoked when an action occurs.
      */
     public void actionPerformed(ActionEvent e) {
+    	OWLOntologyManagerImpl imp = (OWLOntologyManagerImpl) getOWLModelManager().getOWLOntologyManager();
+    	imp.broadcastChanges.set(false);
         ReasonerPreferences  preferences = getOWLModelManager().getOWLReasonerManager().getReasonerPreferences();
         Set<InferenceType> precompute;
         precompute = preferences.getPrecomputedInferences();

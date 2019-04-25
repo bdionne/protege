@@ -95,6 +95,8 @@ import org.semanticweb.owlapi.model.RemoveAxiom;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uk.ac.manchester.cs.owl.owlapi.OWLOntologyManagerImpl;
+
 /*
  * Copyright (C) 2007, University of Manchester
  *
@@ -590,8 +592,12 @@ public class OWLFrameList<R> extends MList implements LinkedObjectComponent, Dro
         OWLFrameSectionRow row = (OWLFrameSectionRow) obj;
         OWLAxiom ax = row.getAxiom();
         if (getExplanationManager().hasExplanation(ax)) {
-            JFrame frame = ProtegeManager.getInstance().getFrame(editorKit.getWorkspace());
+        	getExplanationManager().setIsRunning(true);
+        	
+        	JFrame frame = ProtegeManager.getInstance().getFrame(editorKit.getWorkspace());
             getExplanationManager().handleExplain(frame, ax);
+            
+            getExplanationManager().setIsRunning(false);
         }
 
     }

@@ -23,6 +23,9 @@ import org.semanticweb.owlapi.model.OWLOntologyChange;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.model.OWLSubClassOfAxiom;
 import org.semanticweb.owlapi.util.InferredOntologyGenerator;
+
+import uk.ac.manchester.cs.owl.owlapi.OWLOntologyManagerImpl;
+
 import org.semanticweb.owlapi.util.BatchInferredSubClassAxiomGenerator;
 
 
@@ -62,8 +65,14 @@ public class InferredAxiomsFrameSection extends AbstractOWLFrameSection<OWLOntol
     @SuppressWarnings("rawtypes")
 	protected void refillInferred() {
     	try {
+    		if (this.getOWLModelManager().getExplanationManager().getIsRunning()) {
+    			return;
+    		}
+    		
     		long now = System.currentTimeMillis();
             OWLOntologyManager man = OWLManager.createOWLOntologyManager();
+            OWLOntologyManagerImpl imp = (OWLOntologyManagerImpl) man;
+    		//imp.broadcastChanges.set(false);
             OWLOntology inferredOnt = man.createOntology(IRI.create("http://another.com/ontology" + System.currentTimeMillis()));
             InferredOntologyGenerator ontGen = new InferredOntologyGenerator(getOWLModelManager().getReasoner(), new ArrayList<>());
             ontGen.addGenerator(new BatchInferredSubClassAxiomGenerator());
@@ -90,7 +99,8 @@ public class InferredAxiomsFrameSection extends AbstractOWLFrameSection<OWLOntol
                 }
             }
             System.out.println("Finished building inferred pane in: " + (System.currentTimeMillis() - now));
-        }
+            //imp.broadcastChanges.set(true);
+    	}
         catch (Exception e) {
             e.printStackTrace();
         }
