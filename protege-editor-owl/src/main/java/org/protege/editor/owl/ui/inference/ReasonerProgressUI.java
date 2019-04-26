@@ -69,9 +69,10 @@ public class ReasonerProgressUI implements ReasonerProgressMonitor, Disposable, 
 		taskLabel = new JLabel(DEFAULT_MESSAGE);
 		panel.add(taskLabel, BorderLayout.NORTH);
 		Frame parent = (Frame) (SwingUtilities.getAncestorOfClass(Frame.class,
-				owlEditorKit.getWorkspace()));
+				panel));
+		
 		window = new JDialog(parent, "Reasoner progress");
-		window.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE); 
+		window.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 		cancelledAction = new AbstractAction("Cancel") {
 			private static final long serialVersionUID = 3688085823398242640L;
 			public void actionPerformed(ActionEvent e) {
