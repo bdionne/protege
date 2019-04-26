@@ -1,13 +1,26 @@
 package org.protege.editor.owl.ui.inference;
 
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Frame;
+import java.awt.event.ActionEvent;
+
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JDialog;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JProgressBar;
+import javax.swing.SwingUtilities;
+import javax.swing.WindowConstants;
+
 import org.protege.editor.core.Disposable;
 import org.protege.editor.core.ui.util.Resettable;
 import org.protege.editor.owl.OWLEditorKit;
 import org.semanticweb.owlapi.reasoner.ReasonerProgressMonitor;
-
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.ActionEvent;
 
 
 /**
@@ -80,7 +93,8 @@ public class ReasonerProgressUI implements ReasonerProgressMonitor, Disposable, 
 		window.pack();
 		Dimension windowSize = window.getPreferredSize();
 		window.setSize(400, windowSize.height);
-		window.setResizable(false);		
+		window.setResizable(false);	
+		
 	}
 
 	public void setCancelled() {
@@ -98,25 +112,28 @@ public class ReasonerProgressUI implements ReasonerProgressMonitor, Disposable, 
 
 	public void reasonerTaskProgressChanged(final int value, final int max) {
 		if (max > 0) {
-			if (len == 0) {
-				len = max;
-				progressBar.setMaximum(len);
+			SwingUtilities.invokeLater(() -> {
+				if (len == 0) {
+					len = max;
+					progressBar.setMaximum(len);
 
-			} else if (len != max) {
-				progressBar.setMaximum(max);
-				len = max;
+				} else if (len != max) {
+					progressBar.setMaximum(max);
+					len = max;
 
 
-			}
+				}
+			});
 			int percent = value * 100 / max;
 			if ((percent > 0) && ((percent % 5) == 0)) {
 				if (percent != last_percent) {
 					last_percent = percent;
+					System.out.print("    ");
+					System.out.print(percent);
+					System.out.println("%");
 					SwingUtilities.invokeLater(() -> {
 						progressBar.setValue(value);
-						System.out.print("    ");
-						System.out.print(percent);
-						System.out.println("%");
+
 					});
 				}
 			}
@@ -129,8 +146,10 @@ public class ReasonerProgressUI implements ReasonerProgressMonitor, Disposable, 
 		if (taskIsRunning)
 			return;
 		taskIsRunning = true;
-		progressBar.setValue(0);
-		showWindow(taskName);
+		SwingUtilities.invokeLater(() -> {
+			progressBar.setValue(0);
+			showWindow(taskName);
+		});
 	}
 
 
