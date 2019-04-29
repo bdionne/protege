@@ -58,7 +58,8 @@ public class ReasonerProgressUI implements ReasonerProgressMonitor, Disposable, 
 
 	public ReasonerProgressUI(final OWLEditorKit owlEditorKit) {
 		this.owlEditorKit = owlEditorKit;        
-		progressBar = new JProgressBar();        
+		progressBar = new JProgressBar(); 
+		initWindow();
 	}
 
 	public void initWindow() {
@@ -113,18 +114,23 @@ public class ReasonerProgressUI implements ReasonerProgressMonitor, Disposable, 
 
 	public void reasonerTaskProgressChanged(final int value, final int max) {
 		if (max > 0) {
-			SwingUtilities.invokeLater(() -> {
-				if (len == 0) {
-					len = max;
+			
+			if (len == 0) {
+				len = max;
+				SwingUtilities.invokeLater(() -> {
 					progressBar.setMaximum(len);
+				});
 
-				} else if (len != max) {
+			} else if (len != max) {
+				len = max;
+				SwingUtilities.invokeLater(() -> {
 					progressBar.setMaximum(max);
-					len = max;
+				});
 
 
-				}
-			});
+
+			}
+			
 			int percent = value * 100 / max;
 			if ((percent > 0) && ((percent % 5) == 0)) {
 				if (percent != last_percent) {
@@ -171,7 +177,6 @@ public class ReasonerProgressUI implements ReasonerProgressMonitor, Disposable, 
 	private void showWindow(final String message) { 
 		if (!taskIsRunning)
 			return;
-		initWindow();
 		taskLabel.setText(message);
 		if (window.isVisible())
 			return;
