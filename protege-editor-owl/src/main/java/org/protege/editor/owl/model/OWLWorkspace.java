@@ -222,6 +222,7 @@ public class OWLWorkspace extends TabbedWorkspace implements SendErrorReportHand
 
         OWLReasonerManager reasonerManager = mngr.getOWLReasonerManager();
         reasonerManager.setReasonerProgressMonitor(new ReasonerProgressUI(getOWLEditorKit()));
+        //reasonerManager.setReasonerProgressMonitor(new ConsoleProgressMonitor());
         reasonerManager.setReasonerExceptionHandler(new UIReasonerExceptionHandler(this));
         reasonerManagerStarted = true;
         updateReasonerStatus(false);
@@ -810,7 +811,7 @@ public class OWLWorkspace extends TabbedWorkspace implements SendErrorReportHand
     }
 
     private void updateReasonerStatus(ReasonerStatus status) {
-        reasonerStatus.setText(status.getDescription());
+        //reasonerStatus.setText(status.getDescription());
         
         classifyAction.setEnabled(status == ReasonerStatus.OUT_OF_SYNC);
 

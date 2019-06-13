@@ -16,6 +16,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
+
+import java.awt.Component;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -411,6 +413,7 @@ public class OWLReasonerManagerImpl implements OWLReasonerManager {
                 OWLOntologyManagerImpl imp = (OWLOntologyManagerImpl) ontology.getOWLOntologyManager();
                 imp.broadcastChanges.set(true);
                 System.out.println("broadcasting again");
+                JOptionPane.showMessageDialog(null, "Classification finished", "Reasoner", JOptionPane.INFORMATION_MESSAGE);
                 logger.info(LogBanner.end());
             }
         }
