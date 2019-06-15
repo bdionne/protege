@@ -44,6 +44,7 @@ import org.protege.editor.owl.ui.util.OWLComponentFactory;
 import org.protege.editor.owl.ui.util.OWLComponentFactoryImpl;
 import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.reasoner.BufferingMode;
+import org.semanticweb.owlapi.reasoner.ConsoleProgressMonitor;
 import org.semanticweb.owlapi.search.EntitySearcher;
 import org.semanticweb.owlapi.util.CollectionFactory;
 import org.semanticweb.owlapi.util.OWLEntityCollectingOntologyChangeListener;
@@ -76,16 +77,16 @@ import java.util.concurrent.Callable;
 public class OWLWorkspace extends TabbedWorkspace implements SendErrorReportHandler {
 
     public static final String REASONER_INITIALIZE = "Start reasoner";
-
-    public static final String REASONER_RESYNC = "Synchronize reasoner";
+    
+    public static final String REASONER_CLASSIFY = "Classify";
+    
+    public static final String REASONER_SAVE_STATE = "Save State";
 
     public static final String REASONER_STOP = "Stop reasoner";
 
     public static final String REASONER_EXPLAIN = "Explain inconsistent ontology";
 
     private static final String WINDOW_MODIFIED = "Window.documentModified";
-
-	private static final Object REASONER_RESTART = "Restart Remote Reasoner";
 
 	private final Logger logger = LoggerFactory.getLogger(OWLWorkspace.class);
 
@@ -107,9 +108,6 @@ public class OWLWorkspace extends TabbedWorkspace implements SendErrorReportHand
 
     private final BackgroundTaskLabel backgroundTaskLabel = new BackgroundTaskLabel(ProtegeApplication.getBackgroundTaskManager());
 
-    public Optional<Callable<Void>> reasonerRestartCallback = Optional.absent();
-
-    public boolean enableReasonerRestart = false;
 
     private final OWLEntityCollectingOntologyChangeListener listener = new OWLEntityCollectingOntologyChangeListener() {
         public void ontologiesChanged() {
@@ -123,34 +121,16 @@ public class OWLWorkspace extends TabbedWorkspace implements SendErrorReportHand
     };
 
     private final Set<URI> hiddenAnnotationURIs = new HashSet<>();
+    
+    private final PrecomputeAction classifyAction = new PrecomputeAction();
 
     private final PrecomputeAction startReasonerAction = new PrecomputeAction();
 
-    private final PrecomputeAction synchronizeReasonerAction = new PrecomputeAction();
-
     private final ProtegeOWLAction stopReasonerAction = new StopReasonerAction();
+    
+    
 
-    private final ProtegeOWLAction restartReasonerAction = new ProtegeOWLAction() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				if (reasonerRestartCallback.isPresent()) {
-					try {
-						reasonerRestartCallback.get().call();
-					} catch (Exception e1) {
-						throw new RuntimeException(e1);
-					}
-				} else {
-					logger.info("pellet restart callback absent");
-				}
-			}
-			@Override
-			public void initialise() throws Exception {
-			}
-			@Override
-			public void dispose() throws Exception {
-			}
-		};
-
+    
     private final ExplainInconsistentOntologyAction explainInconsistentOntologyAction = new ExplainInconsistentOntologyAction();
 
     private final JLabel reasonerStatus = new JLabel();
@@ -242,6 +222,7 @@ public class OWLWorkspace extends TabbedWorkspace implements SendErrorReportHand
 
         OWLReasonerManager reasonerManager = mngr.getOWLReasonerManager();
         reasonerManager.setReasonerProgressMonitor(new ReasonerProgressUI(getOWLEditorKit()));
+        //reasonerManager.setReasonerProgressMonitor(new ConsoleProgressMonitor());
         reasonerManager.setReasonerExceptionHandler(new UIReasonerExceptionHandler(this));
         reasonerManagerStarted = true;
         updateReasonerStatus(false);
@@ -558,22 +539,18 @@ public class OWLWorkspace extends TabbedWorkspace implements SendErrorReportHand
 
         reasonerMenu.removeAll();
 
+        classifyAction.setEditorKit(getOWLEditorKit());
+        classifyAction.putValue(Action.NAME, REASONER_CLASSIFY);
+        reasonerMenu.add(classifyAction);
+        
         startReasonerAction.setEditorKit(getOWLEditorKit());
         startReasonerAction.putValue(Action.NAME, REASONER_INITIALIZE);
         reasonerMenu.add(startReasonerAction);
 
-        synchronizeReasonerAction.setEditorKit(getOWLEditorKit());
-        synchronizeReasonerAction.putValue(Action.NAME, REASONER_RESYNC);
-        reasonerMenu.add(synchronizeReasonerAction);
-
         stopReasonerAction.setEditorKit(getOWLEditorKit());
         stopReasonerAction.putValue(Action.NAME, REASONER_STOP);
         reasonerMenu.add(stopReasonerAction);
-
-        restartReasonerAction.setEditorKit(getOWLEditorKit());
-        restartReasonerAction.putValue(Action.NAME, REASONER_RESTART);
-        reasonerMenu.add(restartReasonerAction);
-
+        
         explainInconsistentOntologyAction.setEditorKit(getOWLEditorKit());
         explainInconsistentOntologyAction.putValue(Action.NAME, REASONER_EXPLAIN);
         explainInconsistentOntologyAction.setEnabled(false);
@@ -834,23 +811,18 @@ public class OWLWorkspace extends TabbedWorkspace implements SendErrorReportHand
     }
 
     private void updateReasonerStatus(ReasonerStatus status) {
-        reasonerStatus.setText(status.getDescription());
+        //reasonerStatus.setText(status.getDescription());
+        
+        classifyAction.setEnabled(status == ReasonerStatus.OUT_OF_SYNC);
 
         startReasonerAction.setEnabled(status.isEnableInitialization());
         startReasonerAction.putValue(Action.SHORT_DESCRIPTION, status.getInitializationTooltip());
-
-        synchronizeReasonerAction.setEnabled(status.isEnableSynchronization());
-        synchronizeReasonerAction.putValue(Action.SHORT_DESCRIPTION, status.getSynchronizationTooltip());
-
         stopReasonerAction.setEnabled(status.isEnableStop());
-        
-        restartReasonerAction.setEnabled(status.isEnableStop() && enableReasonerRestart);
 
         explainInconsistentOntologyAction.setEnabled(status == ReasonerStatus.INCONSISTENT);
 
         KeyStroke shortcut = KeyStroke.getKeyStroke(KeyEvent.VK_R, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask());
         startReasonerAction.putValue(Action.ACCELERATOR_KEY, status.isEnableInitialization() ? shortcut : null);
-        synchronizeReasonerAction.putValue(Action.ACCELERATOR_KEY, status.isEnableSynchronization() ? shortcut : null);
     }
 
 

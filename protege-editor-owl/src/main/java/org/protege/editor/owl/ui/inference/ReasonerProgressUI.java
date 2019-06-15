@@ -1,13 +1,26 @@
 package org.protege.editor.owl.ui.inference;
 
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Frame;
+import java.awt.event.ActionEvent;
+
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JDialog;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JProgressBar;
+import javax.swing.SwingUtilities;
+import javax.swing.WindowConstants;
+
 import org.protege.editor.core.Disposable;
 import org.protege.editor.core.ui.util.Resettable;
 import org.protege.editor.owl.OWLEditorKit;
 import org.semanticweb.owlapi.reasoner.ReasonerProgressMonitor;
-
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.ActionEvent;
 
 
 /**
@@ -22,39 +35,45 @@ import java.awt.event.ActionEvent;
 public class ReasonerProgressUI implements ReasonerProgressMonitor, Disposable, Resettable {
 	public static final long CLOSE_PROGRESS_TIMEOUT = 1000;
 
-    public static final int PADDING = 5;
+	public static final int PADDING = 5;
 
-    public static final String DEFAULT_MESSAGE = "Classifying...";
+	public static final String DEFAULT_MESSAGE = "Classifying...";
 
-    private OWLEditorKit owlEditorKit;
+	private OWLEditorKit owlEditorKit;
 
-    private JLabel taskLabel;
+	private JLabel taskLabel;
 
-    private JProgressBar progressBar;
+	private JProgressBar progressBar;
 
-    private JDialog window;
+	private JDialog window;
 
-    private Action cancelledAction;
+	private Action cancelledAction;
 
-    private boolean taskIsRunning = false;
+	private boolean taskIsRunning = false;
+
+	private int last_percent = 0;
+
+	private int len = 0;
 
 
-    public ReasonerProgressUI(final OWLEditorKit owlEditorKit) {
-        this.owlEditorKit = owlEditorKit;        
-        progressBar = new JProgressBar();        
-    }
-    
+	public ReasonerProgressUI(final OWLEditorKit owlEditorKit) {
+		this.owlEditorKit = owlEditorKit;        
+		progressBar = new JProgressBar(); 
+		initWindow();
+	}
+
 	public void initWindow() {
 		if (window != null)
 			return;		
 		JPanel panel = new JPanel(new BorderLayout(PADDING, PADDING));
-        panel.add(progressBar, BorderLayout.SOUTH);
-        taskLabel = new JLabel(DEFAULT_MESSAGE);
-        panel.add(taskLabel, BorderLayout.NORTH);
+		panel.add(progressBar, BorderLayout.SOUTH);
+		taskLabel = new JLabel(DEFAULT_MESSAGE);
+		panel.add(taskLabel, BorderLayout.NORTH);
 		Frame parent = (Frame) (SwingUtilities.getAncestorOfClass(Frame.class,
-				owlEditorKit.getWorkspace()));
-		window = new JDialog(parent, "Reasoner progress", true);
-		window.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE); 
+				panel));
+		
+		window = new JDialog(parent, "Reasoner progress");
+		window.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 		cancelledAction = new AbstractAction("Cancel") {
 			private static final long serialVersionUID = 3688085823398242640L;
 			public void actionPerformed(ActionEvent e) {
@@ -76,32 +95,58 @@ public class ReasonerProgressUI implements ReasonerProgressMonitor, Disposable, 
 		window.pack();
 		Dimension windowSize = window.getPreferredSize();
 		window.setSize(400, windowSize.height);
-		window.setResizable(false);		
+		window.setResizable(false);	
+		
 	}
-    
+
 	public void setCancelled() {
-		SwingUtilities.invokeLater(() -> {
-            initWindow();
-            taskLabel
-                    .setText("Cancelled.  Waiting for reasoner to terminate...");
-            cancelledAction.setEnabled(false);
-        });
+		initWindow();
+		taskLabel
+		.setText("Cancelled.  Waiting for reasoner to terminate...");
+		cancelledAction.setEnabled(false);
 		owlEditorKit.getOWLModelManager().getOWLReasonerManager()
-				.killCurrentClassification();
+		.killCurrentClassification();
 	}
 
 	public void reasonerTaskBusy() {
-		SwingUtilities.invokeLater(() -> {
-            progressBar.setIndeterminate(true);
-        });
+		progressBar.setIndeterminate(true);
 	}
 
 	public void reasonerTaskProgressChanged(final int value, final int max) {
-		SwingUtilities.invokeLater(() -> {
-            progressBar.setIndeterminate(false);
-            progressBar.setMaximum(max);
-            progressBar.setValue(value);
-        });
+		if (max > 0) {
+			
+			if (len == 0) {
+				len = max;
+				SwingUtilities.invokeLater(() -> {
+					progressBar.setMaximum(len);
+				});
+
+			} else if (len != max) {
+				len = max;
+				SwingUtilities.invokeLater(() -> {
+					progressBar.setMaximum(max);
+				});
+
+
+
+			}
+			
+			int percent = value * 100 / max;
+			if ((percent > 0) && ((percent % 5) == 0)) {
+				if (percent != last_percent) {
+					last_percent = percent;					
+					SwingUtilities.invokeLater(() -> {
+						System.out.print("    ");
+						System.out.print(percent);
+						System.out.println("%");
+						progressBar.setValue(value);
+
+					});
+				}
+			}
+
+		}
+
 	}
 
 	public void reasonerTaskStarted(String taskName) {
@@ -109,52 +154,44 @@ public class ReasonerProgressUI implements ReasonerProgressMonitor, Disposable, 
 			return;
 		taskIsRunning = true;
 		SwingUtilities.invokeLater(() -> {
-            progressBar.setIndeterminate(false);
-            progressBar.setValue(0);
-        });
-		showWindow(taskName);
+			progressBar.setValue(0);
+			showWindow(taskName);
+		});
 	}
 
 
-    public void reasonerTaskStopped() {
-    	if (!taskIsRunning)
-    		return;
-    	taskIsRunning = false;    	
-		SwingUtilities.invokeLater(() -> {
-            if (taskIsRunning)
-                return;
-            initWindow();
-            if (!window.isVisible())
-                return;
-            taskLabel.setText("");
-            window.setVisible(false);
-        });
-    }
+	public void reasonerTaskStopped() {
+		if (!taskIsRunning)
+			return;
+		taskIsRunning = false; 
+		if (taskIsRunning)
+			return;
+		if (!window.isVisible())
+			return;
+		taskLabel.setText("");
+		window.setVisible(false);
+		len = 0;
+	}
 
 
-    private void showWindow(final String message) {    	
-    	SwingUtilities.invokeLater(() -> {
-            if (!taskIsRunning)
-                return;
-            initWindow();
-            taskLabel.setText(message);
-            if (window.isVisible())
-                return;
-            cancelledAction.setEnabled(true);
-            window.setLocationRelativeTo(window.getOwner());
-            window.setVisible(true);
-        });
-    }
+	private void showWindow(final String message) { 
+		if (!taskIsRunning)
+			return;
+		taskLabel.setText(message);
+		if (window.isVisible())
+			return;
+		cancelledAction.setEnabled(true);
+		window.setLocationRelativeTo(window.getOwner());
+		window.setVisible(true);
+	}
 
 	public void reset() {
-		SwingUtilities.invokeLater(() -> {
-            initWindow();
-            window.dispose();
-        });
+		initWindow();
+		//window.dispose();
 	}
 
-    public void dispose() throws Exception {
-    	reset();
-    }
+	public void dispose() throws Exception {
+		reset();
+	}
 
 }

@@ -30,6 +30,12 @@ public class ExplanationManager implements Disposable {
 	
 	private final Collection<ExplanationDialog> openedExplanations = new HashSet<>();
 	
+	private boolean isRunning = false;
+	
+	public void setIsRunning(boolean b) { isRunning = b; }
+	
+	public boolean getIsRunning() { return isRunning; }
+	
 	public ExplanationManager(OWLEditorKit editorKit) {
 		this.editorKit = editorKit;
 		reload();
