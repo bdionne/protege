@@ -1,7 +1,8 @@
 setlocal
+call removeOldPlugins
 cd /d %~dp0
 .\jre1.8.0_102\bin\java -Xmx8000M -Xms2000M ^
--Xss16M ^
+-Xss1024M ^
 -DentityExpansionLimit=100000000 ^
 -Dlogback.configurationFile=conf/logback-win.xml ^
 -Dfile.encoding=utf-8 ^

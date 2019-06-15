@@ -1,8 +1,10 @@
 package org.protege.editor.core.plugin;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.util.jar.Pack200;
 import java.io.IOException;
 import java.lang.reflect.Method;
@@ -23,12 +25,9 @@ import java.util.jar.Manifest;
 
 import org.eclipse.core.runtime.IExtension;
 import org.osgi.framework.Constants;
-import org.osgi.framework.Version;
 import org.protege.editor.core.ProtegeApplication;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-
 
 
 /*
@@ -133,9 +132,24 @@ public class JPFUtil {
 			}
 		}
 		
+		BufferedWriter writer = null;
+		
 		for (String rmPath : removePluginPath) {
+			if (writer == null) {
+				writer = new BufferedWriter(new FileWriter("oldPlugins.txt"));
+			}
 			File rmFile = new File(rmPath);
+			
 			rmFile.delete();
+			
+			if (rmFile.exists()) {
+				writer.write(rmFile.getAbsolutePath());
+				writer.newLine();
+			}
+		}
+		
+		if (writer != null) {
+			writer.close();
 		}
 
 		for (String path : pluginMap.values()) {
