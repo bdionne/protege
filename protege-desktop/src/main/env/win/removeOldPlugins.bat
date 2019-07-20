@@ -1,7 +1,9 @@
 @echo off
-for /f "tokens=*" %%a in (oldPlugins.txt) do (
-  echo line=%%a
-  del %%a /f /q
+if exist oldPlugins.txt (
+  for /f "tokens=*" %%a in (oldPlugins.txt) do (
+    echo line=%%a
+    del %%a /f /q
+  )
+  del oldPlugins.txt
 )
-del oldPlugins.txt
-end echo
+@echo on
