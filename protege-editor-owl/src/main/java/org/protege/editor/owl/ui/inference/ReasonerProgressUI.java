@@ -1,6 +1,7 @@
 package org.protege.editor.owl.ui.inference;
 
 import java.awt.BorderLayout;
+import java.awt.Dialog.ModalityType;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Frame;
@@ -73,6 +74,7 @@ public class ReasonerProgressUI implements ReasonerProgressMonitor, Disposable, 
 				panel));
 		
 		window = new JDialog(parent, "Reasoner progress");
+		window.setModalityType(ModalityType.APPLICATION_MODAL);
 		window.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 		cancelledAction = new AbstractAction("Cancel") {
 			private static final long serialVersionUID = 3688085823398242640L;
