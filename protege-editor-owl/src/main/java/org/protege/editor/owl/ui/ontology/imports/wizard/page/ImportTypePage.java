@@ -27,6 +27,8 @@ public class ImportTypePage extends AbstractWizardPanel {
     private JRadioButton libraryRadioButton;
 
     private JRadioButton loadedOntologyButton;
+    
+    private JRadioButton projectRadioButton;
 
 
     public ImportTypePage(OWLEditorKit owlEditorKit) {
@@ -42,12 +44,14 @@ public class ImportTypePage extends AbstractWizardPanel {
         box.add(webRadioButton = new JRadioButton("Import an ontology contained in a document located on the web."));
         box.add(loadedOntologyButton = new JRadioButton("Import an ontology that is already loaded in the workspace."));
         box.add(libraryRadioButton = new JRadioButton("Import an ontology that is contained in one of the ontology libraries."));
+        box.add(projectRadioButton = new JRadioButton("Import an ontology that is contained in a project on server side."));
         parent.add(box, BorderLayout.NORTH);
         ButtonGroup bg = new ButtonGroup();
         bg.add(webRadioButton);
         bg.add(localFileRadioButton);
         bg.add(libraryRadioButton);
         bg.add(loadedOntologyButton);
+        bg.add(projectRadioButton);
         localFileRadioButton.setSelected(true);
     }
 
@@ -62,8 +66,11 @@ public class ImportTypePage extends AbstractWizardPanel {
         else if (libraryRadioButton.isSelected()) {
             return LibraryPage.ID;
         }
-        else {
+        else if (loadedOntologyButton.isSelected()){
             return LoadedOntologyPage.ID;
+        } else {
+        	return ProjectPage.ID;
+        	//return LoadedOntologyPage.ID;
         }
     }
 

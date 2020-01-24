@@ -19,6 +19,7 @@ import org.protege.editor.core.ui.error.ErrorLogListener;
 import org.protege.editor.core.ui.error.ErrorNotificationLabel;
 import org.protege.editor.core.ui.error.SendErrorReportHandler;
 import org.protege.editor.core.ui.progress.BackgroundTaskLabel;
+import org.protege.editor.core.ui.wizard.WizardPanel;
 import org.protege.editor.core.ui.workspace.*;
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.ProtegeOWL;
@@ -37,6 +38,8 @@ import org.protege.editor.owl.ui.action.ProtegeOWLAction;
 import org.protege.editor.owl.ui.inference.*;
 import org.protege.editor.owl.ui.navigation.OWLEntityNavPanel;
 import org.protege.editor.owl.ui.ontology.OntologySourcesChangedHandlerUI;
+import org.protege.editor.owl.ui.ontology.imports.wizard.OntologyImportWizard;
+import org.protege.editor.owl.ui.ontology.imports.wizard.page.ProjectPage;
 import org.protege.editor.owl.ui.preferences.AnnotationPreferences;
 import org.protege.editor.owl.ui.renderer.*;
 import org.protege.editor.owl.ui.search.SearchDialogPanel;
@@ -176,7 +179,15 @@ public class OWLWorkspace extends TabbedWorkspace implements SendErrorReportHand
     
     private ClassSearcher searcher = null;
     
+    private OntologyImportWizard importWizard = null;
+    
     public void setClassSearcher(ClassSearcher s) { searcher = s; }
+    
+    public void setImportWizard(OntologyImportWizard iw) { importWizard = iw; }
+    
+    public OntologyImportWizard getImportWizard() {
+    	return importWizard;
+    }
 
     public OWLWorkspace() {
         super();
@@ -743,7 +754,7 @@ public class OWLWorkspace extends TabbedWorkspace implements SendErrorReportHand
     	}
     	return null;
     }
-
+    
     public void setTitle(String title) {
         altTitle = title;
         updateTitleBar();
