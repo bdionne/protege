@@ -1439,13 +1439,13 @@
 
 	<!-- Editor Hook -->
 
-	<extension id="ClientSession"
+	<extension id="client.ClientSession"
 			   name="Client Session"
 			   point="org.protege.editor.core.application.EditorKitHook">
 		<class value="org.protege.editor.owl.client.ClientSession"/>
 		<editorKitId value="OWLEditorKit"/>
 	</extension>
-	<extension id="SessionRecorder"
+	<extension id="client.SessionRecorder"
 			   name="Session Recorder"
 			   point="org.protege.editor.core.application.EditorKitHook">
 		<class value="org.protege.editor.owl.client.SessionRecorder"/>
