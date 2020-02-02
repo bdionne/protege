@@ -1354,7 +1354,7 @@
 
 	<!-- Server menu -->
 
-	<extension id="Server"
+	<extension id="client.Server"
         	   name="Top Level Server Menu"
                point="org.protege.editor.core.application.EditorKitMenuAction">
     	<name value="Server"/>
@@ -1362,7 +1362,7 @@
       	<editorKitId value="OWLEditorKit"/>
    	</extension>
    
-   	<extension id="Login"
+   	<extension id="client.Login"
                name="Login Menu"
                point="org.protege.editor.core.application.EditorKitMenuAction">
 		<name value="Login"/>
@@ -1371,7 +1371,7 @@
       	<class value="org.protege.editor.owl.client.action.LoginAction"/>
 	</extension>
 
-	<extension id="Logout"
+	<extension id="client.Logout"
                name="Logout Menu"
                point="org.protege.editor.core.application.EditorKitMenuAction">
 		<name value="Logout"/>
@@ -1381,7 +1381,7 @@
 	</extension>
 
 	
-	<extension id="Commit"
+	<extension id="client.Commit"
                name="Commit Menu"
                point="org.protege.editor.core.application.EditorKitMenuAction">
 		<name value="Commit"/>
@@ -1390,7 +1390,7 @@
       	<class value="org.protege.editor.owl.client.action.CommitAction"/>
 	</extension>
    
-	<extension id="Update"
+	<extension id="client.Update"
                name="Update Menu"
                point="org.protege.editor.core.application.EditorKitMenuAction">
 		<name value="Update"/>
@@ -1399,7 +1399,7 @@
       	<class value="org.protege.editor.owl.client.action.UpdateAction"/>
 	</extension>
    
-	<extension id="ShowUncommitted"
+	<extension id="client.ShowUncommitted"
                name="Show Uncommitted Changes"
                point="org.protege.editor.core.application.EditorKitMenuAction">
 		<name value="Show uncommitted changes"/>
@@ -1408,7 +1408,7 @@
        	<class value="org.protege.editor.owl.client.action.ShowUncommittedChangesAction"/>
 	</extension>
    
-	<extension id="ShowHistory"
+	<extension id="client.ShowHistory"
                name="Show History"
                point="org.protege.editor.core.application.EditorKitMenuAction">
 		<name value="Show change history"/>
@@ -1417,7 +1417,7 @@
        	<class value="org.protege.editor.owl.client.action.ShowHistoryAction"/>
 	</extension>
 	
-	<extension id="EnableAutoUpdate"
+	<extension id="client.EnableAutoUpdate"
                name="Auto Update Menu"
                point="org.protege.editor.core.application.EditorKitMenuAction">
 		<name value="Auto-update"/>
@@ -1427,7 +1427,7 @@
       	<checkbox value="true"/>
 	</extension>
 	
-	<extension id="PauseServer"
+	<extension id="client.PauseServer"
                name="Pause Server"
                point="org.protege.editor.core.application.EditorKitMenuAction">
 		<name value="Pause-server"/>
