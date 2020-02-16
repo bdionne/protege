@@ -125,7 +125,7 @@ public class OpenFromServerPanel extends JPanel {
     }
 
     
-    private void loadProjectList() {
+    public void loadProjectList() {
         try {
             Client client = clientSession.getActiveClient();
             remoteProjectModel.initialize(client);
