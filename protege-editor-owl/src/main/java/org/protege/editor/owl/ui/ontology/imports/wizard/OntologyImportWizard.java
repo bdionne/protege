@@ -36,7 +36,7 @@ public class OntologyImportWizard extends Wizard {
         registerWizardPanel(AnticipateOntologyIdPage.ID, new AnticipateOntologyIdPage(owlEditorKit));
         registerWizardPanel(SelectImportLocationPage.ID, new SelectImportLocationPage(owlEditorKit));
         registerWizardPanel(ImportConfirmationPage.ID, new ImportConfirmationPage(owlEditorKit));
-        //registerWizardPanel(ProjectPage.ID, new ProjectPage(ProjectPage.ID, "Import from project", owlEditorKit));
+        registerWizardPanel(ProjectPage.ID, new ProjectPage(owlEditorKit));
         setCurrentPanel(ImportTypePage.ID);
         owlEditorKit.getOWLWorkspace().setImportWizard(this);
     }
