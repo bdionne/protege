@@ -137,7 +137,15 @@ public class OpenFromServerPanel extends JPanel {
                     JOptionPane.ERROR_MESSAGE, JOptionPane.DEFAULT_OPTION, null);
         }
     }
+    
+    public ServerTableModel getRemoteProjectModel() {
+    	return this.remoteProjectModel;
+    }
 
+    public int getSelectedRow() {
+    	return tblRemoteProjects.getSelectedRow();
+    }
+    
     private class OpenActionListener implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
@@ -178,7 +186,7 @@ public class OpenFromServerPanel extends JPanel {
         }
     }
 
-    protected void openOntologyDocument(int row) {
+    public void openOntologyDocument(int row) {
         ProjectId pid = remoteProjectModel.getValueAt(row);
         Object pobj = remoteProjectModel.getValueAt(row, 0);
         try {

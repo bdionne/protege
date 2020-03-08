@@ -70,7 +70,6 @@ public class ImportTypePage extends AbstractWizardPanel {
             return LoadedOntologyPage.ID;
         } else {
         	return ProjectPage.ID;
-        	//return LoadedOntologyPage.ID;
         }
     }
 
