@@ -4,8 +4,16 @@ import com.google.common.util.concurrent.*;
 import org.protege.editor.core.log.LogBanner;
 import org.protege.editor.core.ui.util.UIUtil;
 import org.protege.editor.owl.OWLEditorKit;
+import org.protege.editor.owl.client.ClientSession;
+import org.protege.editor.owl.client.LocalHttpClient;
+import org.protege.editor.owl.client.api.OpenProjectResult;
+import org.protege.editor.owl.client.api.exception.AuthorizationException;
+import org.protege.editor.owl.client.api.exception.ClientRequestException;
+import org.protege.editor.owl.client.api.exception.LoginTimeoutException;
 import org.protege.editor.owl.model.io.*;
 import org.protege.editor.owl.model.library.OntologyCatalogManager;
+import org.protege.editor.owl.server.versioning.api.ServerDocument;
+import org.protege.editor.owl.server.versioning.api.VersionedOWLOntology;
 import org.protege.editor.owl.ui.ontology.imports.wizard.ImportInfo;
 import org.protege.editor.owl.ui.util.ProgressDialog;
 import org.protege.xmlcatalog.CatalogUtilities;
@@ -99,9 +107,32 @@ public class AddImportsStrategy {
                             .add(man.getIRIMappers());
                     ProgressDialogOntologyLoaderListener listener = new ProgressDialogOntologyLoaderListener(dlg, logger);
                     loadingManager.addOntologyLoaderListener(listener);
-                    loadingManager.loadOntologyFromOntologyDocument(
-                            new IRIDocumentSource(IRI.create(physicalLocation)),
-                            new OWLOntologyLoaderConfiguration().setMissingImportHandlingStrategy(MissingImportHandlingStrategy.SILENT));
+                    if (importParameters.getProjectId() != null) {
+                    	ClientSession clientSession = ClientSession.getInstance(editorKit);
+                    	LocalHttpClient httpClient = (LocalHttpClient) clientSession.getActiveClient();
+                    	OpenProjectResult openProjectResult;
+						try {
+							openProjectResult = httpClient.openProject(importParameters.getProjectId());
+							ServerDocument serverDocument = openProjectResult.serverDocument;
+	                        VersionedOWLOntology vont = httpClient.buildVersionedOntology(serverDocument, loadingManager,
+	                        		importParameters.getProjectId());
+						} catch (LoginTimeoutException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						} catch (AuthorizationException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						} catch (ClientRequestException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+                        
+
+                    } else {
+                    	loadingManager.loadOntologyFromOntologyDocument(
+                    			new IRIDocumentSource(IRI.create(physicalLocation)),
+                    			new OWLOntologyLoaderConfiguration().setMissingImportHandlingStrategy(MissingImportHandlingStrategy.SILENT));
+                    }
                     loadingManager.removeOntologyLoaderListener(listener);
 //                        editorKit.getModelManager().fireEvent(EventType.ONTOLOGY_LOADED);
                     for(OWLOntology importedOntology : loadingManager.getOntologies()) {

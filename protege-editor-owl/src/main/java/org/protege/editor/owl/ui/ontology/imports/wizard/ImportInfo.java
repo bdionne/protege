@@ -3,6 +3,8 @@ package org.protege.editor.owl.ui.ontology.imports.wizard;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntologyID;
 
+import edu.stanford.protege.metaproject.api.ProjectId;
+
 import java.net.URI;
 import java.util.Optional;
 
@@ -23,6 +25,8 @@ public class ImportInfo {
     private URI physicalLocation;
 
     private IRI importLocation;
+    
+    private ProjectId pid;
 
     public OWLOntologyID getOntologyID() {
         return ontologyID;
@@ -31,6 +35,10 @@ public class ImportInfo {
     public void setOntologyID(OWLOntologyID ontologyID) {
         this.ontologyID = ontologyID;
     }
+    
+    public void setProjectId(ProjectId p) {pid = p;}
+    
+    public ProjectId getProjectId() {return pid;}
 
     public URI getPhysicalLocation() {
         return physicalLocation;

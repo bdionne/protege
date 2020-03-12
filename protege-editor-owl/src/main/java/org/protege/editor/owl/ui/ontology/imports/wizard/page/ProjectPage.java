@@ -58,6 +58,7 @@ public class ProjectPage extends OntologyImportPage {
     	//IRI physicalLocation = getOWLModelManager().getOWLOntologyManager().getOntologyDocumentIRI(ontology);
     	IRI physicalLocation = id.getOntologyIRI().get();
     	ImportInfo parameter = new ImportInfo();
+    	parameter.setProjectId(pid);
     	parameter.setOntologyID(ontology.getOntologyID());
     	parameter.setPhysicalLocation(physicalLocation.toURI());
     	parameter.setImportLocation(!id.isAnonymous() ? id.getDefaultDocumentIRI().get() : physicalLocation);
