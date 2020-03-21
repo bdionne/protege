@@ -87,6 +87,11 @@ public class OpenFromServerPanel extends JPanel {
         setFocusable(true);
     }
 
+    public void setButtonsEnable(boolean enable) {
+    	btnOpenProject.setEnabled(enable);
+    	btnCancel.setEnabled(enable);
+    }
+    
     private JPanel getRemoteProjectsPanel() {
         JPanel pnlRemoteProjects = new JPanel(new BorderLayout());
         
