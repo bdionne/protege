@@ -19,7 +19,7 @@
 	<properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <protege.version>5.1.2-SNAPSHOT</protege.version>
-        <metaproject.version>1.0.0-SNAPSHOT</metaproject.version>
+        <metaproject.version>1.0.1-SNAPSHOT</metaproject.version>
         <owlapi.version>5.1.6-SNAPSHOT</owlapi.version>
         <binaryowl.version>2.0.2-SNAPSHOT</binaryowl.version>
         <slf4j.version>1.7.12</slf4j.version>
