@@ -27,6 +27,8 @@ public class ImportInfo {
     private IRI importLocation;
     
     private ProjectId pid;
+    
+    private ProjectId importingPid;
 
     public OWLOntologyID getOntologyID() {
         return ontologyID;
@@ -38,7 +40,11 @@ public class ImportInfo {
     
     public void setProjectId(ProjectId p) {pid = p;}
     
+    public void setImportingProjectId(ProjectId p) {importingPid = p;}
+    
     public ProjectId getProjectId() {return pid;}
+    
+    public ProjectId getImportingProjectId() {return importingPid;}
 
     public URI getPhysicalLocation() {
         return physicalLocation;

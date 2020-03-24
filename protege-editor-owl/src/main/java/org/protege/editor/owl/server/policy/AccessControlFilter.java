@@ -68,10 +68,10 @@ public class AccessControlFilter extends ServerFilterAdapter {
     }
 
     @Override
-    public ServerDocument createProject(AuthToken token, ProjectId projectId, Name projectName, Description description,
+    public ServerDocument createProject(AuthToken token, ProjectId projectId, String namespace, Name projectName, Description description,
             UserId owner, Optional<ProjectOptions> options) throws AuthorizationException, ServerServiceException {
         checkPermission(token.getUser(), Operations.ADD_PROJECT);
-        return super.createProject(token, projectId, projectName, description, owner, options);
+        return super.createProject(token, projectId, namespace, projectName, description, owner, options);
     }
 
     @Override

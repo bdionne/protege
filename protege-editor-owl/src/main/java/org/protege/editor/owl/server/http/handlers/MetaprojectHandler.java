@@ -9,6 +9,7 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import edu.stanford.protege.metaproject.impl.ServerStatus;
 import org.protege.editor.owl.server.api.ServerLayer;
@@ -100,11 +101,19 @@ public class MetaprojectHandler extends BaseRoutingHandler {
 		else if (requestPath.equals(ServerEndpoints.PROJECT) && requestMethod.equals(Methods.POST)) {
 			ObjectInputStream ois = new ObjectInputStream(exchange.getInputStream());
 			ProjectId pid = (ProjectId) ois.readObject();
+			String nspc = (String) ois.readObject();
 			Name pname = (Name) ois.readObject();
 			Description desc = (Description) ois.readObject();
 			UserId uid = (UserId) ois.readObject();
+			Set<ProjectId> imps = (Set<ProjectId>) ois.readObject();
 			Optional<ProjectOptions> oopts = Optional.ofNullable((ProjectOptions) ois.readObject());
-			createNewProject(getAuthToken(exchange), pid, pname, desc, uid, oopts, exchange.getOutputStream());
+			createNewProject(getAuthToken(exchange), pid, nspc, pname, desc, uid, oopts, exchange.getOutputStream());
+		}
+		else if (requestPath.equals(ServerEndpoints.PROJECT_UPDATE) && requestMethod.equals(Methods.POST)) {
+			ObjectInputStream ois = new ObjectInputStream(exchange.getInputStream());
+			Project proj = (Project) ois.readObject();
+			
+			updateProject(getAuthToken(exchange), proj);
 		}
 		else if (requestPath.equals(ServerEndpoints.PROJECT) && requestMethod.equals(Methods.GET)) {
 			ProjectId projectId = f.getProjectId(getQueryParameter(exchange, "projectid"));
@@ -184,10 +193,10 @@ public class MetaprojectHandler extends BaseRoutingHandler {
 		}
 	}
 
-	private void createNewProject(AuthToken authToken, ProjectId pid, Name pname,
+	private void createNewProject(AuthToken authToken, ProjectId pid, String nspc, Name pname,
 			Description desc, UserId uid, Optional<ProjectOptions> oopts, OutputStream os) throws ServerException {
 		try {
-			ServerDocument doc = serverLayer.createProject(authToken, pid, pname, desc, uid, oopts);
+			ServerDocument doc = serverLayer.createProject(authToken, pid, nspc, pname, desc, uid, oopts);
 			ObjectOutputStream oos = new ObjectOutputStream(os);
 			oos.writeObject(doc);
 		}
@@ -199,6 +208,19 @@ public class MetaprojectHandler extends BaseRoutingHandler {
 		}
 		catch (IOException e) {
 			throw new ServerException(StatusCodes.INTERNAL_SERVER_ERROR, "Server failed to transmit the returned data", e);
+		}
+	}
+	
+	private void updateProject(AuthToken authToken, Project proj) throws ServerException {
+		try {
+			serverLayer.updateProject(authToken, proj.getId(), proj);
+			updateMetaproject(serverLayer.getConfiguration());
+		}
+		catch (AuthorizationException e) {
+			throw new ServerException(StatusCodes.UNAUTHORIZED, "Access denied", e);
+		}
+		catch (ServerServiceException e) {
+			throw new ServerException(StatusCodes.INTERNAL_SERVER_ERROR, "Server failed to create the project", e);
 		}
 	}
 

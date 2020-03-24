@@ -40,6 +40,7 @@ import org.semanticweb.binaryowl.owlapi.OWLOntologyWrapper;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
+import org.semanticweb.owlapi.model.OWLOntologyID;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,6 +53,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Executors;
@@ -191,8 +193,26 @@ public class LocalHttpClient implements Client, ClientSessionListener {
 	public ServerDocument createProject(Project project, File font)
 		throws LoginTimeoutException, AuthorizationException, ClientRequestException {
 		try {
-			ServerDocument sdoc = postProjectToServer(project);
-			postProjectSnapShotToServer(project, font); // send snapshot to server
+			OWLOntology ont = null;
+			if (font.getName().endsWith(".zip")) {
+				ZipInputStream zi = new ZipInputStream(new FileInputStream(font));
+				try {
+					ont = OWLManager.createConcurrentOWLOntologyManager().loadOntologyFromOntologyDocument(zi);
+				} catch (OWLOntologyCreationException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			} else {
+				try {
+					ont = OWLManager.createOWLOntologyManager().loadOntologyFromOntologyDocument(font);
+				} catch (OWLOntologyCreationException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+	
+			}
+			ServerDocument sdoc = postProjectToServer(project, ont);
+			postProjectSnapShotToServer(project, ont); // send snapshot to server
 			initConfig();
 			return sdoc;
 		} catch (IOException e) {
@@ -200,23 +220,91 @@ public class LocalHttpClient implements Client, ClientSessionListener {
 			throw new ClientRequestException("Unable to send request to server (see error log for details)", e);
 		}
 	}
+	
+	public void addImport(ProjectId activeProject, ProjectId projectId) {
+		
+		List<Project> projects = config.getAllProjects();
+		Project proj = null;
+		
+		Iterator<Project> it = projects.iterator();
+		
+		while (it.hasNext()) {
+			Project p = it.next();
+			if (p.getId().compareTo(activeProject) == 0) {
+				proj = p;
+				
+			}
+		}
+		proj.addImport(projectId);
+		
+		updateProject(proj);
+		
+	}
+	
+	public Project findProject(ProjectId pid) {
+		
+		List<Project> projects = config.getAllProjects();
+		Project proj = null;
+		
+		Iterator<Project> it = projects.iterator();
+		
+		while (it.hasNext()) {
+			Project p = it.next();
+			if (p.getId().compareTo(pid) == 0) {
+				return p;
+				
+			}
+		}
+		
+		return proj;
+		
+	}	
+	
+	private void updateProject(Project proj) {
+		ByteArrayOutputStream b = new ByteArrayOutputStream();
+		ObjectOutputStream os;
+		try {
+			os = new ObjectOutputStream(b);
+			os.writeObject(proj);
+			try {
+				Response response = post(PROJECT_UPDATE,
+						RequestBody.create(ApplicationContentType, b.toByteArray()),
+						true);
+				System.out.println("WEll " + response.message());
+			} catch (AuthorizationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (ClientRequestException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		
+	}
 
-	private ServerDocument postProjectToServer(Project project) throws IOException,
+	private ServerDocument postProjectToServer(Project project, OWLOntology ont) throws IOException,
 		LoginTimeoutException, AuthorizationException, ClientRequestException {
-		ByteArrayOutputStream b = writeRequestArgumentsIntoByteStream(project);
+		String nspc = ont.getOntologyID().getOntologyIRI().get().getIRIString();
+		ByteArrayOutputStream b = writeRequestArgumentsIntoByteStream(project, nspc);
 		Response response = post(PROJECT,
 			RequestBody.create(ApplicationContentType, b.toByteArray()),
 			true); // send the request to server
 		return retrieveServerDocumentFromServerResponse(response);
 	}
 
-	private ByteArrayOutputStream writeRequestArgumentsIntoByteStream(Project proj) throws IOException {
+	private ByteArrayOutputStream writeRequestArgumentsIntoByteStream(Project proj, String nspc) throws IOException {
 		ByteArrayOutputStream b = new ByteArrayOutputStream();
 		ObjectOutputStream os = new ObjectOutputStream(b);
 		os.writeObject(proj.getId());
+		os.writeObject(nspc);
 		os.writeObject(proj.getName());
 		os.writeObject(proj.getDescription());
 		os.writeObject(proj.getOwner());
+		os.writeObject(proj.getImports());
 		os.writeObject(proj.getOptions().orNull());
 		return b;
 	}
@@ -391,7 +479,7 @@ public class LocalHttpClient implements Client, ClientSessionListener {
 		OWLOntology targetOntology = loadSnapShot(owlManager, pid);
 		ChangeHistory remoteChangeHistory = getLatestChanges(sdoc, DocumentRevision.START_REVISION, pid);
 		logger.info("Loaded ontology, now updating from server");
-		ClientUtils.updateOntology(targetOntology, remoteChangeHistory, owlManager);
+		ClientUtils.updateOntology(targetOntology, remoteChangeHistory, owlManager, this);
 		return new VersionedOWLOntologyImpl(sdoc, targetOntology, remoteChangeHistory);
 	}
 
@@ -440,17 +528,11 @@ public class LocalHttpClient implements Client, ClientSessionListener {
 		}
 	}
 
-	private void postProjectSnapShotToServer(Project project, File font) throws LoginTimeoutException,
+	private void postProjectSnapShotToServer(Project project, OWLOntology ont) throws LoginTimeoutException,
 		AuthorizationException, ClientRequestException {
 		Response response = null;
 		try {
-			OWLOntology ont;
-			if (font.getName().endsWith(".zip")) {
-				ZipInputStream zi = new ZipInputStream(new FileInputStream(font));
-				ont = OWLManager.createConcurrentOWLOntologyManager().loadOntologyFromOntologyDocument(zi);
-			} else {
-				ont = OWLManager.createOWLOntologyManager().loadOntologyFromOntologyDocument(font);
-			}
+			
 			ByteArrayOutputStream b = writeRequestArgumentsIntoByteStream(project.getId(), new SnapShot(ont));
 
 			response = post(PROJECT_SNAPSHOT,
@@ -460,7 +542,7 @@ public class LocalHttpClient implements Client, ClientSessionListener {
 			ObjectInputStream ois = new ObjectInputStream(response.body().byteStream());
 			String snapshotChecksum = (String) ois.readObject();
 			writeSnapshotChecksum(project.getId(), snapshotChecksum);
-		} catch (IOException | OWLOntologyCreationException | ClassNotFoundException e) {
+		} catch (IOException | ClassNotFoundException e) {
 			logger.error(e.getMessage(), e);
 			throw new ClientRequestException("Unable to send request to server (see error log for details)", e);
 		} finally {
@@ -1011,4 +1093,6 @@ public class LocalHttpClient implements Client, ClientSessionListener {
 			}
 		}
 	}
+
+	
 }

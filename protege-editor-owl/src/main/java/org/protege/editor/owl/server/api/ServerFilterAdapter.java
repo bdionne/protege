@@ -42,9 +42,9 @@ public class ServerFilterAdapter extends ServerLayer {
     }
 
     @Override
-    public ServerDocument createProject(AuthToken token, ProjectId projectId, Name projectName, Description description,
+    public ServerDocument createProject(AuthToken token, ProjectId projectId, String namespace, Name projectName, Description description,
             UserId owner, Optional<ProjectOptions> options) throws AuthorizationException, ServerServiceException {
-			return delegate.createProject(token, projectId, projectName, description, owner, options);
+			return delegate.createProject(token, projectId, namespace, projectName, description, owner, options);
     }
 
     @Override

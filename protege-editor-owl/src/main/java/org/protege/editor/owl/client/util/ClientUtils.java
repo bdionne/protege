@@ -7,6 +7,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -18,8 +19,13 @@ import javax.swing.KeyStroke;
 
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.client.ClientSession;
+import org.protege.editor.owl.client.LocalHttpClient;
 import org.protege.editor.owl.client.SessionRecorder;
 import org.protege.editor.owl.client.api.Client;
+import org.protege.editor.owl.client.api.OpenProjectResult;
+import org.protege.editor.owl.client.api.exception.AuthorizationException;
+import org.protege.editor.owl.client.api.exception.ClientRequestException;
+import org.protege.editor.owl.client.api.exception.LoginTimeoutException;
 import org.protege.editor.owl.client.event.ClientSessionListener;
 import org.protege.editor.owl.client.ui.OpenFromServerPanel;
 import org.protege.editor.owl.model.ChangeListMinimizer;
@@ -28,7 +34,10 @@ import org.protege.editor.owl.server.versioning.ChangeHistoryUtils;
 import org.protege.editor.owl.server.versioning.Commit;
 import org.protege.editor.owl.server.versioning.api.ChangeHistory;
 import org.protege.editor.owl.server.versioning.api.RevisionMetadata;
+import org.protege.editor.owl.server.versioning.api.ServerDocument;
+import org.protege.editor.owl.server.versioning.api.VersionedOWLOntology;
 import org.semanticweb.owlapi.model.AddImport;
+import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.MissingImportHandlingStrategy;
 import org.semanticweb.owlapi.model.MissingOntologyHeaderStrategy;
 import org.semanticweb.owlapi.model.OWLImportsDeclaration;
@@ -37,6 +46,9 @@ import org.semanticweb.owlapi.model.OWLOntologyChange;
 import org.semanticweb.owlapi.model.OWLOntologyLoaderConfiguration;
 //import org.semanticweb.owlapi.model.OWLOntologyLoaderConfiguration.MissingOntologyHeaderStrategy;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
+
+import edu.stanford.protege.metaproject.api.Project;
+import edu.stanford.protege.metaproject.api.ProjectId;
 
 /**
  * @author Josef Hardi <johardi@stanford.edu> <br>
@@ -106,16 +118,18 @@ public class ClientUtils {
      * Private utility methods
      */
 
-    public static void updateOntology(OWLOntology placeholder, ChangeHistory changeHistory, OWLOntologyManager manager) {
+    public static void updateOntology(OWLOntology placeholder, ChangeHistory changeHistory, 
+    		OWLOntologyManager manager, LocalHttpClient client) {
     	
     	List<OWLOntologyChange> changes = ChangeHistoryUtils.getOntologyChanges(changeHistory, placeholder);
         
         manager.applyChanges(changes);
        
-        fixMissingImports(placeholder, changes, manager);
+        fixMissingImports(placeholder, changes, manager, client);
     }
 
-    private static void fixMissingImports(OWLOntology ontology, List<OWLOntologyChange> changes, OWLOntologyManager manager) {
+    private static void fixMissingImports(OWLOntology ontology, List<OWLOntologyChange> changes, 
+    		OWLOntologyManager manager, LocalHttpClient client) {
         OWLOntologyLoaderConfiguration configuration = new OWLOntologyLoaderConfiguration();
         configuration = configuration.setMissingImportHandlingStrategy(MissingImportHandlingStrategy.SILENT);
         configuration = configuration.setMissingOntologyHeaderStrategy(MissingOntologyHeaderStrategy.IMPORT_GRAPH);
@@ -131,8 +145,44 @@ public class ClientUtils {
             }
         }
         for (OWLImportsDeclaration importDecl : missingImports) {
-            manager.makeLoadImportRequest(importDecl, configuration);
+            //manager.makeLoadImportRequest(importDecl, configuration);
+        	ProjectId pid = findProjectId(importDecl, client);
+        	OpenProjectResult openProjectResult;
+        	try {
+				openProjectResult = client.openProject(pid);
+				ServerDocument serverDocument = openProjectResult.serverDocument;
+	            client.buildVersionedOntology(serverDocument, manager, pid);
+			} catch (LoginTimeoutException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (AuthorizationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (ClientRequestException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
         }
+    }
+    
+    private static ProjectId findProjectId(OWLImportsDeclaration idecl, LocalHttpClient client) {
+    	IRI iri = idecl.getIRI();
+    	
+    	List<Project> projects = client.getProjects();
+		Project proj = null;
+		
+		Iterator<Project> it = projects.iterator();
+		
+		while (it.hasNext()) {
+			Project p = it.next();
+			if (p.namespace().compareTo(iri.getIRIString()) == 0) {
+				proj = p;
+				
+			}
+		}
+    	return proj.getId();
+    	
     }
     
     public static JDialog createOpenFromServerDialog(ClientSession clientSession, OWLEditorKit editorKit) {

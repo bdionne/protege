@@ -142,7 +142,7 @@ public interface ServerServices {
      * @throws ServerServiceException
      *             If the server failed to fulfill the user request.
      */
-    ServerDocument createProject(AuthToken token, ProjectId projectId, Name projectName, Description description,
+    ServerDocument createProject(AuthToken token, ProjectId projectId, String namespace, Name projectName, Description description,
             UserId owner, Optional<ProjectOptions> options) throws AuthorizationException, ServerServiceException;
 
     /**

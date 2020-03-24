@@ -226,6 +226,7 @@ public final class HTTPServer {
 		//adminRouter.add("POST", PROJECT_SNAPSHOT,  metaprojectHandler);
 		//adminRouter.add("DELETE", PROJECT,  metaprojectHandler);
 		webRouter.add("POST", PROJECT,  metaprojectHandler);
+		webRouter.add("POST", PROJECT_UPDATE,  metaprojectHandler);
 		webRouter.add("POST", PROJECT_SNAPSHOT,  metaprojectHandler);
 	    webRouter.add("DELETE", PROJECT,  metaprojectHandler);
 		

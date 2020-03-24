@@ -136,7 +136,7 @@ public class ProtegeServer extends ServerLayer {
     }
 
     @Override
-    public ServerDocument createProject(AuthToken token, ProjectId projectId, Name projectName,
+    public ServerDocument createProject(AuthToken token, ProjectId projectId, String namespace, Name projectName,
             Description description, UserId owner, Optional<ProjectOptions> options)
             throws AuthorizationException, ServerServiceException {
         try {
@@ -145,7 +145,7 @@ public class ProtegeServer extends ServerLayer {
             com.google.common.base.Optional<ProjectOptions> opts =
                     com.google.common.base.Optional.fromNullable(options.orElse(null));
             Project newProject = factory.getProject(
-                    projectId, projectName, description, owner, opts);
+                    projectId, namespace, projectName, description, owner, opts);
             try {
                 writeLock.lock();
                 logger.info(printLog(token.getUser(), "Add project", newProject.toString()));

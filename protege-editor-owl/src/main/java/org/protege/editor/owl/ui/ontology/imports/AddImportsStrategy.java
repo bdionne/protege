@@ -116,6 +116,8 @@ public class AddImportsStrategy {
 							ServerDocument serverDocument = openProjectResult.serverDocument;
 	                        VersionedOWLOntology vont = httpClient.buildVersionedOntology(serverDocument, loadingManager,
 	                        		importParameters.getProjectId());
+	                        
+	                        httpClient.addImport(importParameters.getImportingProjectId(), importParameters.getProjectId());
 						} catch (LoginTimeoutException e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();

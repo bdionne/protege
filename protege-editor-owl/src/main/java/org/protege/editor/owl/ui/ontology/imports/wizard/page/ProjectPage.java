@@ -1,6 +1,8 @@
 package org.protege.editor.owl.ui.ontology.imports.wizard.page;
 
 import java.awt.BorderLayout;
+import java.net.URI;
+
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -51,17 +53,22 @@ public class ProjectPage extends OntologyImportPage {
     	try {
     	ServerTableModel remoteProjectModel = openFromSVPanel.getRemoteProjectModel();
     	int row = openFromSVPanel.getSelectedRow();
+    	ProjectId inportingPid = clientSession.getActiveProject();
     	ProjectId pid = remoteProjectModel.getValueAt(row);
-    	SnapShot snapshot = httpClient.getSnapShot(pid);
-    	OWLOntology ontology = snapshot.getOntology();
-    	OWLOntologyID id = ontology.getOntologyID();
+    	//SnapShot snapshot = httpClient.getSnapShot(pid);
+    	//OWLOntology ontology = snapshot.getOntology();
+    	//OWLOntologyID id = ontology.getOntologyID();
     	//IRI physicalLocation = getOWLModelManager().getOWLOntologyManager().getOntologyDocumentIRI(ontology);
-    	IRI physicalLocation = id.getOntologyIRI().get();
+    	//IRI physicalLocation = id.getOntologyIRI().get();
+    	URI physicalLocation = URI.create(httpClient.findProject(pid).namespace());
+    	OWLOntologyID id = new OWLOntologyID(IRI.create(physicalLocation));
     	ImportInfo parameter = new ImportInfo();
     	parameter.setProjectId(pid);
-    	parameter.setOntologyID(ontology.getOntologyID());
-    	parameter.setPhysicalLocation(physicalLocation.toURI());
-    	parameter.setImportLocation(!id.isAnonymous() ? id.getDefaultDocumentIRI().get() : physicalLocation);
+    	parameter.setImportingProjectId(inportingPid);
+    	parameter.setOntologyID(id);
+    	parameter.setPhysicalLocation(physicalLocation);
+    	parameter.setImportLocation(!id.isAnonymous() ? id.getDefaultDocumentIRI().get() : 
+    		IRI.create(physicalLocation));
     	//parameter.setImportLocation(id.getDefaultDocumentIRI().get());
     	wizard.addImport(parameter);
         
