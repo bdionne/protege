@@ -38,6 +38,8 @@ import org.semanticweb.binaryowl.BinaryOWLOntologyDocumentSerializer;
 import org.semanticweb.binaryowl.owlapi.BinaryOWLOntologyBuildingHandler;
 import org.semanticweb.binaryowl.owlapi.OWLOntologyWrapper;
 import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLImportsDeclaration;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyID;
@@ -241,6 +243,26 @@ public class LocalHttpClient implements Client, ClientSessionListener {
 		
 	}
 	
+	public void removeImport(ProjectId activeProject, ProjectId projectId) {
+		
+		List<Project> projects = config.getAllProjects();
+		Project proj = null;
+		
+		Iterator<Project> it = projects.iterator();
+		
+		while (it.hasNext()) {
+			Project p = it.next();
+			if (p.getId().compareTo(activeProject) == 0) {
+				proj = p;
+				
+			}
+		}
+		proj.removeImport(projectId);
+		
+		updateProject(proj);
+		
+	}
+	
 	public Project findProject(ProjectId pid) {
 		
 		List<Project> projects = config.getAllProjects();
@@ -258,7 +280,25 @@ public class LocalHttpClient implements Client, ClientSessionListener {
 		
 		return proj;
 		
-	}	
+	}
+	
+	public ProjectId findProjectId(IRI iri) {
+		
+    	List<Project> projects = getProjects();
+		Project proj = null;
+		
+		Iterator<Project> it = projects.iterator();
+		
+		while (it.hasNext()) {
+			Project p = it.next();
+			if (p.namespace().compareTo(iri.getIRIString()) == 0) {
+				proj = p;
+				
+			}
+		}
+    	return proj.getId();
+    	
+    }
 	
 	private void updateProject(Project proj) {
 		ByteArrayOutputStream b = new ByteArrayOutputStream();

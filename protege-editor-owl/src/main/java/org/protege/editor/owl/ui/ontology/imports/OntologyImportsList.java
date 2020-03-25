@@ -4,8 +4,12 @@ import org.protege.editor.core.ui.list.MList;
 import org.protege.editor.core.ui.list.MListSectionHeader;
 import org.protege.editor.core.ui.wizard.Wizard;
 import org.protege.editor.owl.OWLEditorKit;
+import org.protege.editor.owl.client.ClientSession;
+import org.protege.editor.owl.client.LocalHttpClient;
 import org.protege.editor.owl.ui.ontology.imports.wizard.OntologyImportWizard;
 import org.semanticweb.owlapi.model.*;
+
+import edu.stanford.protege.metaproject.api.ProjectId;
 
 import javax.swing.*;
 import java.awt.*;
@@ -74,6 +78,23 @@ public class OntologyImportsList extends MList {
             AddImportsStrategy strategy = new AddImportsStrategy(editorKit, ont, wizard.getImports());
             strategy.addImports();
         }
+    }
+    
+    protected void handleDelete() {
+    	OntologyImportItem item = (OntologyImportItem) this.getSelectedValue();
+    	OWLImportsDeclaration decl = item.getImportDeclaration();
+    	
+    	
+    	ClientSession clientSession = ClientSession.getInstance(editorKit);
+    	LocalHttpClient httpClient = (LocalHttpClient) clientSession.getActiveClient();
+    	
+    	ProjectId importing = httpClient.findProjectId(ont.getOntologyID().getOntologyIRI().get());
+    	ProjectId imported = httpClient.findProjectId(decl.getIRI());
+    	
+    	httpClient.removeImport(importing, imported);
+    	
+    	super.handleDelete();
+    	
     }
 
     public void setOntology(OWLOntology ont) {

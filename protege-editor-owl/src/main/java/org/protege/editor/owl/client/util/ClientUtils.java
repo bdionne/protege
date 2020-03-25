@@ -146,7 +146,7 @@ public class ClientUtils {
         }
         for (OWLImportsDeclaration importDecl : missingImports) {
             //manager.makeLoadImportRequest(importDecl, configuration);
-        	ProjectId pid = findProjectId(importDecl, client);
+        	ProjectId pid = client.findProjectId(importDecl.getIRI());
         	OpenProjectResult openProjectResult;
         	try {
 				openProjectResult = client.openProject(pid);
@@ -166,24 +166,7 @@ public class ClientUtils {
         }
     }
     
-    private static ProjectId findProjectId(OWLImportsDeclaration idecl, LocalHttpClient client) {
-    	IRI iri = idecl.getIRI();
-    	
-    	List<Project> projects = client.getProjects();
-		Project proj = null;
-		
-		Iterator<Project> it = projects.iterator();
-		
-		while (it.hasNext()) {
-			Project p = it.next();
-			if (p.namespace().compareTo(iri.getIRIString()) == 0) {
-				proj = p;
-				
-			}
-		}
-    	return proj.getId();
-    	
-    }
+    
     
     public static JDialog createOpenFromServerDialog(ClientSession clientSession, OWLEditorKit editorKit) {
         final JDialog dialog = new JDialog(null, "Open from Protege OWL Server", Dialog.ModalityType.MODELESS);
