@@ -27,16 +27,21 @@ public class OntologyImportWizard extends Wizard {
     
     public OntologyImportWizard(Frame owner, OWLEditorKit owlEditorKit) {
         super(owner);
+        String serverConnectionStr = owlEditorKit.getModelManager().getServerConnectionData();
         setTitle("Import ontology wizard");
         registerWizardPanel(ImportTypePage.ID, new ImportTypePage(owlEditorKit));
-        registerWizardPanel(LocalFilePage.ID, new LocalFilePage(owlEditorKit));
-        registerWizardPanel(URLPage.ID, new URLPage(owlEditorKit));
-        registerWizardPanel(LoadedOntologyPage.ID, new LoadedOntologyPage(owlEditorKit));
-        registerWizardPanel(LibraryPage.ID, new LibraryPage(owlEditorKit));
+        if (serverConnectionStr != null && serverConnectionStr.contains("Project:")) {	
+        	registerWizardPanel(ProjectPage.ID, new ProjectPage(owlEditorKit));	
+        } else {
+        	registerWizardPanel(LocalFilePage.ID, new LocalFilePage(owlEditorKit));
+        	registerWizardPanel(URLPage.ID, new URLPage(owlEditorKit));
+            registerWizardPanel(LoadedOntologyPage.ID, new LoadedOntologyPage(owlEditorKit));
+            registerWizardPanel(LibraryPage.ID, new LibraryPage(owlEditorKit));
+        }
         registerWizardPanel(AnticipateOntologyIdPage.ID, new AnticipateOntologyIdPage(owlEditorKit));
         registerWizardPanel(SelectImportLocationPage.ID, new SelectImportLocationPage(owlEditorKit));
         registerWizardPanel(ImportConfirmationPage.ID, new ImportConfirmationPage(owlEditorKit));
-        registerWizardPanel(ProjectPage.ID, new ProjectPage(owlEditorKit));
+        
         setCurrentPanel(ImportTypePage.ID);
         owlEditorKit.getOWLWorkspace().setImportWizard(this);
     }
