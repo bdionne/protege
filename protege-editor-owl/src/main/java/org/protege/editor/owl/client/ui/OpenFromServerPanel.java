@@ -16,6 +16,7 @@ import org.protege.editor.owl.server.util.SnapShot;
 import org.protege.editor.owl.server.versioning.api.ServerDocument;
 import org.protege.editor.owl.server.versioning.api.VersionedOWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyChange;
+import org.semanticweb.owlapi.model.OWLOntologyID;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 import javax.swing.*;
@@ -46,6 +47,7 @@ public class OpenFromServerPanel extends JPanel {
     
     private JProgressBar progressBar;
     private JDialog dialog;
+    private boolean fromImport;
 
     public OpenFromServerPanel(ClientSession clientSession, OWLEditorKit editorKit) {
         this.clientSession = clientSession;
@@ -134,6 +136,10 @@ public class OpenFromServerPanel extends JPanel {
         try {
             Client client = clientSession.getActiveClient();
             remoteProjectModel.initialize(client);
+            if (getFromImport()) {
+            	OWLOntologyID ontologyID = this.editorKit.getModelManager().getActiveOntology().getOntologyID();
+            	remoteProjectModel.removeRemoteProject(ontologyID);
+            }
             tblRemoteProjects.changeSelection(0, 0, false, false); // select the first item as default
         }
         catch (OWLClientException e) {
@@ -285,5 +291,13 @@ public class OpenFromServerPanel extends JPanel {
         Window window = SwingUtilities.getWindowAncestor(OpenFromServerPanel.this);
         window.setVisible(false);
         window.dispose();
+    }
+    
+    public boolean getFromImport() {
+    	return this.fromImport;
+    }
+    
+    public void setFromImport(boolean fimport) {
+    	this.fromImport = fimport;
     }
 }

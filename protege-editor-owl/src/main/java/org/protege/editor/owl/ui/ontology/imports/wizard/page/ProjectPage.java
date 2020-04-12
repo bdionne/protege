@@ -92,7 +92,7 @@ public class ProjectPage extends OntologyImportPage {
         
         openFromSVPanel.setBorder(ComponentFactory.createTitledBorder("Open from Protege OWL Server"));
         openFromSVPanel.setButtonsEnable(false);
-        
+        openFromSVPanel.setFromImport(true);
         parent.setLayout(new BorderLayout(6, 6));
         parent.add(openFromSVPanel, BorderLayout.CENTER);
     	

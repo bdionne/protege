@@ -3,9 +3,12 @@ package org.protege.editor.owl.client.ui;
 import edu.stanford.protege.metaproject.api.Project;
 import edu.stanford.protege.metaproject.api.ProjectId;
 import edu.stanford.protege.metaproject.impl.ConfigurationUtils;
+import edu.stanford.protege.metaproject.impl.ProjectImpl;
+
 import org.protege.editor.owl.client.api.Client;
 import org.protege.editor.owl.client.api.exception.AuthorizationException;
 import org.protege.editor.owl.client.api.exception.OWLClientException;
+import org.semanticweb.owlapi.model.OWLOntologyID;
 
 import javax.swing.table.AbstractTableModel;
 import java.util.ArrayList;
@@ -83,5 +86,13 @@ public class ServerTableModel extends AbstractTableModel {
     public ProjectId getValueAt(int row) {
         Project project = remoteProjects.get(row);
         return project.getId();
+    }
+    
+    public void removeRemoteProject (OWLOntologyID ontologyID) {
+    	for (Project rmProject : remoteProjects) {
+    		if (rmProject.namespace().equals(ontologyID.getOntologyIRI().get().toString())) {
+    			remoteProjects.remove(rmProject);
+    		}
+    	}
     }
 }
