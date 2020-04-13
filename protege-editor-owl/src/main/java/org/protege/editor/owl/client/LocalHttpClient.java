@@ -17,6 +17,7 @@ import edu.stanford.protege.metaproject.serialization.DefaultJsonSerializer;
 import io.undertow.util.StatusCodes;
 import okhttp3.*;
 import org.apache.commons.codec.binary.Base64;
+import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.client.api.Client;
 import org.protege.editor.owl.client.api.OpenProjectResult;
 import org.protege.editor.owl.client.api.UserInfo;
@@ -508,7 +509,7 @@ public class LocalHttpClient implements Client, ClientSessionListener {
 	}
 
 	public VersionedOWLOntology buildVersionedOntology(ServerDocument sdoc, OWLOntologyManager owlManager,
-													   @Nonnull ProjectId pid)
+													   @Nonnull ProjectId pid, OWLEditorKit kit)
 			throws LoginTimeoutException, AuthorizationException, ClientRequestException {
 		if (pid == null) throw new IllegalArgumentException("projectId is null");
 		setCurrentProject(pid);
@@ -519,7 +520,7 @@ public class LocalHttpClient implements Client, ClientSessionListener {
 		OWLOntology targetOntology = loadSnapShot(owlManager, pid);
 		ChangeHistory remoteChangeHistory = getLatestChanges(sdoc, DocumentRevision.START_REVISION, pid);
 		logger.info("Loaded ontology, now updating from server");
-		ClientUtils.updateOntology(targetOntology, remoteChangeHistory, owlManager, this);
+		ClientUtils.updateOntology(targetOntology, remoteChangeHistory, owlManager, this, kit);
 		return new VersionedOWLOntologyImpl(sdoc, targetOntology, remoteChangeHistory);
 	}
 

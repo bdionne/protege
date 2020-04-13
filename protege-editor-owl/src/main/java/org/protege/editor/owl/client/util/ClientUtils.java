@@ -119,17 +119,17 @@ public class ClientUtils {
      */
 
     public static void updateOntology(OWLOntology placeholder, ChangeHistory changeHistory, 
-    		OWLOntologyManager manager, LocalHttpClient client) {
+    		OWLOntologyManager manager, LocalHttpClient client, OWLEditorKit kit) {
     	
     	List<OWLOntologyChange> changes = ChangeHistoryUtils.getOntologyChanges(changeHistory, placeholder);
         
         manager.applyChanges(changes);
        
-        fixMissingImports(placeholder, changes, manager, client);
+        fixMissingImports(placeholder, changes, manager, client, kit);
     }
 
     private static void fixMissingImports(OWLOntology ontology, List<OWLOntologyChange> changes, 
-    		OWLOntologyManager manager, LocalHttpClient client) {
+    		OWLOntologyManager manager, LocalHttpClient client, OWLEditorKit kit) {
         OWLOntologyLoaderConfiguration configuration = new OWLOntologyLoaderConfiguration();
         configuration = configuration.setMissingImportHandlingStrategy(MissingImportHandlingStrategy.SILENT);
         configuration = configuration.setMissingOntologyHeaderStrategy(MissingOntologyHeaderStrategy.IMPORT_GRAPH);
@@ -151,7 +151,9 @@ public class ClientUtils {
         	try {
 				openProjectResult = client.openProject(pid);
 				ServerDocument serverDocument = openProjectResult.serverDocument;
-	            client.buildVersionedOntology(serverDocument, manager, pid);
+	            VersionedOWLOntology vont = client.buildVersionedOntology(serverDocument, manager, pid, kit);
+	            ClientSession.getInstance(kit).registerProject(vont.getOntology().getOntologyID(), pid); 
+	            ClientSession.getInstance(kit).registerVersionOntology(vont.getOntology().getOntologyID(), vont);            
 			} catch (LoginTimeoutException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

@@ -96,7 +96,8 @@ public class SessionRecorder extends OWLEditorKitHook implements HistoryManager 
 
 				List<Stack<List<OWLOntologyChange>>> ont_stacks = stash.get(ontologyId);
 				undoStack = ont_stacks.get(0);
-				redoStack = ont_stacks.get(1);	
+				redoStack = ont_stacks.get(1);
+				fireStateChanged();
 
 			}
 		}

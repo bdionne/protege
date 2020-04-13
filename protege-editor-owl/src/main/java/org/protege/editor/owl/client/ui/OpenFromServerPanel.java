@@ -233,7 +233,8 @@ public class OpenFromServerPanel extends JPanel {
             progressBar.setValue(30);
             dialog.setTitle("Building versioned ontology...");
             Thread.sleep(1000);
-            VersionedOWLOntology vont = httpClient.buildVersionedOntology(serverDocument, owlManager, pid);
+            VersionedOWLOntology vont = httpClient.buildVersionedOntology(serverDocument, owlManager, 
+            		pid, editorKit);
             SessionRecorder.getInstance(this.editorKit).startRecording();
             
             progressBar.setValue(80);

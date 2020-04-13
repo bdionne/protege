@@ -115,7 +115,7 @@ public class AddImportsStrategy {
 							openProjectResult = httpClient.openProject(importParameters.getProjectId());
 							ServerDocument serverDocument = openProjectResult.serverDocument;
 	                        VersionedOWLOntology vont = httpClient.buildVersionedOntology(serverDocument, loadingManager,
-	                        		importParameters.getProjectId());
+	                        		importParameters.getProjectId(), editorKit);
 	                        
 	                        httpClient.addImport(importParameters.getImportingProjectId(), importParameters.getProjectId());
 						} catch (LoginTimeoutException e) {

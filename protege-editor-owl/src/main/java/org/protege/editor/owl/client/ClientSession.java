@@ -165,7 +165,7 @@ public class ClientSession extends OWLEditorKitHook {
     }
 
     public VersionedOWLOntology getActiveVersionOntology() {
-        OWLOntologyID ontologyId = getEditorKit().getOWLModelManager().getActiveOntology().getOntologyID();
+    	OWLOntologyID ontologyId = getEditorKit().getOWLModelManager().getActiveOntology().getOntologyID();
         return ontologyMap.get(ontologyId);
     }
 
@@ -234,7 +234,7 @@ public class ClientSession extends OWLEditorKitHook {
         getEditorKit().getOWLModelManager().removeListener(changeActiveProject);
     }
 
-    private void registerProject(OWLOntologyID ontologyId, ProjectId projectId) {
+    public void registerProject(OWLOntologyID ontologyId, ProjectId projectId) {
         projectMap.put(ontologyId, projectId);
     }
 
@@ -242,7 +242,7 @@ public class ClientSession extends OWLEditorKitHook {
         projectMap.clear();
     }
 
-    private void registerVersionOntology(OWLOntologyID ontologyId, VersionedOWLOntology versionOntology) {
+    public void registerVersionOntology(OWLOntologyID ontologyId, VersionedOWLOntology versionOntology) {
         ontologyMap.put(ontologyId, versionOntology);
     }
 

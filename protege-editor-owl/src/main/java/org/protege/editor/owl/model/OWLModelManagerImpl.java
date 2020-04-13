@@ -728,7 +728,7 @@ public class OWLModelManagerImpl extends AbstractModelManager implements OWLMode
             }
         }
         if (refreshActiveOntology) {
-            setActiveOntology(getActiveOntology(), true);
+            //setActiveOntology(getActiveOntology(), true);
         }
     }
 
