@@ -763,15 +763,6 @@ public class OWLWorkspace extends TabbedWorkspace implements SendErrorReportHand
         updateTitleBar();
     }
 
-    /*private void applyChanges(SessionRecorder sessionRecorder, List<OWLOntologyChange> changes) {
-    	sessionRecorder.stopRecording();       	
-        getOWLEditorKit().getOWLModelManager().applyChanges(changes);
-        getOWLEditorKit().getSearchManager().updateIndex(changes);
-        sessionRecorder.startRecording();
-    	
-        //adjustImports(changes);
-    }*/
-    
     public void showSearchDialog() {
         if(getOWLEditorKit() == null) {
             logger.info("The OWLWorkspace has not been initialised.  Not displaying the search dialog.");
