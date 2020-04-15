@@ -23,6 +23,7 @@ import org.protege.editor.core.ui.wizard.WizardPanel;
 import org.protege.editor.core.ui.workspace.*;
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.ProtegeOWL;
+import org.protege.editor.owl.client.SessionRecorder;
 import org.protege.editor.owl.model.entity.OWLEntityCreationSet;
 import org.protege.editor.owl.model.event.EventType;
 import org.protege.editor.owl.model.event.OWLModelManagerListener;
@@ -688,7 +689,25 @@ public class OWLWorkspace extends TabbedWorkspace implements SendErrorReportHand
         ontologiesList.addActionListener(e -> {
             OWLOntology ont = (OWLOntology) ontologiesList.getSelectedItem();
             if (ont != null) {
-                mngr.setActiveOntology(ont);
+            	if (mngr.getHistoryManager() instanceof SessionRecorder) {
+            		SessionRecorder sr = (SessionRecorder) mngr.getHistoryManager();
+                	List<OWLOntologyChange> changes = sr.getUncommittedChanges(); 
+                	if (changes != null && !changes.isEmpty()) {
+                		//Popup warning message
+                		if(JOptionPane.showConfirmDialog(this,
+                                "Do you want to commit changes before switching project?",
+                                "Ontology Project changed",
+                                JOptionPane.YES_NO_OPTION,
+                                JOptionPane.WARNING_MESSAGE) == JOptionPane.OK_OPTION) {
+                			List<OWLOntologyChange> uncommittedChanges = sr.getUncommittedChanges();
+                			//applyChanges(sr, uncommittedChanges);
+                			
+                		} else {
+                			return;
+                		}
+                	}
+                }
+            	mngr.setActiveOntology(ont);
             }
         });
 
@@ -732,6 +751,15 @@ public class OWLWorkspace extends TabbedWorkspace implements SendErrorReportHand
         updateTitleBar();
     }
 
+    /*private void applyChanges(SessionRecorder sessionRecorder, List<OWLOntologyChange> changes) {
+    	sessionRecorder.stopRecording();       	
+        getOWLEditorKit().getOWLModelManager().applyChanges(changes);
+        getOWLEditorKit().getSearchManager().updateIndex(changes);
+        sessionRecorder.startRecording();
+    	
+        //adjustImports(changes);
+    }*/
+    
     public void showSearchDialog() {
         if(getOWLEditorKit() == null) {
             logger.info("The OWLWorkspace has not been initialised.  Not displaying the search dialog.");

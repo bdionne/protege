@@ -5,6 +5,7 @@ import org.protege.editor.core.AbstractModelManager;
 import org.protege.editor.core.log.LogBanner;
 import org.protege.editor.core.ui.error.ErrorLogPanel;
 import org.protege.editor.core.ui.util.UIUtil;
+import org.protege.editor.owl.client.SessionRecorder;
 import org.protege.editor.owl.model.cache.OWLEntityRenderingCache;
 import org.protege.editor.owl.model.cache.OWLEntityRenderingCacheImpl;
 import org.protege.editor.owl.model.cache.OWLObjectRenderingCache;
@@ -648,6 +649,7 @@ public class OWLModelManagerImpl extends AbstractModelManager implements OWLMode
                 }
             }
         }
+        
         this.activeOntology = activeOntology;
         logger.debug("Setting active ontology to " + activeOntology.getOntologyID());
         rebuildActiveOntologiesCache();
@@ -728,7 +730,7 @@ public class OWLModelManagerImpl extends AbstractModelManager implements OWLMode
             }
         }
         if (refreshActiveOntology) {
-            //setActiveOntology(getActiveOntology(), true);
+            setActiveOntology(getActiveOntology(), true);
         }
     }
 
