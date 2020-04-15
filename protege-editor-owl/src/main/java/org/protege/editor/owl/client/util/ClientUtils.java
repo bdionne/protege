@@ -146,7 +146,7 @@ public class ClientUtils {
         }
         for (OWLImportsDeclaration importDecl : missingImports) {
             //manager.makeLoadImportRequest(importDecl, configuration);
-        	ProjectId pid = client.findProjectId(importDecl.getIRI());
+        	ProjectId pid = client.findProjectId(importDecl.getIRI()).get();
         	OpenProjectResult openProjectResult;
         	try {
 				openProjectResult = client.openProject(pid);

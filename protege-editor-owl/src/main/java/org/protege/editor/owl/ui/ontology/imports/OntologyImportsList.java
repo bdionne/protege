@@ -88,8 +88,8 @@ public class OntologyImportsList extends MList {
     	ClientSession clientSession = ClientSession.getInstance(editorKit);
     	LocalHttpClient httpClient = (LocalHttpClient) clientSession.getActiveClient();
     	
-    	ProjectId importing = httpClient.findProjectId(ont.getOntologyID().getOntologyIRI().get());
-    	ProjectId imported = httpClient.findProjectId(decl.getIRI());
+    	ProjectId importing = httpClient.findProjectId(ont.getOntologyID().getOntologyIRI().get()).get();
+    	ProjectId imported = httpClient.findProjectId(decl.getIRI()).get();
     	
     	httpClient.removeImport(importing, imported);
     	

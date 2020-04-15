@@ -283,7 +283,7 @@ public class LocalHttpClient implements Client, ClientSessionListener {
 		
 	}
 	
-	public ProjectId findProjectId(IRI iri) {
+	public Optional<ProjectId> findProjectId(IRI iri) {
 		
     	List<Project> projects = getProjects();
 		Project proj = null;
@@ -297,7 +297,11 @@ public class LocalHttpClient implements Client, ClientSessionListener {
 				
 			}
 		}
-    	return proj.getId();
+		if (proj != null) {
+    	return Optional.of(proj.getId());
+		} else {
+			return Optional.empty();
+		}
     	
     }
 	
