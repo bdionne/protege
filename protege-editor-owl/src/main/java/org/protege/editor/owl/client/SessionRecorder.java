@@ -205,6 +205,13 @@ public class SessionRecorder extends OWLEditorKitHook implements HistoryManager 
 			}
 		}
 	}
+	
+	public void undoAll() {
+    	while (canUndo()) {
+    		undo();
+    	}
+    	
+    }
 
 
 	public void addUndoManagerListener(UndoManagerListener listener) {

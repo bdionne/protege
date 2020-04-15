@@ -688,26 +688,38 @@ public class OWLWorkspace extends TabbedWorkspace implements SendErrorReportHand
 
         ontologiesList.addActionListener(e -> {
             OWLOntology ont = (OWLOntology) ontologiesList.getSelectedItem();
+            
             if (ont != null) {
-            	if (mngr.getHistoryManager() instanceof SessionRecorder) {
-            		SessionRecorder sr = (SessionRecorder) mngr.getHistoryManager();
-                	List<OWLOntologyChange> changes = sr.getUncommittedChanges(); 
-                	if (changes != null && !changes.isEmpty()) {
-                		//Popup warning message
-                		if(JOptionPane.showConfirmDialog(this,
-                                "Do you want to commit changes before switching project?",
-                                "Ontology Project changed",
-                                JOptionPane.YES_NO_OPTION,
-                                JOptionPane.WARNING_MESSAGE) == JOptionPane.OK_OPTION) {
-                			List<OWLOntologyChange> uncommittedChanges = sr.getUncommittedChanges();
-                			//applyChanges(sr, uncommittedChanges);
-                			
+            	
+            	if (mngr.getActiveOntology() == ont) {
+                	
+                } else {              
+            	
+                	if (mngr.getHistoryManager() instanceof SessionRecorder) {
+                		SessionRecorder sr = (SessionRecorder) mngr.getHistoryManager();
+                		List<OWLOntologyChange> changes = sr.getUncommittedChanges(); 
+                		if (changes != null && !changes.isEmpty()) {
+                			//Popup warning message
+                			if (JOptionPane.showConfirmDialog(this,
+                					"You have changes pending, if you switch THEY WILL BE LOST, proceed?",
+                					"Ontology Project changed",
+                					JOptionPane.YES_NO_OPTION,
+                					JOptionPane.WARNING_MESSAGE) == JOptionPane.OK_OPTION) {
+                				sr.undoAll();
+                				mngr.setActiveOntology(ont);
+
+                			} else {
+                				ontologiesList.setSelectedItem(mngr.getActiveOntology());
+                				return;
+                			}
                 		} else {
-                			return;
+                			mngr.setActiveOntology(ont);                			
                 		}
                 	}
                 }
-            	mngr.setActiveOntology(ont);
+                
+                
+            	
             }
         });
 
