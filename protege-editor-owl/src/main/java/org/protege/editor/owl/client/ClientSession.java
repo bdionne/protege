@@ -80,7 +80,11 @@ public class ClientSession extends OWLEditorKitHook {
         ClientSessionChangeEvent event = new ClientSessionChangeEvent(this, category);
                 
         for (ClientSessionListener listener : clientSessionListeners) {
-            listener.handleChange(event);
+        	try {
+        		listener.handleChange(event);
+        	} catch (NullPointerException ex) {
+        		ex.printStackTrace();
+        	}
         }
     }
 
