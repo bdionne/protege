@@ -781,7 +781,7 @@ public class OWLModelManagerImpl extends AbstractModelManager implements OWLMode
                     listener.handleChange(event);
                 } catch (Throwable e) {
                     logger.warn("Exception thrown by listener: {}.  Detatching bad listener.", listener.getClass().getName());
-                    modelManagerChangeListeners.remove(listener);
+                    //modelManagerChangeListeners.remove(listener);
                 }
             }
         };
