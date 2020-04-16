@@ -189,8 +189,10 @@ public abstract class AbstractOWLFrameSection<R extends Object, A extends OWLAxi
             	FreshActionStrategySelector strategySelector = new FreshActionStrategySelector(prefs, owlEditorKit);
             	FreshAxiomLocationStrategy strategy = strategySelector.getFreshAxiomLocationStrategy();
             	OWLOntology ontology = strategy.getFreshAxiomLocation(ax, getOWLModelManager());
-            	changes.add(new AddAxiom(ontology, ax));
-            	axioms.add(ax);
+            	if (checkOkAxiom(ax, ontology)) {
+            		changes.add(new AddAxiom(ontology, ax));
+            		axioms.add(ax);
+            	}
             }
         }
         getOWLModelManager().applyChanges(changes);
@@ -200,8 +202,65 @@ public abstract class AbstractOWLFrameSection<R extends Object, A extends OWLAxi
             }
         }
     }
-
-
+    
+    private boolean checkOkAxiom(A ax, OWLOntology ont) {
+    	if (ax.isOfType(AxiomType.SUBCLASS_OF)) {
+    		OWLSubClassOfAxiom subax = (OWLSubClassOfAxiom) ax;
+    		OWLClass cls = subax.getSubClass().asOWLClass();    		
+    		if (!subax.getSuperClass().isAnonymous()) {
+    			OWLClass newParent = subax.getSuperClass().asOWLClass();
+    			boolean found = false;
+    			try {
+    				found = findPath(cls, newParent, ont);
+    			} catch (Exception ex) {
+    				found = true;    				
+    			}
+    			if (found) {
+    				if (JOptionPane.showConfirmDialog(null,
+    						"Asserted parent is already parent of existing parent!",
+    						"Ontology Project changed",
+    						JOptionPane.YES_NO_OPTION,
+    						JOptionPane.WARNING_MESSAGE) ==
+    						JOptionPane.OK_OPTION) {
+    					return true;
+    				} else {
+    					return false;
+    				}
+    			}
+    		}
+    	}
+    	return true;
+    }
+    
+    private boolean findPath(OWLClass src, OWLClass target, OWLOntology ont) throws Exception {
+    	List<OWLClass> assertedParents = getAssertedParents(src, ont);
+    	
+		for (OWLClass ap : assertedParents) {
+			List<OWLClass> app = getAssertedParents(ap, ont);
+			if (app.contains(target)) {
+				throw new Exception();				
+			} else {
+				findPath(ap, target, ont);
+			}
+		}
+		return false;
+    	
+    }
+    
+    private List<OWLClass> getAssertedParents(OWLClass cls, OWLOntology ont) {
+    	List<OWLClass> parents = new ArrayList<OWLClass>();
+    	Set<OWLSubClassOfAxiom> axs = 
+    			ont.getSubClassAxiomsForSubClass(cls);
+    	
+    	for(OWLSubClassOfAxiom ax : axs) {
+    		if (!ax.getSuperClass().isAnonymous()) {
+    			parents.add(ax.getSuperClass().asOWLClass());
+    		}
+    	}
+    	
+    	return parents;
+    }
+    
     protected abstract A createAxiom(E object);
 
 
