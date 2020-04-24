@@ -167,6 +167,8 @@ public class OWLFrameList<R> extends MList implements LinkedObjectComponent, Dro
     
     private boolean read_only = false;
     
+    public void setReadOnly(boolean b) { read_only = b;}
+    
     public OWLFrameList(OWLEditorKit editorKit, OWLFrame<R> frame, boolean read_only) {
     	this(editorKit, frame);
     	this.read_only = read_only;

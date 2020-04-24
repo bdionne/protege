@@ -227,9 +227,42 @@ public abstract class AbstractOWLFrameSection<R extends Object, A extends OWLAxi
     					return false;
     				}
     			}
+    			if (findRoot(cls, ont, new HashSet<OWLClass>()) != 
+    					findRoot(newParent, ont, new HashSet<OWLClass>())) {
+    				if (JOptionPane.showConfirmDialog(null,
+    						"Adding this parent creates multiple disjoint roots!",
+    						"Ontology Project changed",
+    						JOptionPane.YES_NO_OPTION,
+    						JOptionPane.WARNING_MESSAGE) ==
+    						JOptionPane.OK_OPTION) {
+    					return true;
+    				} else {
+    					return false;
+    				}
+    			}
     		}
     	}
     	return true;
+    }
+    
+    private OWLClass findRoot(OWLClass cls, OWLOntology ont, Set<OWLClass> res) {
+    	    	
+        List<OWLClass> assertedParents = getAssertedParents(cls, ont);
+        
+        if (assertedParents.isEmpty()) {
+        	return cls;        	
+        } else {
+        	for (OWLClass ap : assertedParents) {
+        		OWLClass rp = findRoot(ap, ont, res);
+        		if (res.contains(rp)) {
+        			
+        		} else {
+        			res.add(rp);
+        		}
+    		}
+        	
+        }
+        return res.iterator().next();
     }
     
     private boolean findPath(OWLClass src, OWLClass target, OWLOntology ont) throws Exception {
