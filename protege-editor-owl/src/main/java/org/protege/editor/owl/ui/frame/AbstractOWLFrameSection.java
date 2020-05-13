@@ -249,8 +249,7 @@ public abstract class AbstractOWLFrameSection<R extends Object, A extends OWLAxi
     	    	
         List<OWLClass> assertedParents = getAssertedParents(cls, ont);
         
-        if (assertedParents.isEmpty()) {
-        	return cls;        	
+        if (assertedParents.isEmpty()) {        	
         } else {
         	for (OWLClass ap : assertedParents) {
         		OWLClass rp = findRoot(ap, ont, res);
@@ -262,7 +261,26 @@ public abstract class AbstractOWLFrameSection<R extends Object, A extends OWLAxi
     		}
         	
         }
-        return res.iterator().next();
+        
+        List<OWLClass> equiv_parents = this.getEquivalentClasses(cls, ont);
+        if (equiv_parents.isEmpty()) {
+        } else {
+        	for (OWLClass ap : equiv_parents) {
+        		OWLClass rp = findRoot(ap, ont, res);
+        		if (res.contains(rp)) {
+        			
+        		} else {
+        			res.add(rp);
+        		}
+    		}
+        	
+        }
+        
+        if (res.isEmpty()) {
+        	return cls;
+        } else {
+        	return res.iterator().next();
+        }
     }
     
     private boolean findPath(OWLClass src, OWLClass target, OWLOntology ont) throws Exception {
@@ -292,6 +310,20 @@ public abstract class AbstractOWLFrameSection<R extends Object, A extends OWLAxi
     	}
     	
     	return parents;
+    }
+    
+    private List<OWLClass> getEquivalentClasses(OWLClass cls, OWLOntology ont) {
+    	List<OWLClass> equivs = new ArrayList<OWLClass>();
+    	Set<OWLEquivalentClassesAxiom> axs =
+    			ont.getEquivalentClassesAxioms(cls);
+    	
+    	for(OWLEquivalentClassesAxiom ax : axs) {
+    		//ax.com
+    		Set<OWLClass> named_classes = ax.getNamedClasses();
+    		equivs.addAll(named_classes);
+    	}
+    	
+    	return equivs;
     }
     
     protected abstract A createAxiom(E object);
