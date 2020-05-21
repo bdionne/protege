@@ -189,10 +189,10 @@ public abstract class AbstractOWLFrameSection<R extends Object, A extends OWLAxi
             	FreshActionStrategySelector strategySelector = new FreshActionStrategySelector(prefs, owlEditorKit);
             	FreshAxiomLocationStrategy strategy = strategySelector.getFreshAxiomLocationStrategy();
             	OWLOntology ontology = strategy.getFreshAxiomLocation(ax, getOWLModelManager());
-            	if (checkOkAxiom(ax, ontology)) {
+            	//if (checkOkAxiom(ax, ontology)) {
             		changes.add(new AddAxiom(ontology, ax));
             		axioms.add(ax);
-            	}
+            	//}
             }
         }
         getOWLModelManager().applyChanges(changes);
