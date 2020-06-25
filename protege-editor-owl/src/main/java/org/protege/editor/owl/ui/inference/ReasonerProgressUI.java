@@ -74,8 +74,8 @@ public class ReasonerProgressUI implements ReasonerProgressMonitor, Disposable, 
 				panel));
 		
 		window = new JDialog(parent, "Reasoner progress");
-		window.setModalityType(ModalityType.APPLICATION_MODAL);
-		window.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+		//window.setModalityType(ModalityType.APPLICATION_MODAL);
+		//window.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 		cancelledAction = new AbstractAction("Cancel") {
 			private static final long serialVersionUID = 3688085823398242640L;
 			public void actionPerformed(ActionEvent e) {
@@ -155,10 +155,16 @@ public class ReasonerProgressUI implements ReasonerProgressMonitor, Disposable, 
 		if (taskIsRunning)
 			return;
 		taskIsRunning = true;
-		SwingUtilities.invokeLater(() -> {
-			progressBar.setValue(0);
-			showWindow(taskName);
-		});
+		new Thread(new Runnable() {
+			public void run() {
+				SwingUtilities.invokeLater(() -> {
+					progressBar.setValue(0);
+					showWindow(taskName);
+				});
+				
+			}
+		}).run();
+		
 	}
 
 
