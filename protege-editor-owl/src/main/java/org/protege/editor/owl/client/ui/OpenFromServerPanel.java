@@ -104,7 +104,7 @@ public class OpenFromServerPanel extends JPanel {
             public void mouseClicked(MouseEvent e) {
                 if (e.getClickCount() == 2) {
                     int row = tblRemoteProjects.getSelectedRow();
-                    openOntologyDocument(row);
+                    btnOpenProject.doClick();
                 }
             }
         });
