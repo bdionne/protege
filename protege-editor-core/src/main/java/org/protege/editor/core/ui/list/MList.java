@@ -404,23 +404,29 @@ public class MList extends JList {
 
     @Override
     protected void paintComponent(Graphics g) {
-        super.paintComponent(g);
-        Color oldColor = g.getColor();
-        Graphics2D g2 = (Graphics2D) g;
-        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        // Paint buttons
-        Stroke oldStroke = g2.getStroke();
-        Rectangle clipBound = g.getClipBounds();
-        for (int index = 0; index < this.getModel().getSize(); index++) {
-            Rectangle rowBounds = this.getCellBounds(index, index);
-            if (rowBounds != null) {
-                if (rowBounds.intersects(clipBound)) {
-                    paintRow(g2, clipBound, index, rowBounds);
-                }
-            }
-        }
-        g.setColor(oldColor);
-        g2.setStroke(oldStroke);
+    	try {
+    		super.paintComponent(g);
+    		Color oldColor = g.getColor();
+    		Graphics2D g2 = (Graphics2D) g;
+    		g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+    		// Paint buttons
+    		Stroke oldStroke = g2.getStroke();
+    		Rectangle clipBound = g.getClipBounds();
+    		for (int index = 0; index < this.getModel().getSize(); index++) {
+    			Rectangle rowBounds = this.getCellBounds(index, index);
+    			if (rowBounds != null) {
+    				if (rowBounds.intersects(clipBound)) {
+    					paintRow(g2, clipBound, index, rowBounds);
+    				}
+    			}
+    		}
+    		g.setColor(oldColor);
+    		g2.setStroke(oldStroke);
+    	} catch (NullPointerException ex) {
+    		System.out.println("Who is throwing this null pointer " + ex.getMessage());
+    		ex.printStackTrace();
+
+    	}
     }
 
     private void paintRow(Graphics2D g2, Rectangle clipBound, int index, Rectangle rowBounds) {
