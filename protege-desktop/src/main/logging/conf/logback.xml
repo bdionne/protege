@@ -43,6 +43,11 @@
     <root level="${protege.logging.level:-info}">        
         <appender-ref ref="rolling-files"/>
     </root>
+    
+    <logger name="gov.nih.nci.curator" level="${curator.logging.level}:-info">
+        <appender-ref ref="stdout"/>
+    	<appender-ref ref="rolling-files"/>
+    </logger>
    
 
 
