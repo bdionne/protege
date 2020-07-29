@@ -165,6 +165,13 @@ public class SessionRecorder extends OWLEditorKitHook implements HistoryManager 
 			fireStateChanged();
 		}
 	}
+	
+	public List<? extends OWLOntologyChange> getLatestChanges() {
+		if (!undoStack.empty()) {
+			return undoStack.peek();
+		}
+		return new ArrayList<OWLOntologyChange>();
+	}
 
 
 	public void redo() {
