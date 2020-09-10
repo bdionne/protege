@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 
@@ -39,6 +40,8 @@ public class HTTPChangeService extends BaseRoutingHandler {
 
 	private final ServerLayer serverLayer;
 	private ChangeService changeService;
+	
+	private static final String DATE_FORMATTER= "yyyy-MM-dd HH-mm-ss";
 
 	static enum PauseAllowed {
 		OK, NOT_WORKFLOW_MANAGER, NOT_PAUSING_USER, SERVER_PAUSED;
@@ -244,13 +247,17 @@ public class HTTPChangeService extends BaseRoutingHandler {
 	private void squashHistory(SnapShot snapShot, ProjectId projectId, OutputStream os) throws IOException {
 		HistoryFile historyFile = serverLayer.createHistoryFile(projectId);
 		String historyName = historyFile.getName();
+		
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_FORMATTER);
+		LocalDateTime localDateTime = LocalDateTime.now();
+        String formatDateTime = localDateTime.format(formatter);
 
 		String archiveDir = serverLayer.getConfiguration().getProperty(ServerProperties.ARCHIVE_ROOT)
 				+ File.separator
 				+ projectId.get()
 				+ File.separator
 				+ "squash-"
-				+ LocalDateTime.now()
+				+ formatDateTime
 				+ File.separator;
 
 		String dataDir = serverLayer.getConfiguration().getServerRoot()
