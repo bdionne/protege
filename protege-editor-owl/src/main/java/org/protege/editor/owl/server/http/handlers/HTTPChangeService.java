@@ -41,7 +41,7 @@ public class HTTPChangeService extends BaseRoutingHandler {
 	private final ServerLayer serverLayer;
 	private ChangeService changeService;
 	
-	private static final String DATE_FORMATTER= "yyyy-MM-dd HH-mm-ss";
+	private static final String DATE_FORMATTER= "yyyyMMdd-HHmmss";
 
 	static enum PauseAllowed {
 		OK, NOT_WORKFLOW_MANAGER, NOT_PAUSING_USER, SERVER_PAUSED;
