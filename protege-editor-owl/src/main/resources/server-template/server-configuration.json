@@ -173,6 +173,21 @@
           "http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#DEFINITION",
           "http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#ALT_DEFINITION"
         ],
+        "syn_type": [
+          "http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#term-group"
+        ],
+         "syn_source": [
+          "http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#term-source"
+        ],
+        "def_source": [
+          "http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#def-source"
+        ],
+        "review_date": [
+          "http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#Definition_Review_Date"
+        ],
+        "reviewer_name": [
+          "http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#Definition_Reviewer_Name"
+        ],
         "design_note": [
           "http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#DesignNote"
         ],
