@@ -208,8 +208,8 @@
           "http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#P201"
         ],
         "http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#P97": [
-          "http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#Definition_Review_Date",
-          "http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#Definition_Reviewer_Name",
+          "http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#P380",
+          "http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#P379",
           "http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#P378",
           "http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#P381"
         ],
@@ -302,12 +302,12 @@
         "http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#P90": [
           "http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#P385",
           "http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#P386",
-          "http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#term-group",
-          "http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#term-source"
+          "http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#P383",
+          "http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#P384"
         ],
         "http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#P325": [
-          "http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#Definition_Review_Date",
-          "http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#Definition_Reviewer_Name",
+          "http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#P380",
+          "http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#P379",
           "http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#P378",
           "http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#P381"
         ],
@@ -320,6 +320,21 @@
           "http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#P375",
           "http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#P90",
           "http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#P97"
+        ],
+        "syn_type": [
+          "http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#P383"
+        ],
+         "syn_source": [
+          "http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#P384"
+        ],
+        "def_source": [
+          "http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#P378"
+        ],
+        "review_date": [
+          "http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#P380"
+        ],
+        "reviewer_name": [
+          "http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#P379"
         ],
         "design_note": [
           "http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#P98"
