@@ -42,7 +42,7 @@ public class SessionRecorder extends OWLEditorKitHook implements HistoryManager 
 
 	private ChangeType typeOfChangeInProgress = ChangeType.NORMAL;
 
-	private Logger logger = LoggerFactory.getLogger(HistoryManager.class);
+	private Logger logger = LoggerFactory.getLogger(SessionRecorder.class);
 
 	private OWLOntologyManager manager;
 
@@ -138,10 +138,18 @@ public class SessionRecorder extends OWLEditorKitHook implements HistoryManager 
 	public boolean canUndo() {
 		return undoStack.size() > 0;
 	}
+	
+	private List<OWLOntologyChange> ignoredUpdates = null;
+	
+	public void ignoreChanges(List<OWLOntologyChange> updates) {
+		ignoredUpdates = updates;
+		logger.info("Ignoring updates");
+		
+	}
 
 
 	public void logChanges(List<? extends OWLOntologyChange> changes) {
-		if (enabled) {
+		if (enabled && !changes.equals(ignoredUpdates)) {
 			switch (typeOfChangeInProgress) {
 			case NORMAL:
 				// Clear the redo stack, because we can
@@ -163,6 +171,9 @@ public class SessionRecorder extends OWLEditorKitHook implements HistoryManager 
 				break;
 			}
 			fireStateChanged();
+		} else {
+			logger.info("Changes equal ignored changes? " + (changes.equals(ignoredUpdates)));
+			
 		}
 	}
 	

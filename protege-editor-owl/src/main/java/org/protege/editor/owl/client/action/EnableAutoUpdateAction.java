@@ -141,7 +141,7 @@ public class EnableAutoUpdateAction extends AbstractClientAction implements Clie
     private void killAutoUpdate() {
         if (autoUpdate != null) {
             autoUpdate.cancel(false);
-            autoUpdate = null;
+            autoUpdate = null;            
         }
     }
     
@@ -201,12 +201,13 @@ public class EnableAutoUpdateAction extends AbstractClientAction implements Clie
 
         private void performUpdate(List<OWLOntologyChange> updates) {
         	SwingUtilities.invokeLater(() -> {
-        		getSessionRecorder().stopRecording();       	
+        		getSessionRecorder().ignoreChanges(updates);
+        		
                 ontology.getOWLOntologyManager().applyChanges(updates);
                 getOWLEditorKit().getSearchManager().updateIndex(updates);
-                getSessionRecorder().startRecording();
-            	
                 adjustImports(updates);
+            	
+                
         		
         	});
         	
