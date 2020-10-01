@@ -38,7 +38,7 @@ public class AboutPanel extends JPanel {
 			versionString = String.format("%d.%d.%d", v.getMajor(), v.getMinor(), v.getMicro());
 
 			if (!v.getQualifier().isEmpty()) {
-				versionString += " Build " + v.getQualifier() + " 3.5.0-dev3";
+				versionString += " Build " + v.getQualifier() + " 3.5.0-qa1";
 			}
 		}
 
