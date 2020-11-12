@@ -68,4 +68,8 @@ public interface VersionedOWLOntology extends Serializable {
      * Returns the local head (latest) revision number (local/HEAD).
      */
     DocumentRevision getHeadRevision();
+    
+    DocumentRevision getRemoteHeadRevision();
+    
+    void setRemoteHeadRevision(DocumentRevision revision);
 }

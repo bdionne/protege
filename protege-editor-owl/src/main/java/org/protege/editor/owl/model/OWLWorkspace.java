@@ -23,7 +23,9 @@ import org.protege.editor.core.ui.wizard.WizardPanel;
 import org.protege.editor.core.ui.workspace.*;
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.ProtegeOWL;
+import org.protege.editor.owl.client.ClientSession;
 import org.protege.editor.owl.client.SessionRecorder;
+import org.protege.editor.owl.client.event.ClientSessionChangeEvent.EventCategory;
 import org.protege.editor.owl.model.entity.OWLEntityCreationSet;
 import org.protege.editor.owl.model.event.EventType;
 import org.protege.editor.owl.model.event.OWLModelManagerListener;
@@ -33,6 +35,8 @@ import org.protege.editor.owl.model.selection.OWLSelectionHistoryManager;
 import org.protege.editor.owl.model.selection.OWLSelectionHistoryManagerImpl;
 import org.protege.editor.owl.model.selection.OWLSelectionModel;
 import org.protege.editor.owl.model.selection.OWLSelectionModelImpl;
+import org.protege.editor.owl.server.versioning.api.DocumentRevision;
+import org.protege.editor.owl.server.versioning.api.VersionedOWLOntology;
 import org.protege.editor.owl.ui.OWLEntityCreationPanel;
 import org.protege.editor.owl.ui.OWLWorkspaceViewsTab;
 import org.protege.editor.owl.ui.action.ProtegeOWLAction;
@@ -140,6 +144,19 @@ public class OWLWorkspace extends TabbedWorkspace implements SendErrorReportHand
     private final JLabel reasonerStatus = new JLabel();
 
     private final JCheckBox displayReasonerResults = new JCheckBox("Show Inferences");
+    
+    private final JButton serverRevision = new JButton("Updates: 0");
+    
+    private void updateServerRevision() {
+
+    	VersionedOWLOntology vont = 
+    			ClientSession.getInstance(getOWLEditorKit()).getActiveVersionOntology();
+    	DocumentRevision remoteHead = vont.getRemoteHeadRevision(); 
+    	DocumentRevision localHead = vont.getHeadRevision();
+    	String diff = Integer.toString(remoteHead.getRevisionNumber() - localHead.getRevisionNumber());
+    	serverRevision.setText("Updates: " + diff);
+
+    }
 
     private final JPanel statusArea = new JPanel();
 
@@ -195,6 +212,8 @@ public class OWLWorkspace extends TabbedWorkspace implements SendErrorReportHand
         statusArea.setBorder(BorderFactory.createEmptyBorder(0, 0, 1, 1));
         statusArea.setLayout(new BoxLayout(statusArea, BoxLayout.X_AXIS));
         statusArea.add(Box.createHorizontalGlue());
+        statusArea.add(serverRevision);
+        statusArea.add(Box.createHorizontalStrut(30));
         statusArea.add(reasonerStatus);
         statusArea.add(Box.createHorizontalStrut(10));
         statusArea.add(displayReasonerResults);
@@ -248,6 +267,11 @@ public class OWLWorkspace extends TabbedWorkspace implements SendErrorReportHand
         reasonerStatus.setFont(Fonts.getSmallDialogFont());
         displayReasonerResults.putClientProperty("JComponent.sizeVariant", "small");
         displayReasonerResults.setFont(Fonts.getSmallDialogFont());
+        
+        serverRevision.addActionListener(e -> {
+        	ClientSession.getInstance(getOWLEditorKit()).
+        	fireChangeEvent(EventCategory.UPDATE_ONTOLOGY_VERBOSE);
+        });
 
 
         new OntologySourcesChangedHandlerUI(this);
@@ -329,6 +353,9 @@ public class OWLWorkspace extends TabbedWorkspace implements SendErrorReportHand
                     updateDirtyFlag();
                     updateTitleBar();
                     break;
+                case SERVER_REVISION:
+                	updateServerRevision();
+                	break;                	
                 case ENTITY_RENDERING_CHANGED:
                 case ONTOLOGY_VISIBILITY_CHANGED:
                     break;
@@ -853,7 +880,7 @@ public class OWLWorkspace extends TabbedWorkspace implements SendErrorReportHand
     }
 
     private void updateReasonerStatus(ReasonerStatus status) {
-        //reasonerStatus.setText(status.getDescription());
+        reasonerStatus.setText(status.getDescription());
         
         classifyAction.setEnabled(status == ReasonerStatus.OUT_OF_SYNC);
 

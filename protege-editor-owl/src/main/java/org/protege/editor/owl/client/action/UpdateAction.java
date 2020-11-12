@@ -12,20 +12,18 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
-import edu.stanford.protege.metaproject.api.AuthToken;
-
-import edu.stanford.protege.metaproject.api.ProjectId;
 import org.protege.editor.owl.client.LocalHttpClient;
-import org.protege.editor.owl.client.api.exception.ClientRequestException;
 import org.protege.editor.owl.client.api.exception.LoginTimeoutException;
 import org.protege.editor.owl.client.api.exception.ServiceUnavailableException;
 import org.protege.editor.owl.client.api.exception.SynchronizationException;
 import org.protege.editor.owl.client.event.ClientSessionChangeEvent;
+import org.protege.editor.owl.client.event.ClientSessionChangeEvent.EventCategory;
 import org.protege.editor.owl.client.event.ClientSessionListener;
 import org.protege.editor.owl.client.ui.UserLoginPanel;
-import org.protege.editor.owl.client.event.ClientSessionChangeEvent.EventCategory;
 import org.protege.editor.owl.client.util.ClientUtils;
 import org.protege.editor.owl.model.OWLModelManager;
+import org.protege.editor.owl.model.OWLModelManagerImpl;
+import org.protege.editor.owl.model.event.EventType;
 import org.protege.editor.owl.server.versioning.ChangeHistoryUtils;
 import org.protege.editor.owl.server.versioning.CollectingChangeVisitor;
 import org.protege.editor.owl.server.versioning.api.ChangeHistory;
@@ -35,6 +33,7 @@ import org.semanticweb.owlapi.model.AddImport;
 import org.semanticweb.owlapi.model.AnnotationChange;
 import org.semanticweb.owlapi.model.ImportChange;
 import org.semanticweb.owlapi.model.MissingImportHandlingStrategy;
+import org.semanticweb.owlapi.model.MissingOntologyHeaderStrategy;
 import org.semanticweb.owlapi.model.OWLAnnotation;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLAxiomChange;
@@ -42,10 +41,10 @@ import org.semanticweb.owlapi.model.OWLImportsDeclaration;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyChange;
 import org.semanticweb.owlapi.model.OWLOntologyLoaderConfiguration;
-import org.semanticweb.owlapi.model.MissingOntologyHeaderStrategy;
 import org.semanticweb.owlapi.model.UnloadableImportException;
 
-import javax.xml.ws.Service;
+import edu.stanford.protege.metaproject.api.AuthToken;
+import edu.stanford.protege.metaproject.api.ProjectId;
 
 /**
  * @author Josef Hardi <johardi@stanford.edu> <br>
@@ -75,25 +74,31 @@ public class UpdateAction extends AbstractClientAction implements ClientSessionL
         if (event.hasCategory(EventCategory.SWITCH_ONTOLOGY)) {
             activeVersionOntology = Optional.ofNullable(event.getSource().getActiveVersionOntology());
             setEnabled(activeVersionOntology.isPresent());
+        } else if (event.hasCategory(EventCategory.UPDATE_ONTOLOGY_VERBOSE)) {
+        	performUpdate(true);
+        } else if (event.hasCategory(EventCategory.UPDATE_ONTOLOGY)) {
+        	performUpdate(false);
         }
     }
 
     @Override
     public void actionPerformed(ActionEvent event) {
-        performUpdate();
+        performUpdate(true);
     }
 
-    private void performUpdate() {
+    private void performUpdate(boolean dialogs) {
         try {
             Optional<List<OWLOntologyChange>> incomingChanges = update();
-            if (incomingChanges.isPresent()) {
-                if (incomingChanges.get().isEmpty()) {
-                    showInfoDialog("Update", "Local copy is already up-to-date");
-                }
-                else {
-                    String template = "Local copy is succesfully updated by %d changes";
-                    showInfoDialog("Update", String.format(template, incomingChanges.get().size()));
-                }
+            if (dialogs) {
+            	if (incomingChanges.isPresent()) {
+            		if (incomingChanges.get().isEmpty()) {
+            			showInfoDialog("Update", "Local copy is already up-to-date");
+            		}
+            		else {
+            			String template = "Local copy is succesfully updated by %d changes";
+            			showInfoDialog("Update", String.format(template, incomingChanges.get().size()));
+            		}
+            	}
             }
         }
         catch (ServiceUnavailableException e) {
@@ -140,12 +145,12 @@ public class UpdateAction extends AbstractClientAction implements ClientSessionL
         private VersionedOWLOntology vont;
         private OWLOntology ontology;
         
-//        private OWLModelManagerImpl modMan;
+        private OWLModelManagerImpl modMan;
 
         public DoUpdate(OWLModelManager modMan, VersionedOWLOntology vont) {
             this.vont = vont;
             ontology = vont.getOntology();
-//            this.modMan = (OWLModelManagerImpl) modMan;
+            this.modMan = (OWLModelManagerImpl) modMan;
         }
 
         @Override
@@ -161,6 +166,7 @@ public class UpdateAction extends AbstractClientAction implements ClientSessionL
                     performUpdate(remoteChanges);
                     incomingChanges = remoteChanges;
                     vont.update(remoteChangeHistory);
+                    modMan.fireEvent(EventType.SERVER_REVISION);
                 }
                 else {
                     throw new SynchronizationException("Conflict was detected and unable to merge changes from the server");

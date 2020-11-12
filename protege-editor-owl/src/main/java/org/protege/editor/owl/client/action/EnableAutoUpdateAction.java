@@ -163,7 +163,7 @@ public class EnableAutoUpdateAction extends AbstractClientAction implements Clie
     	public void run() {
     		try {
     			OWLOntologyManagerImpl imp = (OWLOntologyManagerImpl) modMan.getOWLOntologyManager();
-    			
+
     			if (!imp.broadcastChanges.get()) {
     				return;
     			}
@@ -171,27 +171,10 @@ public class EnableAutoUpdateAction extends AbstractClientAction implements Clie
     				return;
     			}
     			log.info("Checking for updates");
-    			if (!isUpdated()) {
-    				List<OWLOntologyChange> localChanges = getLatestChangesFromClient();
-    				ChangeHistory remoteChangeHistory = getLatestChangesFromServer();
-                    List<OWLOntologyChange> remoteChanges = ChangeHistoryUtils.getOntologyChanges(remoteChangeHistory, ontology);
-    				List<OWLOntologyChange> conflictChanges = getConflicts(localChanges, remoteChanges);
-    				if (conflictChanges.isEmpty()) {
-    					performUpdate(remoteChanges);
-    					vont.update(remoteChangeHistory);
-    				}
-    				else {
-    					throw new SynchronizationException("Conflict was detected and unable to merge changes from the server");
-    				}
+    			if (behindServer()) {
+    				modMan.fireEvent(EventType.SERVER_REVISION);
     			}
-    		}
-    		catch (SynchronizationException udae) {
-    			autoUpdate.cancel(false);
-    			autoUpdate = null;
-    			checkBoxMenuItem.setSelected(false);
-    			showErrorDialog("AutoUpdate error:", udae.getMessage(), udae);
-    		}
-    		catch (Throwable t) {
+    		} catch (Throwable t) {
     			autoUpdate.cancel(false);
     			autoUpdate = null;
     			checkBoxMenuItem.setSelected(false);
@@ -199,123 +182,16 @@ public class EnableAutoUpdateAction extends AbstractClientAction implements Clie
     		}
     	}
 
-        private void performUpdate(List<OWLOntologyChange> updates) {
-        	SwingUtilities.invokeLater(() -> {
-        		getSessionRecorder().ignoreChanges(updates);
-        		
-                ontology.getOWLOntologyManager().applyChanges(updates);
-                getOWLEditorKit().getSearchManager().updateIndex(updates);
-                adjustImports(updates);
-            	
-                
-        		
-        	});
-        	
-        }
-
-        private boolean isUpdated() {
+        private boolean behindServer() {
             try {
             	ProjectId projectId = getClientSession().getActiveProject();
                 DocumentRevision remoteHead = LocalHttpClient.current_user().getRemoteHeadRevision(vont, projectId);
-                DocumentRevision localHead = vont.getHeadRevision();
-                return localHead.sameAs(remoteHead);
-            }
-            catch (ServiceUnavailableException e) {
-                // TODO: add non-blocking indicator / disable auto-update here ?
+                vont.setRemoteHeadRevision(remoteHead);
                 return true;
             }
             catch (Exception e) {
                 showErrorDialog("Update error", "Error while fetching the remote head revision\n" + e.getMessage(), e);
-                return true;
-            }
-        }
-
-        public List<OWLOntologyChange> getLatestChangesFromClient() {
-            return ClientUtils.getUncommittedChanges(getSessionRecorder(), vont.getOntology(), vont.getChangeHistory());
-        }
-
-        private ChangeHistory getLatestChangesFromServer() {
-            //List<OWLOntologyChange> changes = new ArrayList<>();
-        	ChangeHistory remoteChangeHistory = null;
-            try {
-            	ProjectId projectId = getClientSession().getActiveProject();
-                remoteChangeHistory = LocalHttpClient.current_user().getLatestChanges(vont, projectId);
-                //changes = ChangeHistoryUtils.getOntologyChanges(remoteChangeHistory, ontology);
-            }
-            catch (ServiceUnavailableException e) {
-                // TODO: add non-blocking indicator here
-            }
-            catch (Exception e) {
-                showErrorDialog("Update error", "Error while fetching the latest changes from server", e);
-            }
-            return remoteChangeHistory;
-        }
-
-        private List<OWLOntologyChange> getConflicts(List<OWLOntologyChange> localChanges, List<OWLOntologyChange> remoteChanges) {
-            List<OWLOntologyChange> conflictChanges = new ArrayList<>();
-
-            CollectingChangeVisitor clientChanges = CollectingChangeVisitor.collectChanges(localChanges);
-            CollectingChangeVisitor serverChanges = CollectingChangeVisitor.collectChanges(remoteChanges);
-
-            /*
-             * Compute the conflicts by comparing the change signature between the client and server changes. The
-             * change signature is defined by the OWL object that becomes the focus of the change (i.e.,
-             * OWLImportDeclaration, OWLAnnotation, OWLAxiom) or the ontology ID.
-             */
-            if (clientChanges.getLastOntologyIDChange() != null && serverChanges.getLastOntologyIDChange() != null) {
-                conflictChanges.add(clientChanges.getLastOntologyIDChange());
-            }
-            final Map<OWLImportsDeclaration, ImportChange> importChanges = clientChanges.getLastImportChangeMap();
-            for (Entry<OWLImportsDeclaration, ImportChange> entry : importChanges.entrySet()) {
-                OWLImportsDeclaration decl = entry.getKey();
-                if (serverChanges.getLastImportChangeMap().containsKey(decl)) {
-                    conflictChanges.add(entry.getValue());
-                }
-            }
-            final Map<OWLAnnotation, AnnotationChange> annotationChanges = clientChanges.getLastOntologyAnnotationChangeMap();
-            for (Entry<OWLAnnotation, AnnotationChange> entry : annotationChanges.entrySet()) {
-                OWLAnnotation annotation = entry.getKey();
-                if (serverChanges.getLastOntologyAnnotationChangeMap().containsKey(annotation)) {
-                    conflictChanges.add(entry.getValue());
-                }
-            }
-            final Map<OWLAxiom, OWLAxiomChange> axiomChanges = clientChanges.getLastAxiomChangeMap();
-            for (Entry<OWLAxiom, OWLAxiomChange> entry : axiomChanges.entrySet()) {
-                OWLAxiom axiom = entry.getKey();
-                if (serverChanges.getLastAxiomChangeMap().containsKey(axiom)) {
-                    conflictChanges.add(entry.getValue());
-                }
-            }
-            return conflictChanges;
-        }
-
-        private void adjustImports(List<OWLOntologyChange> changes) {
-            OWLOntologyLoaderConfiguration configuration = new OWLOntologyLoaderConfiguration();
-            configuration = configuration.setMissingImportHandlingStrategy(MissingImportHandlingStrategy.SILENT);
-            configuration = configuration.setMissingOntologyHeaderStrategy(MissingOntologyHeaderStrategy.IMPORT_GRAPH);
-            try {
-                adjustImports(changes, configuration);
-            }
-            catch (UnloadableImportException e) {
-                showErrorDialog("Update error", "Unexpected error when adjusting import declarations", e);
-            }
-        }
-        
-        private void adjustImports(List<OWLOntologyChange> changes, OWLOntologyLoaderConfiguration configuration)
-                throws UnloadableImportException {
-            Set<OWLImportsDeclaration> finalDeclaredImports = ontology.getImportsDeclarations();
-            Set<OWLImportsDeclaration> missingImports = new TreeSet<OWLImportsDeclaration>();
-            for (OWLOntologyChange change : changes) {
-                if (change instanceof AddImport) {
-                    OWLImportsDeclaration importDecl = ((AddImport) change).getImportDeclaration();
-                    if (finalDeclaredImports.contains(importDecl)
-                            && ontology.getOWLOntologyManager().getImportedOntology(importDecl) == null) {
-                        missingImports.add(importDecl);
-                    }
-                }
-            }
-            for (OWLImportsDeclaration missingImport : missingImports) {
-                ontology.getOWLOntologyManager().makeLoadImportRequest(missingImport, configuration);
+                return false;
             }
         }
 

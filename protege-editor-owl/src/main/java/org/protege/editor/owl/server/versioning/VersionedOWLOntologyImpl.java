@@ -33,6 +33,8 @@ public class VersionedOWLOntologyImpl implements VersionedOWLOntology {
     private ServerDocument serverDocument;
     private OWLOntology ontology;
     private ChangeHistory changeHistory;
+    
+    private DocumentRevision remoteRevision = null;
 
     /**
      * Creates a versioned ontology that tracks changes of the specified underlying OWL ontology.
@@ -92,6 +94,7 @@ public class VersionedOWLOntologyImpl implements VersionedOWLOntology {
             changeHistory.addRevision(metadata, changes);
             logCache.add(metadata);
         }
+        remoteRevision = end;
     }
 
     @Override
@@ -131,4 +134,15 @@ public class VersionedOWLOntologyImpl implements VersionedOWLOntology {
         }
         return sb.toString();
     }
+
+	@Override
+	public DocumentRevision getRemoteHeadRevision() {
+		
+		return remoteRevision;
+	}
+
+	@Override
+	public void setRemoteHeadRevision(DocumentRevision revision) {
+		remoteRevision = revision;
+	}
 }

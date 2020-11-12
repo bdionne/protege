@@ -42,5 +42,7 @@ public enum EventType {
 
     SERVER_PAUSED,
 
-    SERVER_RESUMED
+    SERVER_RESUMED,
+    
+    SERVER_REVISION
 }
