@@ -11,6 +11,12 @@ import org.protege.editor.core.ui.util.Icons;
 import javax.swing.*;
 import javax.swing.border.Border;
 import java.awt.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 
 
 /**
@@ -38,7 +44,8 @@ public class AboutPanel extends JPanel {
 			versionString = String.format("%d.%d.%d", v.getMajor(), v.getMinor(), v.getMicro());
 
 			if (!v.getQualifier().isEmpty()) {
-				versionString += " Build " + v.getQualifier() + " 3.5.0-qa1";
+				versionString += " " + v.getQualifier()
+				+ " " + "Build: " + getBuild();
 			}
 		}
 
@@ -76,6 +83,15 @@ public class AboutPanel extends JPanel {
         copy.setMinimumSize(copy.getPreferredSize());
         panel.addGroupComponent(copy);
         add(panel, BorderLayout.NORTH);
+    }
+    
+    private String getBuild() {
+    	try {
+			BufferedReader r = new BufferedReader(new FileReader(new File(".build_version")));
+			return r.readLine();
+		} catch (IOException e) {
+			return "no version no.";
+		}
     }
 
 
