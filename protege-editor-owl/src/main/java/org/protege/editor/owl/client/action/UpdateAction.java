@@ -169,7 +169,8 @@ public class UpdateAction extends AbstractClientAction implements ClientSessionL
                     modMan.fireEvent(EventType.SERVER_REVISION);
                 }
                 else {
-                    throw new SynchronizationException("Conflict was detected and unable to merge changes from the server");
+                    throw new SynchronizationException("<html>A conflict was detected, unable to merge changes from the server. <br/>"
+                    		+ "Please Clear local changes and Update from server.</html>");
                 }
             }
             return incomingChanges;
