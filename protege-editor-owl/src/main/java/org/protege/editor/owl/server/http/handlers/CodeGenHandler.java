@@ -24,6 +24,8 @@ import java.util.Optional;
 import javax.annotation.Nonnull;
 
 import org.protege.editor.owl.server.http.ServerEndpoints;
+import org.protege.editor.owl.server.http.ServerProperties;
+
 import static org.protege.editor.owl.server.http.ServerProperties.*;
 import org.protege.editor.owl.server.http.exception.ServerException;
 import org.protege.editor.owl.server.http.messages.History;
@@ -41,6 +43,8 @@ import io.undertow.util.StatusCodes;
 public class CodeGenHandler extends BaseRoutingHandler {
 
 	private static Logger logger = LoggerFactory.getLogger(CodeGenHandler.class);
+	
+	private static final String DATE_FORMATTER= "yyyyMMdd-HHmmss";
 
 	private final ServerConfiguration serverConfiguration;
 	
@@ -403,12 +407,18 @@ public class CodeGenHandler extends BaseRoutingHandler {
 			
 			reader.close();			
 			pw.close();
+			
+			DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_FORMATTER);
+			LocalDateTime localDateTime = LocalDateTime.now();
+	        String formatDateTime = localDateTime.format(formatter);
+
+			
 
 			String archiveDir = serverConfiguration.getProperty(ARCHIVE_ROOT)
 					+ File.separator
 					+ projectId
 					+ File.separator
-					+ LocalDateTime.now()
+					+ formatDateTime
 					+ File.separator;
 
 			Files.createDirectories(Paths.get(archiveDir));
