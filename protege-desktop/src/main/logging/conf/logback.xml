@@ -29,33 +29,32 @@
         </encoder>
     </appender>
     
-    <logger name="gov.nih.nci.ui" level="info">
+    <logger name="gov.nih.nci.ui" level="INFO">
+    	<appender-ref ref="rolling-files"/>
+    </logger>
+    
+    <logger name="org.protege.editor.owl.client" level="${client.server.comm.level:-ERROR}">
         <appender-ref ref="stdout"/>
     	<appender-ref ref="rolling-files"/>
     </logger>
     
-    <logger name="org.protege.editor.owl.client" level="${client.server.comm.level:-error}">
+    <logger name="org.protege.editor.core.prefs" level="${core.fileprefs.level:-ERROR}">
         <appender-ref ref="stdout"/>
     	<appender-ref ref="rolling-files"/>
     </logger>
     
-    <logger name="org.protege.editor.core.prefs" level="${core.fileprefs.level:-error}">
-        <appender-ref ref="stdout"/>
-    	<appender-ref ref="rolling-files"/>
-    </logger>
-    
-    <logger name="org.semanticweb.owlapi" level="error">
+    <logger name="org.semanticweb.owlapi" level="ERROR">
         <appender-ref ref="stdout"/>
     	<appender-ref ref="rolling-files"/>
     </logger>
     
 
    
-    <root level="${protege.logging.level:-info}">        
-        <appender-ref ref="rolling-files"/>
+    <root level="${protege.logging.level:-ERROR}">        
+        <appender-ref ref="stdout"/>
     </root>
     
-    <logger name="gov.nih.nci.curator" level="${curator.logging.level:-error}">
+    <logger name="gov.nih.nci.curator" level="${curator.logging.level:-INFO}" additivity="false">
         <appender-ref ref="stdout"/>
     	<appender-ref ref="rolling-files"/>
     </logger>
