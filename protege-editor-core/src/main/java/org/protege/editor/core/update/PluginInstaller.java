@@ -296,7 +296,7 @@ public class PluginInstaller {
     }
 
     private boolean installPlugin(File pluginLocation, PluginInfo info) {
-        if (info.getPluginInfo() == null) {  // download not an update...
+        //if (info.getPluginInfo() == null) {  // download not an update...
             logger.info("Installing the {} plugin", info.getLabel());
             try {
             	JPFUtil.setClasspathForPlugins();
@@ -306,10 +306,10 @@ public class PluginInstaller {
                logger.info("The {} plugin requires a restart of Protégé (Reason: {})", info.getLabel(), e.getMessage());
                 return false;
             }
-        }
-        else {
-            logger.info("The {} plugin requires a restart of Protégé", info.getLabel());
-            return false;
-        }
+        //}
+        //else {
+           // logger.info("The {} plugin requires a restart of Protégé", info.getLabel());
+            //return false;
+        //}
     }
 }

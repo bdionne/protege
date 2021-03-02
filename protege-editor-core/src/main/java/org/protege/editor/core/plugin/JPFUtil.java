@@ -135,15 +135,16 @@ public class JPFUtil {
 		BufferedWriter writer = null;
 		
 		for (String rmPath : removePluginPath) {
-			if (writer == null) {
-				writer = new BufferedWriter(new FileWriter("oldPlugins.txt"));
-			}
+			
 			File rmFile = new File(rmPath);
 			
 			rmFile.delete();
 			
 			if (rmFile.exists()) {
-				writer.write(rmFile.getAbsolutePath());
+				if (writer == null) {
+					writer = new BufferedWriter(new FileWriter("oldPlugins.txt"));
+				}
+				writer.write("\"" + rmFile.getAbsolutePath() + "\"");
 				writer.newLine();
 			}
 		}
@@ -181,6 +182,8 @@ public class JPFUtil {
 	        	if(f.getAbsolutePath().compareTo(oldPath) > 0) {
 	        		pluginMap.put(nameString, f.getAbsolutePath());
 	        		removeFiles.add(oldPath);
+	        	} else {
+	        		removeFiles.add(f.getAbsolutePath());
 	        	}
 	        } else {
 	            pluginMap.put(nameString, f.getAbsolutePath());
