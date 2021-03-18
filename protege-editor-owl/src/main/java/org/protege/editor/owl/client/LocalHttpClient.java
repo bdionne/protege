@@ -142,10 +142,7 @@ public class LocalHttpClient implements Client, ClientSessionListener {
 		throws LoginTimeoutException, AuthorizationException, ClientRequestException {
 		LoginCreds creds = new LoginCreds(username, password);
 		String endPoint = LOGIN;
-		if (admin) {
-			endPoint = ADMIN_LOGIN;
-			
-		}
+		
 		Response response = post(endPoint,
 			RequestBody.create(JsonContentType, serl.write(creds, LoginCreds.class)),
 			false); // send the request to server

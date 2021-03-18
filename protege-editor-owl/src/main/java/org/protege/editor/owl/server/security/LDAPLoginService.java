@@ -68,7 +68,7 @@ public class LDAPLoginService implements LoginService {
 					
 				}				
 			}
-    	} catch (LDAPException | SSLContextInitializationException e1) {
+    	} catch (Exception e1) {
     		if (backup != null) {
     			result = backup.login(userid, password);
 

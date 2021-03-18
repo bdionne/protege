@@ -173,24 +173,23 @@ public final class HTTPServer {
 		RoutingHandler webRouter = Handlers.routing();
 		//RoutingHandler adminRouter = Handlers.routing();
 		
-		// use default login service for admin web server
-	    LoginService adminLoginService = new DefaultLoginService();
+		// use default login service as backup
+	    LoginService defaultLoginService = new DefaultLoginService();
 		
 		// create login handler for web server
 		LoginService loginService = instantiateLoginService();
 		
-		loginService.setBackup(adminLoginService);
+		loginService.setBackup(defaultLoginService);
 		
 		HttpHandler login_handler = new BlockingHandler(new HTTPLoginService(loginService));
 		
 		webRouter.add("POST", LOGIN, login_handler);
 		
 		
-		adminLoginService.setConfig(serverConfiguration);
-		HttpHandler admin_login_handler = new BlockingHandler(new HTTPLoginService(adminLoginService));
+		defaultLoginService.setConfig(serverConfiguration);
+		
 		
 		//adminRouter.add("POST", ADMIN_LOGIN, admin_login_handler);
-		webRouter.add("POST", ADMIN_LOGIN, admin_login_handler);
 		
 		// create change service handler
 		HttpHandler changeServiceHandler = new AuthenticationHandler(new BlockingHandler(new HTTPChangeService(acf, changeService)));
@@ -255,7 +254,6 @@ public final class HTTPServer {
 		
 		logger.info("Starting server instances");
 		final URI serverHostUri = serverConfiguration.getHost().getUri();
-		final int serverAdminPort = serverConfiguration.getHost().getSecondaryPort().get().get();
 		if (serverHostUri.getScheme().equalsIgnoreCase("https")) {
 			SSLContext ctx = new SSLContextFactory().createSslContext();
 			webServer = Undertow.builder()
@@ -265,15 +263,7 @@ public final class HTTPServer {
 					.build();
 			webServer.start();
 			logger.info("... Web server has started at port " + serverHostUri.getPort());
-			/**
-			adminServer = Undertow.builder()
-					.addHttpsListener(serverAdminPort, serverHostUri.getHost(), ctx)
-					.setServerOption(UndertowOptions.ALWAYS_SET_DATE, true)
-					.setHandler(adminRouterHandler)
-					.build();
-			adminServer.start();
-			logger.info("... Admin server has started at port " + serverAdminPort);
-			**/
+			
 		}
 		else {
 			webServer = Undertow.builder()
@@ -283,15 +273,7 @@ public final class HTTPServer {
 					.build();
 			webServer.start();
 			logger.info("... Web server has started at port " + serverHostUri.getPort());
-			/**
-			adminServer = Undertow.builder()
-					.addHttpListener(serverAdminPort, serverHostUri.getHost())
-					.setServerOption(UndertowOptions.ALWAYS_SET_DATE, true)
-					.setHandler(adminRouterHandler)
-					.build();
-			adminServer.start();
-			logger.info("... Admin server has started at port " + serverAdminPort);
-			**/
+			
 		}
 		isRunning = true;
 	}
