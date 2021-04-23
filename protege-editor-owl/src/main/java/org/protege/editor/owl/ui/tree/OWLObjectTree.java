@@ -127,12 +127,13 @@ public class OWLObjectTree<N extends OWLObject> extends JTree implements OWLObje
                     reload();
                 }
                 if (e.isPopupTrigger()) {
+                	ensureSelected(e.getX(), e.getY());		// addresses #359
                     showPopupMenu(e);
                 }
             }
 
             public void mousePressed(MouseEvent e) {
-                if (e.isPopupTrigger()) {   
+                if (e.isPopupTrigger()) {
                 	ensureSelected(e.getX(), e.getY());
                 	showPopupMenu(e);
                 }
@@ -141,9 +142,9 @@ public class OWLObjectTree<N extends OWLObject> extends JTree implements OWLObje
                 }
             }
         });
-        
-        
-        
+
+
+
 
         getSelectionModel().addTreeSelectionListener(event -> {
             scrollPathToVisible(event.getNewLeadSelectionPath());
@@ -171,7 +172,7 @@ public class OWLObjectTree<N extends OWLObject> extends JTree implements OWLObje
             }
         }
     }
-    
+
     public void ensureSelected(final int x, int y) {
         // It's necessary to traverse all rows to find the path where the user clicked.  This is because
         // the getRowAt(X,Y) call only returns a row index if the actual node rendering is clicked.  We
