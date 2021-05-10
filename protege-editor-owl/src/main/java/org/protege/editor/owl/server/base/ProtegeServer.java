@@ -141,9 +141,10 @@ public class ProtegeServer extends ServerLayer {
             throws AuthorizationException, ServerServiceException {
         try {
             HistoryFile historyFile = createHistoryFile(projectId);
-            createCodegenFile(projectId.get());
+           
             com.google.common.base.Optional<ProjectOptions> opts =
                     com.google.common.base.Optional.fromNullable(options.orElse(null));
+            createCodegenFile(projectId.get(), opts);
             Project newProject = factory.getProject(
                     projectId, namespace, projectName, description, owner, opts);
             try {

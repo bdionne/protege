@@ -34,7 +34,11 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Iterables;
 
+import edu.stanford.protege.metaproject.api.Project;
+import edu.stanford.protege.metaproject.api.ProjectOptions;
 import edu.stanford.protege.metaproject.api.ServerConfiguration;
+import edu.stanford.protege.metaproject.api.exception.UnknownProjectIdException;
+import edu.stanford.protege.metaproject.impl.ProjectIdImpl;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.util.HttpString;
 import io.undertow.util.Methods;
@@ -97,13 +101,36 @@ public class CodeGenHandler extends BaseRoutingHandler {
 
 		// TODO: handle failure and remove literal
 		String projectID = getQueryParameter(exchange, "projectid");
+		
+		String p = null;
+		String s = null;
+		String d = null;
+		try {
+			Project proj = serverConfiguration.getProject(new ProjectIdImpl(projectID));
+			com.google.common.base.Optional<ProjectOptions> opts = proj.getOptions();
+			if (opts.isPresent()) {
+				p = opts.get().getValue(CODEGEN_PREFIX);
+				s = opts.get().getValue(CODEGEN_SUFFIX);
+				d = opts.get().getValue(CODEGEN_DELIMETER);
+			}
+			
+		} catch (UnknownProjectIdException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 
 		if (requestPath.equals(ServerEndpoints.GEN_CODE)) {
 			int cnt = readIntParameter("count", exchange);
 
-			String p = serverConfiguration.getProperty(CODEGEN_PREFIX);
-			String s = serverConfiguration.getProperty(CODEGEN_SUFFIX);
-			String d = serverConfiguration.getProperty(CODEGEN_DELIMETER);
+			if (p == null) {
+				p = serverConfiguration.getProperty(CODEGEN_PREFIX);
+			}
+			if (s == null) {
+				s = serverConfiguration.getProperty(CODEGEN_SUFFIX);
+			}
+			if (d == null) {
+				d = serverConfiguration.getProperty(CODEGEN_DELIMETER);
+			}
 			String cfn = addRoot(projectID + File.separator
 				+ serverConfiguration.getProperty(CODEGEN_FILE));
 			try {

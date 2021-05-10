@@ -15,6 +15,7 @@ public final class ServerProperties {
     public static final String CODEGEN_SUFFIX = "codegen_suffix";
     public static final String CODEGEN_DELIMETER = "codegen_delimeter";
     public static final String CODEGEN_FILE = "codegen_file";
+    public static final String CODEGEN_SEED = "codegen_seed";
 
     /*
      * Constants for EVS History module

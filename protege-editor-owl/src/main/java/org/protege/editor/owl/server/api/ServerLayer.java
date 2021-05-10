@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Optional;
 
 import edu.stanford.protege.metaproject.api.ProjectId;
+import edu.stanford.protege.metaproject.api.ProjectOptions;
+
 import org.protege.editor.owl.server.http.HTTPServer;
 import org.protege.editor.owl.server.http.exception.ServerException;
 import org.protege.editor.owl.server.util.SnapShot;
@@ -30,6 +32,7 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nonnull;
 
 import static org.protege.editor.owl.server.http.ServerProperties.CODEGEN_FILE;
+import static org.protege.editor.owl.server.http.ServerProperties.CODEGEN_SEED;
 
 public abstract class ServerLayer implements ServerServices {
 
@@ -72,11 +75,27 @@ public abstract class ServerLayer implements ServerServices {
         return HistoryFile.createNew(getHistoryFilePath(projectId));
     }
 
-    public void createCodegenFile(String projectId) throws IOException {
+    public void createCodegenFile(String projectId, com.google.common.base.Optional<ProjectOptions> opts) throws IOException {
         String rootDir = getConfiguration().getServerRoot() + File.separator + projectId;
-        String filename = rootDir + File.separator + getConfiguration().getProperty(CODEGEN_FILE);
+        String codegen_file_name = null;
+        String codeseed = null;
+        if (opts.isPresent()) {
+        	codegen_file_name = opts.get().getValue(CODEGEN_FILE);
+        	codeseed = opts.get().getValue(CODEGEN_SEED);
+        }
+        if (codegen_file_name == null) {
+        	codegen_file_name = getConfiguration().getProperty(CODEGEN_FILE);
+        }
+        if (codeseed == null) {
+        	codeseed = getConfiguration().getProperty(CODEGEN_SEED);
+        }
+        String filename = rootDir + File.separator + codegen_file_name;
         OutputStream os = new FileOutputStream(filename);
-        os.write("999999".getBytes());
+        if (codeseed != null) {
+        	os.write(codeseed.getBytes());
+        } else {
+        	os.write("999999".getBytes());
+        }
     }
     
     public String getHistoryFilePath(@Nonnull ProjectId projectId) {
