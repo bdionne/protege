@@ -65,11 +65,9 @@ public class OWLObjectTree<N extends OWLObject> extends JTree implements OWLObje
 
     private OWLTreeDragAndDropHandler<N> dragAndDropHandler;
 
-    private boolean dragOriginator;
-
-    private Point mouseDownPos;
-
-    private Optional<PopupMenuId> popupMenuId = Optional.empty();
+    private Optional<PopupMenuId> popupMenuId = Optional.empty();    
+    
+    private JPopupMenu popupMenu;
 
 
     public OWLObjectTree(OWLEditorKit eKit, OWLObjectHierarchyProvider<N> provider) {
@@ -114,38 +112,24 @@ public class OWLObjectTree<N extends OWLObject> extends JTree implements OWLObje
         setAutoscrolls(true);
         setExpandsSelectedPaths(true);
         OWLTreePreferences treePreferences = OWLTreePreferences.getInstance();
-        DropTarget dt = new DropTarget(this, new OWLObjectTreeDropTargetListener(this, treePreferences));
+        new DropTarget(this, new OWLObjectTreeDropTargetListener(this, treePreferences));
         DragSource dragSource = DragSource.getDefaultDragSource();
         dragSource.createDefaultDragGestureRecognizer(this,
                 DnDConstants.ACTION_COPY_OR_MOVE,
                 new OWLObjectTreeDragGestureListener(eKit, this));
 
+        
         addMouseListener(new MouseAdapter() {
 
-            public void mouseReleased(MouseEvent e) {
-                if (e.getClickCount() == 3 && e.isControlDown() && e.isShiftDown()) {
-                    reload();
-                }
-                if (e.isPopupTrigger()) {
-                	ensureSelected(e.getX(), e.getY());		// addresses #359
-                    showPopupMenu(e);
-                }
-            }
 
             public void mousePressed(MouseEvent e) {
                 if (e.isPopupTrigger()) {
-                	ensureSelected(e.getX(), e.getY());
                 	showPopupMenu(e);
                 }
-                if (e.isAltDown()) {
-                    expandDescendantsOfRowAt(e.getX(), e.getY());
-                }
             }
+          
         });
-
-
-
-
+        
         getSelectionModel().addTreeSelectionListener(event -> {
             scrollPathToVisible(event.getNewLeadSelectionPath());
         });
@@ -157,33 +141,6 @@ public class OWLObjectTree<N extends OWLObject> extends JTree implements OWLObje
         }
         else {
             putClientProperty("JTree.lineStyle", "None");
-        }
-    }
-
-    public void expandDescendantsOfRowAt(final int x, int y) {
-        // It's necessary to traverse all rows to find the path where the user clicked.  This is because
-        // the getRowAt(X,Y) call only returns a row index if the actual node rendering is clicked.  We
-        // Want to detect if the node handle is clicked (or anywhere in the white space of a row).
-        for(int i = 0; i < getRowCount(); i++) {
-            Rectangle rowBounds = getRowBounds(i);
-            if(rowBounds != null && rowBounds.y <= y && y <= rowBounds.y + rowBounds.height) {
-            	expandDescendantsOfRow(i);
-                break;
-            }
-        }
-    }
-
-    public void ensureSelected(final int x, int y) {
-        // It's necessary to traverse all rows to find the path where the user clicked.  This is because
-        // the getRowAt(X,Y) call only returns a row index if the actual node rendering is clicked.  We
-        // Want to detect if the node handle is clicked (or anywhere in the white space of a row).
-        for(int i = 0; i < getRowCount(); i++) {
-            Rectangle rowBounds = getRowBounds(i);
-            if(rowBounds != null && rowBounds.y <= y && y <= rowBounds.y + rowBounds.height) {
-            	this.setSelectionRow(i);
-            	this.requestFocusInWindow();
-                break;
-            }
         }
     }
 
@@ -202,8 +159,14 @@ public class OWLObjectTree<N extends OWLObject> extends JTree implements OWLObje
      *
      * @param popupMenuId The id.  Not {@code null}.
      */
+   
+    
     public void setPopupMenuId(PopupMenuId popupMenuId) {
         this.popupMenuId = Optional.of(checkNotNull(popupMenuId));
+        
+        MenuBuilder menuBuilder = new MenuBuilder(eKit);
+        PopupMenuId menuId = getPopupMenuId().get();
+        popupMenu = menuBuilder.buildPopupMenu(menuId);
     }
 
     /**
@@ -217,13 +180,10 @@ public class OWLObjectTree<N extends OWLObject> extends JTree implements OWLObje
         return popupMenuId;
     }
 
+   
+    
     public void showPopupMenu(MouseEvent e) {
-        if (!getPopupMenuId().isPresent()) {
-            return;
-        }
-        MenuBuilder menuBuilder = new MenuBuilder(eKit);
-        PopupMenuId popupMenuId = getPopupMenuId().get();
-        JPopupMenu popupMenu = menuBuilder.buildPopupMenu(popupMenuId);
+    	setSelectionRow(getRowForLocation(e.getX(), e.getY()));
         popupMenu.show(this, e.getX(), e.getY());
     }
 
@@ -343,7 +303,7 @@ public class OWLObjectTree<N extends OWLObject> extends JTree implements OWLObje
      * all expanded paths except for the current selection.
      */
     public void reload() {
-        N currentSelection = getSelectedOWLObject();
+        getSelectedOWLObject();
         // Reload the tree
         nodeMap.clear();
         // TODO: getRoots needs to be changed - the user might have specified specific roots
@@ -614,7 +574,6 @@ public class OWLObjectTree<N extends OWLObject> extends JTree implements OWLObje
 
 
     public void setDragOriginater(boolean b) {
-        dragOriginator = b;
     }
 
 

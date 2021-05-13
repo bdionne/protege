@@ -100,16 +100,6 @@ public abstract class AbstractOWLEntityHierarchyViewComponent<E extends OWLEntit
         assertedTree.getModel().addTreeModelListener(treeModelListener);
         
 
-        assertedTree.addMouseListener(new MouseAdapter() {
-            public void mousePressed(MouseEvent e) {
-                if (e.isPopupTrigger()) {  
-                	
-                	assertedTree.showPopupMenu(e);
-                }
-            }
-        });
-
-
         try {
             Optional<OWLObjectHierarchyProvider<E>> inferredHierarchyProvider = getInferredHierarchyProvider();
             if (inferredHierarchyProvider.isPresent()) {
