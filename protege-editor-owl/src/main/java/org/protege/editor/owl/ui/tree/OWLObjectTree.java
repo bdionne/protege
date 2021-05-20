@@ -122,7 +122,14 @@ public class OWLObjectTree<N extends OWLObject> extends JTree implements OWLObje
         addMouseListener(new MouseAdapter() {
 
 
+        	public void mouseReleased(MouseEvent e) {
+        		e.getComponent().requestFocus();
+                if (e.isPopupTrigger()) {
+                	showPopupMenu(e);
+                }
+            }
             public void mousePressed(MouseEvent e) {
+            	e.getComponent().requestFocus();
                 if (e.isPopupTrigger()) {
                 	showPopupMenu(e);
                 }
@@ -183,8 +190,10 @@ public class OWLObjectTree<N extends OWLObject> extends JTree implements OWLObje
    
     
     public void showPopupMenu(MouseEvent e) {
-    	setSelectionRow(getRowForLocation(e.getX(), e.getY()));
-        popupMenu.show(this, e.getX(), e.getY());
+    	if (popupMenu != null) {
+    		setSelectionRow(getRowForLocation(e.getX(), e.getY()));
+    		popupMenu.show(this, e.getX(), e.getY());
+    	}
     }
 
 
