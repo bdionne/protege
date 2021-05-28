@@ -370,7 +370,8 @@ public class LocalHttpClient implements Client, ClientSessionListener {
 	@Override
 	public void deleteProject(@Nonnull ProjectId projectId, boolean includeFile)
 		throws AuthorizationException, LoginTimeoutException, ClientRequestException {
-		String requestUrl = PROJECT + "?projectid=" + projectId.get();
+		String requestUrl = PROJECT + "?projectid=" + projectId.get() + 
+				"&includefiles=" + includeFile;
 		delete(requestUrl, true); // send request to server
 		initConfig();
 	}

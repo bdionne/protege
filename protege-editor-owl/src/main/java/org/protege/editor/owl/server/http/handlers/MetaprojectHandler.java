@@ -126,7 +126,8 @@ public class MetaprojectHandler extends BaseRoutingHandler {
 		}
 		else if (requestPath.equals(ServerEndpoints.PROJECT) && requestMethod.equals(Methods.DELETE)) {
 			ProjectId projectId = f.getProjectId(getQueryParameter(exchange, "projectid"));
-			deleteExistingProject(getAuthToken(exchange), projectId);
+			boolean incFiles = Boolean.parseBoolean(getQueryParameter(exchange, "includefiles"));
+			deleteExistingProject(getAuthToken(exchange), projectId, incFiles);
 		}
 		else if (requestPath.equals(ServerEndpoints.PROJECT_SNAPSHOT) && requestMethod.equals(Methods.POST)) {
 			ObjectInputStream ois = new ObjectInputStream(exchange.getInputStream());
@@ -241,9 +242,9 @@ public class MetaprojectHandler extends BaseRoutingHandler {
 		}
 	}
 
-	private void deleteExistingProject(AuthToken authToken, ProjectId projectId) throws ServerException {
+	private void deleteExistingProject(AuthToken authToken, ProjectId projectId, boolean incFiles) throws ServerException {
 		try {
-			serverLayer.deleteProject(authToken, projectId, true);
+			serverLayer.deleteProject(authToken, projectId, incFiles);
 		}
 		catch (AuthorizationException e) {
 			throw new ServerException(StatusCodes.UNAUTHORIZED, "Access denied", e);
