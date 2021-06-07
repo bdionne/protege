@@ -75,6 +75,7 @@ public class UsagePanel extends JPanel {
     public void setOWLEntity(OWLEntity entity) {
         currentSelection = entity;
         showNamedSubSuperclassesCheckbox.setVisible(entity != null && entity instanceof OWLClass);
+        showNamedSubSuperclassesCheckbox.setSelected(!UsagePreferences.getInstance().isFilterActive(UsageFilter.filterNamedSubsSupers));
         showDisjointsCheckbox.setVisible(entity != null && (entity instanceof OWLProperty || entity instanceof OWLClass));
         showDifferentCheckbox.setVisible(entity != null && entity instanceof OWLIndividual);
         tree.setOWLEntity(entity);
