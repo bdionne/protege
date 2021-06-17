@@ -114,6 +114,10 @@ public class OWLClassGeneralClassAxiomFrameSection extends AbstractOWLFrameSecti
             public Boolean visit(OWLDisjointClassesAxiom axiom) {
                 return !axiom.contains(getRootObject());
             }
+            
+            public Boolean visit(OWLDeclarationAxiom axiom) {
+                return false;
+            }
         });
     }
 }

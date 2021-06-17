@@ -385,6 +385,7 @@ public class OWLReasonerManagerImpl implements OWLReasonerManager {
         public void run() {
             logger.info(LogBanner.start("Running Reasoner"));
             boolean inconsistencyFound = false;
+            String inconsistencyFoundMessage = null;
             boolean reasonerChanged = false;
             try {
                 Stopwatch stopwatch = Stopwatch.createStarted();
@@ -400,6 +401,7 @@ public class OWLReasonerManagerImpl implements OWLReasonerManager {
                 reasonerInBadState.dispose();
             } catch (InconsistentOntologyException ioe) {
                 inconsistencyFound = true;
+                inconsistencyFoundMessage = ioe.getLocalizedMessage();
             } finally {
                 if (runningReasoner != null) {
                     synchronized (runningReasoner) {
@@ -413,7 +415,11 @@ public class OWLReasonerManagerImpl implements OWLReasonerManager {
                 OWLOntologyManagerImpl imp = (OWLOntologyManagerImpl) ontology.getOWLOntologyManager();
                 imp.broadcastChanges.set(true);
                 System.out.println("broadcasting again");
-                JOptionPane.showMessageDialog(null, "Classification finished", "Reasoner", JOptionPane.INFORMATION_MESSAGE);
+                String msg = "Classification finished";
+                if (inconsistencyFoundMessage != null) {
+                	msg += ", " + inconsistencyFoundMessage;
+                }
+                JOptionPane.showMessageDialog(null, msg, "Reasoner", JOptionPane.INFORMATION_MESSAGE);
                 logger.info(LogBanner.end());
             }
         }
@@ -469,9 +475,6 @@ public class OWLReasonerManagerImpl implements OWLReasonerManager {
                 });
             }
             fireReclassified();
-            if (inconsistencyFound) {
-                InconsistentOntologyManager.get(owlModelManager).explain();
-            }
         }
     }
 
