@@ -120,8 +120,9 @@ public class ClientSession extends OWLEditorKitHook {
         if (!hasActiveClient()) {
             activeClient = client;
             getEditorKit().getWorkspace().setCheckLevel(new TabViewableChecker(this, client));
-            getEditorKit().getWorkspace().recheckPlugins();
+            //getEditorKit().getWorkspace().recheckPlugins();
             if (((LocalHttpClient) client).getClientType() == UserType.ADMIN) {
+            	getEditorKit().getWorkspace().recheckPlugins();
             	WorkspaceTab admin = getEditorKit().getOWLWorkspace().getWorkspaceTab("metaproject-admin.AdminTab");
         		
         		((OWLWorkspaceViewsTab) admin).fireUpViews();
@@ -159,7 +160,13 @@ public class ClientSession extends OWLEditorKitHook {
     public void setActiveProject(ProjectId projectId, VersionedOWLOntology versionOntology) {
         registerProject(versionOntology.getOntology().getOntologyID(), projectId);
         registerVersionOntology(versionOntology.getOntology().getOntologyID(), versionOntology);
+        
+        
+        
         getEditorKit().getOWLModelManager().setActiveOntology(versionOntology.getOntology());
+        
+        getEditorKit().getWorkspace().recheckPlugins();
+        
         fireChangeEvent(EventCategory.OPEN_PROJECT);
 
     }
