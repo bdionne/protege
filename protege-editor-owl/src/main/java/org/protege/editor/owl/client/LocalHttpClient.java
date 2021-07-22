@@ -61,6 +61,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
 import java.util.zip.ZipInputStream;
 
 import static org.protege.editor.owl.server.http.ServerEndpoints.*;
@@ -1078,18 +1079,35 @@ public class LocalHttpClient implements Client, ClientSessionListener {
 		}
 	}
 
-	public boolean codeIsLessThan(String lower, String upper) {
+	public boolean codeIsLessThan(String lower, String upper, ProjectId pid) {
+		
+		List<Project> all_projs = config.getAllProjects();
+		
+		String p = null;
+		String s = null;
+		String d = null;
+		
+		for (Project proj : all_projs) {
+			if (proj.getId().equals(pid)) {
+				if (proj.getOptions().isPresent()) {
+					ProjectOptions opts = proj.getOptions().get();
+					p = opts.getValue(CODEGEN_PREFIX);
+					s = opts.getValue(CODEGEN_SUFFIX);
+					d = opts.getValue(CODEGEN_DELIMETER);
+					
+					
+				}
+			}
+		}
 
-		String p = config.getCurrentConfig().getProperty(CODEGEN_PREFIX);
-		String s = config.getCurrentConfig().getProperty(CODEGEN_SUFFIX);
-		String d = config.getCurrentConfig().getProperty(CODEGEN_DELIMETER);
+		
 
 		int lowNum = 0;
 		int upNum = 0;
 
 		if (d != null) {
-			String[] lowSplit = lower.split(d);
-			String[] upSplit = upper.split(d);
+			String[] lowSplit = lower.split(Pattern.quote(d));
+			String[] upSplit = upper.split(Pattern.quote(d));
 			lowNum = Integer.parseInt(lowSplit[1]);
 			upNum = Integer.parseInt(upSplit[1]);
 
