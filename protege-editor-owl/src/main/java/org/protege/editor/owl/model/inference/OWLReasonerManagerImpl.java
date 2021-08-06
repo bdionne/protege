@@ -417,7 +417,12 @@ public class OWLReasonerManagerImpl implements OWLReasonerManager {
                 System.out.println("broadcasting again");
                 String msg = "Classification finished";
                 if (inconsistencyFoundMessage != null) {
-                	msg += ", " + inconsistencyFoundMessage;
+                	if (inconsistencyFoundMessage.equalsIgnoreCase("Issues with role domains and ranges")) {
+                		msg = "Classification not complete. Issues with role domain and ranges need to be fixed before performing classification.";
+
+                	} else {
+                		msg += ", " + inconsistencyFoundMessage;
+                	}
                 }
                 JOptionPane.showMessageDialog(null, msg, "Reasoner", JOptionPane.INFORMATION_MESSAGE);
                 logger.info(LogBanner.end());
