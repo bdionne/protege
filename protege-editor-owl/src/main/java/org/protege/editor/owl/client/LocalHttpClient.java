@@ -1094,6 +1094,16 @@ public class LocalHttpClient implements Client, ClientSessionListener {
 					p = opts.getValue(CODEGEN_PREFIX);
 					s = opts.getValue(CODEGEN_SUFFIX);
 					d = opts.getValue(CODEGEN_DELIMETER);
+
+					if (p == null) {
+						p = config.getCurrentConfig().getProperty(CODEGEN_PREFIX);
+					}
+					if (s == null) {
+						s = config.getCurrentConfig().getProperty(CODEGEN_SUFFIX);
+					}
+					if (d == null) {
+						d = config.getCurrentConfig().getProperty(CODEGEN_DELIMETER);
+					}
 					
 					
 				}
