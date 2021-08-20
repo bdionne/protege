@@ -111,7 +111,7 @@ public class CodeGenHandler extends BaseRoutingHandler {
 			if (opts.isPresent()) {
 				p = opts.get().getValue(CODEGEN_PREFIX);
 				s = opts.get().getValue(CODEGEN_SUFFIX);
-				d = opts.get().getValue(CODEGEN_DELIMETER);
+				d = opts.get().getValue(CODEGEN_DELIMITER);
 			}
 			
 		} catch (UnknownProjectIdException e1) {
@@ -129,7 +129,7 @@ public class CodeGenHandler extends BaseRoutingHandler {
 				s = serverConfiguration.getProperty(CODEGEN_SUFFIX);
 			}
 			if (d == null) {
-				d = serverConfiguration.getProperty(CODEGEN_DELIMETER);
+				d = serverConfiguration.getProperty(CODEGEN_DELIMITER);
 			}
 			String cfn = addRoot(projectID + File.separator
 				+ serverConfiguration.getProperty(CODEGEN_FILE));

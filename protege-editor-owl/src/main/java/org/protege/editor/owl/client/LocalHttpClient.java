@@ -1093,7 +1093,7 @@ public class LocalHttpClient implements Client, ClientSessionListener {
 					ProjectOptions opts = proj.getOptions().get();
 					p = opts.getValue(CODEGEN_PREFIX);
 					s = opts.getValue(CODEGEN_SUFFIX);
-					d = opts.getValue(CODEGEN_DELIMETER);
+					d = opts.getValue(CODEGEN_DELIMITER);
 
 					if (p == null) {
 						p = config.getCurrentConfig().getProperty(CODEGEN_PREFIX);
@@ -1102,7 +1102,7 @@ public class LocalHttpClient implements Client, ClientSessionListener {
 						s = config.getCurrentConfig().getProperty(CODEGEN_SUFFIX);
 					}
 					if (d == null) {
-						d = config.getCurrentConfig().getProperty(CODEGEN_DELIMETER);
+						d = config.getCurrentConfig().getProperty(CODEGEN_DELIMITER);
 					}
 					
 					

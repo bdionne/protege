@@ -13,7 +13,7 @@ public final class ServerProperties {
      */
     public static final String CODEGEN_PREFIX = "codegen_prefix";
     public static final String CODEGEN_SUFFIX = "codegen_suffix";
-    public static final String CODEGEN_DELIMETER = "codegen_delimeter";
+    public static final String CODEGEN_DELIMITER = "codegen_delimiter";
     public static final String CODEGEN_FILE = "codegen_file";
     public static final String CODEGEN_SEED = "codegen_seed";
 
