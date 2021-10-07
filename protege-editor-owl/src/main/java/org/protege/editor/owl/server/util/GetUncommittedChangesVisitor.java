@@ -20,6 +20,7 @@ import org.semanticweb.owlapi.model.OWLOntologyID;
 import org.semanticweb.owlapi.model.RemoveAxiom;
 import org.semanticweb.owlapi.model.RemoveImport;
 import org.semanticweb.owlapi.model.RemoveOntologyAnnotation;
+import org.semanticweb.owlapi.model.ReplaceOntologyPrefixMappingChange;
 import org.semanticweb.owlapi.model.SetOntologyID;
 
 public class GetUncommittedChangesVisitor implements OWLOntologyChangeVisitor {
@@ -174,4 +175,10 @@ public class GetUncommittedChangesVisitor implements OWLOntologyChangeVisitor {
         OWLAnnotation annotation = change.getAnnotation();
         OntologyChangeType.removeElementFromBaseline(annotation, annotationChanges);
     }
+
+	@Override
+	public void visit(ReplaceOntologyPrefixMappingChange change) {
+		// TODO Auto-generated method stub
+		
+	}
 }

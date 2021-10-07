@@ -11,6 +11,7 @@ import org.semanticweb.owlapi.model.OWLOntologyChangeVisitor;
 import org.semanticweb.owlapi.model.RemoveAxiom;
 import org.semanticweb.owlapi.model.RemoveImport;
 import org.semanticweb.owlapi.model.RemoveOntologyAnnotation;
+import org.semanticweb.owlapi.model.ReplaceOntologyPrefixMappingChange;
 import org.semanticweb.owlapi.model.SetOntologyID;
 
 import java.util.Date;
@@ -164,5 +165,12 @@ public class ChangeListTableModel extends AbstractTableModel {
             changeType = "Remove Ontology Annotation";
             entityChanged = change.getAnnotation();
         }
+
+		@Override
+		public void visit(ReplaceOntologyPrefixMappingChange change) {
+			changeType = "Replace Prefix Mapping";
+            entityChanged = change.getOntology();
+			
+		}
     }
 }

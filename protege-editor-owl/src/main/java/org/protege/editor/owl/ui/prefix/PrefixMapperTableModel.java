@@ -2,6 +2,8 @@ package org.protege.editor.owl.ui.prefix;
 
 import org.semanticweb.owlapi.formats.PrefixDocumentFormat;
 import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OntologyPrefixMappingChange;
+import org.semanticweb.owlapi.model.ReplaceOntologyPrefixMappingChange;
 import org.semanticweb.owlapi.util.DefaultPrefixManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -107,7 +109,13 @@ public class PrefixMapperTableModel extends AbstractTableModel {
     			}
     		}
     		changed = false;
-    		ont.getOWLOntologyManager().setOntologyFormat(ont, prefixManager);
+    		// Bob: Change to applyChanges here
+    		
+    		OntologyPrefixMappingChange mc = new ReplaceOntologyPrefixMappingChange(ont, prefixManager);
+    		
+    		ont.getOWLOntologyManager().applyChange(mc);
+    		
+    		//ont.getOWLOntologyManager().setOntologyFormat(ont, prefixManager);
     		return true;
     	}
     	return false;

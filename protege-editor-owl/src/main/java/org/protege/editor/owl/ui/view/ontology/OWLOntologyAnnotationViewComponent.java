@@ -351,6 +351,12 @@ public class OWLOntologyAnnotationViewComponent extends AbstractOWLViewComponent
                 public void visit(SetOntologyID change) {
                     updateView();
                 }
+
+				@Override
+				public void visit(ReplaceOntologyPrefixMappingChange replaceOntologyPrefixMappingChange) {
+					// TODO Auto-generated method stub
+					
+				}
             });
         }
     }

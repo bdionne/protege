@@ -9,6 +9,7 @@ import org.semanticweb.owlapi.model.OWLOntologyChangeVisitorEx;
 import org.semanticweb.owlapi.model.RemoveAxiom;
 import org.semanticweb.owlapi.model.RemoveImport;
 import org.semanticweb.owlapi.model.RemoveOntologyAnnotation;
+import org.semanticweb.owlapi.model.ReplaceOntologyPrefixMappingChange;
 import org.semanticweb.owlapi.model.SetOntologyID;
 
 import java.util.ArrayList;
@@ -65,4 +66,11 @@ public class ReplaceChangedOntologyVisitor implements OWLOntologyChangeVisitorEx
     public OWLOntologyChange visit(RemoveOntologyAnnotation change) {
         return new RemoveOntologyAnnotation(ontology, change.getAnnotation());
     }
+
+	@Override
+	public OWLOntologyChange visit(ReplaceOntologyPrefixMappingChange change) {
+		return new ReplaceOntologyPrefixMappingChange(change.getOntology(), 
+				change.getDocumentFormat());
+		
+	}
 }

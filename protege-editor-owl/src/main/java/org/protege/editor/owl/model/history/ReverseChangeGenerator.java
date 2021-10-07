@@ -52,4 +52,11 @@ public class ReverseChangeGenerator implements OWLOntologyChangeVisitor {
     public void visit(RemoveOntologyAnnotation removeOntologyAnnotation) {
         reverseChange = new AddOntologyAnnotation(removeOntologyAnnotation.getOntology(), removeOntologyAnnotation.getAnnotation());
     }
+
+
+	
+	public void visit(ReplaceOntologyPrefixMappingChange replaceOntologyPrefixMappingChange) {
+		reverseChange = replaceOntologyPrefixMappingChange; 
+		
+	}
 }

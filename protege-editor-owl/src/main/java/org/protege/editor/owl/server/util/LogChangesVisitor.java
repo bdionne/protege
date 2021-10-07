@@ -7,6 +7,7 @@ import org.semanticweb.owlapi.model.OWLOntologyChangeVisitor;
 import org.semanticweb.owlapi.model.RemoveAxiom;
 import org.semanticweb.owlapi.model.RemoveImport;
 import org.semanticweb.owlapi.model.RemoveOntologyAnnotation;
+import org.semanticweb.owlapi.model.ReplaceOntologyPrefixMappingChange;
 import org.semanticweb.owlapi.model.SetOntologyID;
 import org.slf4j.Logger;
 
@@ -52,4 +53,10 @@ public class LogChangesVisitor implements OWLOntologyChangeVisitor {
     public void visit(RemoveOntologyAnnotation change) {
         logger.info("\t" + change);
     }
+
+	@Override
+	public void visit(ReplaceOntologyPrefixMappingChange change) {
+		// TODO Auto-generated method stub
+		
+	}
 }

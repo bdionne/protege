@@ -262,5 +262,12 @@ public class IndividualsByTypeHierarchyProvider extends AbstractOWLObjectHierarc
             }
             return false;
         }
+
+
+		@Override
+		public void visit(ReplaceOntologyPrefixMappingChange change) {
+			// TODO Auto-generated method stub
+			
+		}
     }
 }
