@@ -99,6 +99,7 @@ public class PrefixMapperTableModel extends AbstractTableModel {
     		if (logger.isDebugEnabled()) {
     			logger.debug("committing prefix changes and clearing changed flag");
     		}
+    		//PrefixDocumentFormat orig = prefixManager;
     		prefixManager.setPrefixManager(new DefaultPrefixManager());
     		for (Map.Entry<String, String> prefixName2PrefixEntry : prefixValueMap.entrySet()) {
     			String prefixName = prefixName2PrefixEntry.getKey();

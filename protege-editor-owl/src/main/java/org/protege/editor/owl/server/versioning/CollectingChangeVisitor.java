@@ -28,6 +28,8 @@ public class CollectingChangeVisitor implements OWLOntologyChangeVisitor {
     private Map<OWLImportsDeclaration, ImportChange> lastImportChangeMap;
     private Map<OWLAnnotation, AnnotationChange> lastOntologyAnnotationChangeMap;
     private Map<OWLAxiom, OWLAxiomChange> lastAxiomChangeMap;
+    
+    private ReplaceOntologyPrefixMappingChange prefMapChange;
 
     public static CollectingChangeVisitor collectChanges(List<OWLOntologyChange> changes) {
         CollectingChangeVisitor visitor = new CollectingChangeVisitor();
@@ -57,6 +59,10 @@ public class CollectingChangeVisitor implements OWLOntologyChangeVisitor {
 
     public Map<OWLAxiom, OWLAxiomChange> getLastAxiomChangeMap() {
         return lastAxiomChangeMap;
+    }
+    
+    public ReplaceOntologyPrefixMappingChange getLastPrefMapChange() {
+    	return prefMapChange;
     }
 
     @Override
@@ -96,7 +102,7 @@ public class CollectingChangeVisitor implements OWLOntologyChangeVisitor {
 
 	@Override
 	public void visit(ReplaceOntologyPrefixMappingChange change) {
-		// TODO Auto-generated method stub
+		this.prefMapChange = change;
 		
 	}
 }

@@ -69,7 +69,7 @@ public class ReplaceChangedOntologyVisitor implements OWLOntologyChangeVisitorEx
 
 	@Override
 	public OWLOntologyChange visit(ReplaceOntologyPrefixMappingChange change) {
-		return new ReplaceOntologyPrefixMappingChange(change.getOntology(), 
+		return new ReplaceOntologyPrefixMappingChange(ontology, 
 				change.getDocumentFormat());
 		
 	}

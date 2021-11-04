@@ -392,6 +392,7 @@
       "operations": [
         "remove-axiom",
         "remove-ontology-annotation",
+        "replace-ontology-pref-map",
         "add-axiom",
         "modify-ontology-iri",
         "add-import",
@@ -587,6 +588,14 @@
       "id": "remove-ontology-annotation",
       "name": "Remove ontology annotation",
       "description": "Remove an annotation from the ontology",
+      "type": "WRITE",
+      "scope": "ONTOLOGY"
+    },
+    {
+      "default": true,
+      "id": "replace-ontology-pref-map",
+      "name": "Replace ontology pref map",
+      "description": "Replace prefix map of ontology",
       "type": "WRITE",
       "scope": "ONTOLOGY"
     },

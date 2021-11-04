@@ -337,6 +337,8 @@ public class ChangeHistoryUtils {
         normalizedChanges.addAll(visitor.getLastImportChangeMap().values());
         normalizedChanges.addAll(visitor.getLastOntologyAnnotationChangeMap().values());
         normalizedChanges.addAll(visitor.getLastAxiomChangeMap().values());
+        normalizedChanges.add(visitor.getLastPrefMapChange());
+        
         return normalizedChanges;
     }
 }

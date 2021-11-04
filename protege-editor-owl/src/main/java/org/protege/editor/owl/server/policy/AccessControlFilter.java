@@ -259,6 +259,9 @@ public class AccessControlFilter extends ServerFilterAdapter {
         else if (change instanceof RemoveOntologyAnnotation) {
             return Operations.REMOVE_ONTOLOGY_ANNOTATION;
         }
+        else if (change instanceof ReplaceOntologyPrefixMappingChange) {
+            return Operations.REPLACE_ONTOLGY_PREF_MAP;
+        }
         else if (change instanceof AddImport) {
             return Operations.ADD_IMPORT;
         }
