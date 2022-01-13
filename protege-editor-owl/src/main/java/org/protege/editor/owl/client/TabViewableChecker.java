@@ -71,14 +71,16 @@ public class TabViewableChecker implements TabViewable {
 		req_admin_tabs.add("Server Administration");
 		
 		List<String> pref_tab_names = ClientPreferences.getInstance().getPreferredTabNames();
-		if (pref_tab_names.size() <= 0) {
-			req_editing_tabs.add("NCI Edit Tab");
-			req_editing_tabs.add("Lucene Search Tab");
-		} else {
+		
+		req_editing_tabs.add("NCI Edit Tab");
+		req_editing_tabs.add("Lucene Search Tab");
+		
+		if (pref_tab_names.size() > 0) {
 			for (String pref_tab_name : pref_tab_names) {
 				req_editing_tabs.add(pref_tab_name);
-			}
+			}			
 		}
+		
 	}
 	
 	public TabViewableChecker(ClientSession clientSession, Client c) {
