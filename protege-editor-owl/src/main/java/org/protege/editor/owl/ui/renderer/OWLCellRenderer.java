@@ -808,8 +808,14 @@ public class OWLCellRenderer implements TableCellRenderer, TreeCellRenderer, Lis
         final int tokenLength = curToken.length();
         Color c = owlEditorKit.getWorkspace().getKeyWordColorMap().get(curToken);
         if (c != null && prefs.isHighlightKeyWords() && highlightKeywords) {
-            Style s = doc.getStyle(curToken);
-            doc.setCharacterAttributes(tokenStartIndex, tokenLength, s, true);
+        	if (entityType != null && entityType.equals(EntityType.CLASS)) {
+        		// don't use color on class names that are logical constructs
+        		// in OWL
+
+        	} else {
+        		Style s = doc.getStyle(curToken);
+        		doc.setCharacterAttributes(tokenStartIndex, tokenLength, s, true);
+        	}
         }
         else {
             // Not a keyword, so might be an entity (or delim)
