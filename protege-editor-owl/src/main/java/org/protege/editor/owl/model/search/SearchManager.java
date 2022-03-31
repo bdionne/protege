@@ -40,7 +40,8 @@ public abstract class SearchManager implements ProtegePluginInstance {
     
     public abstract void enableIncrementalIndexing();
     
-    public abstract void updateIndex(List<? extends OWLOntologyChange> changes);
+    public abstract void updateIndex(List<? extends OWLOntologyChange> changes,
+    		boolean... bs);
     
     public abstract void disableIncrementalIndexing();
 }

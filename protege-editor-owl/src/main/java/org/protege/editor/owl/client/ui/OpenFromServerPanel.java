@@ -243,14 +243,13 @@ public class OpenFromServerPanel extends JPanel {
             
             clientSession.setActiveProject(pid, vont);
 
-            boolean isWorkflowManager = httpClient.isWorkFlowManager(pid);
-            OWLWorkspace workspace = editorKit.getWorkspace();
-            //workspace.enableReasonerRestart = isWorkflowManager;
+            
 
             // update index with possibly new changes from other modelers
             List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
             
             progressBar.setValue(90);
+            
             dialog.setTitle("Updating search indices...");
             Thread.sleep(1000);
             for (List<OWLOntologyChange> c : vont.getChangeHistory().getRevisions().values()) {
@@ -262,8 +261,8 @@ public class OpenFromServerPanel extends JPanel {
           
             
             
-            editorKit.getSearchManager().updateIndex(changes);
-            
+            editorKit.getSearchManager().updateIndex(changes, new boolean[] {true});
+                     
             progressBar.setValue(100);
             dialog.setTitle("Operations complete...");
             Thread.sleep(1000);
