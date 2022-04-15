@@ -845,7 +845,16 @@ public class OWLModelManagerImpl extends AbstractModelManager implements OWLMode
                     return rendering;
                 }
                 else {
-                    return getOWLEntityRenderer().render((OWLEntity) object);
+                	
+                //	return getOWLEntityRenderer().render((OWLEntity) object);
+                	
+                    String ren = getOWLEntityRenderer().render((OWLEntity) object);
+                    if (object instanceof OWLClass) {
+                    	((OWLEntityRenderingCacheImpl)owlEntityRenderingCache)
+                    	.addClassRendering((OWLClass) object, ren);
+                    }
+                    	return ren;
+                	 
                 }
             }
         }

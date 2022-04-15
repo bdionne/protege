@@ -312,8 +312,7 @@ public class DefaultSearchManager extends SearchManager {
 	}
 
 	@Override
-	public void updateIndex(List<? extends OWLOntologyChange> changes,
-			boolean...bs) {
+	public void updateIndex(List<? extends OWLOntologyChange> changes) {
 		// TODO Auto-generated method stub
 		
 	}

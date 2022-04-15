@@ -520,7 +520,9 @@ public class LocalHttpClient implements Client, ClientSessionListener {
 			SnapShot snapshot = getSnapShot(pid);
 			createLocalSnapShot(snapshot.getOntology(), pid);
 		}
+		//kit.getSearchManager().disableIncrementalIndexing();
 		OWLOntology targetOntology = loadSnapShot(owlManager, pid);
+		//kit.getSearchManager().enableIncrementalIndexing();
 		ChangeHistory remoteChangeHistory = getLatestChanges(sdoc, DocumentRevision.START_REVISION, pid);
 		logger.info("Loaded ontology, now updating from server");
 		ClientUtils.updateOntology(targetOntology, remoteChangeHistory, owlManager, this, kit);

@@ -233,23 +233,29 @@ public class OpenFromServerPanel extends JPanel {
             progressBar.setValue(30);
             dialog.setTitle("Building versioned ontology...");
             Thread.sleep(1000);
+            editorKit.getSearchManager().disableIncrementalIndexing();
             VersionedOWLOntology vont = httpClient.buildVersionedOntology(serverDocument, owlManager, 
             		pid, editorKit);
             SessionRecorder.getInstance(this.editorKit).startRecording();
+            editorKit.getSearchManager().enableIncrementalIndexing();
             
             progressBar.setValue(80);
             dialog.setTitle("Updating menus and components...."); 
             Thread.sleep(1000);
-            
+            long beg = System.currentTimeMillis();
             clientSession.setActiveProject(pid, vont);
+            System.out.println("It took; " +
+            		(System.currentTimeMillis() - beg) + " secs");
 
-            
+
 
             // update index with possibly new changes from other modelers
             List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
             
             progressBar.setValue(90);
-            
+            //dialog.setTitle("Updating search indices...");
+            //editorKit.getSearchManager().initialise();
+            /**
             dialog.setTitle("Updating search indices...");
             Thread.sleep(1000);
             for (List<OWLOntologyChange> c : vont.getChangeHistory().getRevisions().values()) {
@@ -262,7 +268,7 @@ public class OpenFromServerPanel extends JPanel {
             
             
             editorKit.getSearchManager().updateIndex(changes, new boolean[] {true});
-                     
+                     **/
             progressBar.setValue(100);
             dialog.setTitle("Operations complete...");
             Thread.sleep(1000);

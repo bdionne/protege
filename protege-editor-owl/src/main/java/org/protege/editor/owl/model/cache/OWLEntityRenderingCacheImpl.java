@@ -76,9 +76,12 @@ public class OWLEntityRenderingCacheImpl implements OWLEntityRenderingCache {
         addRendering(factory.getOWLBottomDataProperty(), owlDataPropertyMap);
 
         for (OWLOntology ont : owlModelManager.getOntologies()) {
+        	/**
             for (OWLClass cls : ont.getClassesInSignature()) {
                 addRendering(cls, owlClassMap);
             }
+             **/
+                    
             for (OWLObjectProperty prop : ont.getObjectPropertiesInSignature()) {
                 addRendering(prop, owlObjectPropertyMap);
             }
@@ -161,7 +164,13 @@ public class OWLEntityRenderingCacheImpl implements OWLEntityRenderingCache {
 
 
     public String getRendering(OWLEntity owlEntity) {
-        return entityRenderingMap.get(owlEntity);
+    	/**
+    	String res = entityRenderingMap.get(owlEntity);
+    	if (res == null) {
+    		addRendering((OWLClass)owlEntity, owlClassMap);
+    	}
+    	**/
+    	return entityRenderingMap.get(owlEntity);
     }
 
     public OWLEntity getOWLEntity(String rendering, EntityType entityType) {
@@ -263,6 +272,11 @@ public class OWLEntityRenderingCacheImpl implements OWLEntityRenderingCache {
             map.put(rendering, entity);
             entityRenderingMap.put(entity, rendering);
         }
+    }
+    
+    public void addClassRendering(OWLClass cl, String ren) {
+    	owlClassMap.put(ren, cl);
+    	entityRenderingMap.put(cl, ren);
     }
 
 
