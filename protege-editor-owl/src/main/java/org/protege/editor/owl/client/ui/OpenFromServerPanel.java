@@ -4,6 +4,7 @@ import edu.stanford.protege.metaproject.api.AuthToken;
 import edu.stanford.protege.metaproject.api.ProjectId;
 import org.protege.editor.core.ui.util.JOptionPaneEx;
 import org.protege.editor.owl.OWLEditorKit;
+import org.protege.editor.owl.client.ClientPreferences;
 import org.protege.editor.owl.client.ClientSession;
 import org.protege.editor.owl.client.LocalHttpClient;
 import org.protege.editor.owl.client.SessionRecorder;
@@ -13,6 +14,7 @@ import org.protege.editor.owl.client.api.exception.LoginTimeoutException;
 import org.protege.editor.owl.client.api.exception.OWLClientException;
 import org.protege.editor.owl.model.OWLWorkspace;
 import org.protege.editor.owl.server.util.SnapShot;
+import org.protege.editor.owl.server.versioning.api.DocumentRevision;
 import org.protege.editor.owl.server.versioning.api.ServerDocument;
 import org.protege.editor.owl.server.versioning.api.VersionedOWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyChange;
@@ -250,25 +252,36 @@ public class OpenFromServerPanel extends JPanel {
 
 
             // update index with possibly new changes from other modelers
-            List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
+            //List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
             
             progressBar.setValue(90);
             //dialog.setTitle("Updating search indices...");
-            //editorKit.getSearchManager().initialise();
-            /**
-            dialog.setTitle("Updating search indices...");
-            Thread.sleep(1000);
-            for (List<OWLOntologyChange> c : vont.getChangeHistory().getRevisions().values()) {
-            	for (OWLOntologyChange oc : c) {
-            		changes.add(oc);
-            	}            	            	
+            
+            int no_changes = ClientPreferences.getInstance().getNoServerChangesIndexed();
+            List<OWLOntologyChange> to_process = new ArrayList<OWLOntologyChange>();
+            if (no_changes > 0) {
+            	if (no_changes < vont.getChangeHistory().getRevisions().size()) {
+            		
+            		 SortedMap<DocumentRevision, List<OWLOntologyChange>> revs = 
+            				 vont.getChangeHistory().getRevisions();
+            		 
+            		 for (DocumentRevision rev : revs.keySet()) {
+            			 if (rev.getRevisionNumber() > no_changes) {
+            				 to_process.addAll(revs.get(rev));
+            			 }
+            		 }
+            		 
+            		 
+            	     
+            		 
+            		
+            		
+            	}
             }
+            ClientPreferences.getInstance().setNoServerChangesIndexed(vont.getChangeHistory().getRevisions().size());
+            editorKit.getSearchManager().updateIndex(to_process);
             
-          
-            
-            
-            editorKit.getSearchManager().updateIndex(changes, new boolean[] {true});
-                     **/
+           
             progressBar.setValue(100);
             dialog.setTitle("Operations complete...");
             Thread.sleep(1000);

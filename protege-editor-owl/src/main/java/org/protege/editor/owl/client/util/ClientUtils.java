@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.SortedMap;
 import java.util.TreeSet;
 
 import javax.swing.AbstractAction;
@@ -18,6 +19,7 @@ import javax.swing.JDialog;
 import javax.swing.KeyStroke;
 
 import org.protege.editor.owl.OWLEditorKit;
+import org.protege.editor.owl.client.ClientPreferences;
 import org.protege.editor.owl.client.ClientSession;
 import org.protege.editor.owl.client.LocalHttpClient;
 import org.protege.editor.owl.client.SessionRecorder;
@@ -33,6 +35,7 @@ import org.protege.editor.owl.model.history.HistoryManager;
 import org.protege.editor.owl.server.versioning.ChangeHistoryUtils;
 import org.protege.editor.owl.server.versioning.Commit;
 import org.protege.editor.owl.server.versioning.api.ChangeHistory;
+import org.protege.editor.owl.server.versioning.api.DocumentRevision;
 import org.protege.editor.owl.server.versioning.api.RevisionMetadata;
 import org.protege.editor.owl.server.versioning.api.ServerDocument;
 import org.protege.editor.owl.server.versioning.api.VersionedOWLOntology;
@@ -121,9 +124,16 @@ public class ClientUtils {
     public static void updateOntology(OWLOntology placeholder, ChangeHistory changeHistory, 
     		OWLOntologyManager manager, LocalHttpClient client, OWLEditorKit kit) {
     	
+    	
+        
+    	
     	List<OWLOntologyChange> changes = ChangeHistoryUtils.getOntologyChanges(changeHistory, placeholder);
         
         manager.applyChanges(changes);
+        
+        
+        
+        
        
         fixMissingImports(placeholder, changes, manager, client, kit);
     }
