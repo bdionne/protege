@@ -24,7 +24,7 @@ public class ClientPreferences {
     
     private static final String PREF_TAB_NAMES = "PREFERRED_TAB_NAMES";
     
-    public static final String SERVER_CHANGES_PROCESSED = "SERVER_CHANGES_ALREADY_PROCESSED";
+    public static final String SERVER_REVISIONS_PROCESSED = "SERVER_REVISIONS_PROCESSED";
 
     public static synchronized ClientPreferences getInstance() {
         if (instance == null) {
@@ -76,12 +76,12 @@ public class ClientPreferences {
     }
     
     
-    public int getNoServerChangesIndexed() {
-        return getPreferences().getInt(SERVER_CHANGES_PROCESSED, 0);
+    public int getNoServerRevisionsIndexed() {
+        return getPreferences().getInt(SERVER_REVISIONS_PROCESSED, 0);
     }
     
-    public void setNoServerChangesIndexed(int no_changes) {
-        getPreferences().putInt(SERVER_CHANGES_PROCESSED, no_changes);
+    public void setNoServerRevisionsIndexed(int no_changes) {
+        getPreferences().putInt(SERVER_REVISIONS_PROCESSED, no_changes);
     }
     
     protected static Preferences getPreferences() {

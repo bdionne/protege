@@ -14,6 +14,8 @@ import org.protege.editor.owl.client.api.exception.LoginTimeoutException;
 import org.protege.editor.owl.client.api.exception.OWLClientException;
 import org.protege.editor.owl.model.OWLWorkspace;
 import org.protege.editor.owl.server.util.SnapShot;
+import org.protege.editor.owl.server.versioning.ChangeHistoryUtils;
+import org.protege.editor.owl.server.versioning.ReplaceChangedOntologyVisitor;
 import org.protege.editor.owl.server.versioning.api.DocumentRevision;
 import org.protege.editor.owl.server.versioning.api.ServerDocument;
 import org.protege.editor.owl.server.versioning.api.VersionedOWLOntology;
@@ -238,8 +240,6 @@ public class OpenFromServerPanel extends JPanel {
             editorKit.getSearchManager().disableIncrementalIndexing();
             VersionedOWLOntology vont = httpClient.buildVersionedOntology(serverDocument, owlManager, 
             		pid, editorKit);
-            SessionRecorder.getInstance(this.editorKit).startRecording();
-            editorKit.getSearchManager().enableIncrementalIndexing();
             
             progressBar.setValue(80);
             dialog.setTitle("Updating menus and components...."); 
@@ -248,40 +248,31 @@ public class OpenFromServerPanel extends JPanel {
             clientSession.setActiveProject(pid, vont);
             System.out.println("It took; " +
             		(System.currentTimeMillis() - beg) + " secs");
-
-
-
-            // update index with possibly new changes from other modelers
-            //List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
             
             progressBar.setValue(90);
-            //dialog.setTitle("Updating search indices...");
+            dialog.setTitle("Updating search indices...");
             
-            int no_changes = ClientPreferences.getInstance().getNoServerChangesIndexed();
-            List<OWLOntologyChange> to_process = new ArrayList<OWLOntologyChange>();
-            if (no_changes > 0) {
-            	if (no_changes < vont.getChangeHistory().getRevisions().size()) {
-            		
-            		 SortedMap<DocumentRevision, List<OWLOntologyChange>> revs = 
-            				 vont.getChangeHistory().getRevisions();
-            		 
-            		 for (DocumentRevision rev : revs.keySet()) {
-            			 if (rev.getRevisionNumber() > no_changes) {
-            				 to_process.addAll(revs.get(rev));
-            			 }
-            		 }
-            		 
-            		 
-            	     
-            		 
-            		
-            		
-            	}
+            // let's store the revision number rather than changes number
+            int rev_no_processed = ClientPreferences.getInstance().getNoServerRevisionsIndexed();
+        	
+            if (!vont.getChangeHistory().isEmpty()) {
+                for (DocumentRevision rev : vont.getChangeHistory().getRevisions().keySet()) {
+                	if (rev.getRevisionNumber() > rev_no_processed) {
+                		editorKit
+                		.getSearchManager()
+                		.updateIndex(vont.getChangeHistory().getChangesForRevision(rev));
+                	}
+                }
             }
-            ClientPreferences.getInstance().setNoServerChangesIndexed(vont.getChangeHistory().getRevisions().size());
-            editorKit.getSearchManager().updateIndex(to_process);
             
-           
+            
+            ClientPreferences.getInstance().setNoServerRevisionsIndexed(vont.getChangeHistory().getHeadRevision().getRevisionNumber());
+            
+            
+            
+            SessionRecorder.getInstance(this.editorKit).startRecording();
+            editorKit.getSearchManager().enableIncrementalIndexing();
+            
             progressBar.setValue(100);
             dialog.setTitle("Operations complete...");
             Thread.sleep(1000);
