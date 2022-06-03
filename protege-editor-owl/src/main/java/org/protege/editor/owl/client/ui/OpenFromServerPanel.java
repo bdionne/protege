@@ -248,6 +248,7 @@ public class OpenFromServerPanel extends JPanel {
             clientSession.setActiveProject(pid, vont);
             System.out.println("It took; " +
             		(System.currentTimeMillis() - beg) + " secs");
+            Thread.sleep(1000);
             
             progressBar.setValue(90);
             dialog.setTitle("Updating search indices...");
