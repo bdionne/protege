@@ -125,6 +125,8 @@ public class TabViewableChecker implements TabViewable {
 			return wf_mod_tabs.contains(cat);
 		} else if (isWorkFlowManager(clientSession.getActiveProject())) {
 			return wf_man_tabs.contains(cat);			
+		} else if (isAdministrator(clientSession.getActiveProject())) {
+			return wf_man_tabs.contains(cat);
 		} else {
 			return false;
 		}
@@ -157,6 +159,19 @@ public class TabViewableChecker implements TabViewable {
 			return false;
 		}
 	}
+	
+	private boolean isAdministrator(ProjectId projectId) {
+		if (projectId == null) {
+			return !isSysAdmin();
+		}
+		try {
+			Role wfm = ((LocalHttpClient) client).getRole(new RoleIdImpl("mp-admin"));
+			return client.getActiveRoles(projectId).contains(wfm);
+		} catch (ClientRequestException e) {
+			Logger.getLogger(this.getClass().getName()).warning("isAdministrator raised " + e.getMessage());
+			return false;
+		}
+	}
 
 	private boolean isSysAdmin() {		
 		return (((LocalHttpClient) client).getClientType() == UserType.ADMIN);
@@ -168,7 +183,8 @@ public class TabViewableChecker implements TabViewable {
 		if (this.isSysAdmin()) {
 			return this.req_admin_tabs.contains(label);
 		} 
-		if (this.isWorkFlowManager(clientSession.getActiveProject()) || this.isWorkFlowModeler(clientSession.getActiveProject())) {
+		if (this.isWorkFlowManager(clientSession.getActiveProject()) || this.isWorkFlowModeler(clientSession.getActiveProject())
+				|| this.isAdministrator(clientSession.getActiveProject())) {
 			return this.req_editing_tabs.contains(label);
 		}
 		return false;

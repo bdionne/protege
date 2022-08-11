@@ -122,18 +122,11 @@ public class ClientUtils {
      */
 
     public static void updateOntology(OWLOntology placeholder, ChangeHistory changeHistory, 
-    		OWLOntologyManager manager, LocalHttpClient client, OWLEditorKit kit) {
-    	
-    	
-        
+    		OWLOntologyManager manager, LocalHttpClient client, OWLEditorKit kit) {        
     	
     	List<OWLOntologyChange> changes = ChangeHistoryUtils.getOntologyChanges(changeHistory, placeholder);
         
-        manager.applyChanges(changes);
-        
-        
-        
-        
+        manager.applyChanges(changes);        
        
         fixMissingImports(placeholder, changes, manager, client, kit);
     }

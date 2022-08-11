@@ -222,6 +222,35 @@ public class LocalHttpClient implements Client, ClientSessionListener {
 		}
 	}
 	
+	public void updateSnapshotForProject(Project project, File font)
+			throws LoginTimeoutException, AuthorizationException, ClientRequestException {
+			try {
+				OWLOntology ont = null;
+				if (font.getName().endsWith(".zip")) {
+					ZipInputStream zi = new ZipInputStream(new FileInputStream(font));
+					try {
+						ont = OWLManager.createConcurrentOWLOntologyManager().loadOntologyFromOntologyDocument(zi);
+					} catch (OWLOntologyCreationException e) {
+						e.printStackTrace();
+					}
+				} else {
+					try {
+						ont = OWLManager.createOWLOntologyManager().loadOntologyFromOntologyDocument(font);
+					} catch (OWLOntologyCreationException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+		
+				}
+				
+				postProjectSnapShotToServer(project, ont); // send snapshot to server
+				
+			} catch (IOException e) {
+				logger.error(e.getMessage(), e);
+				throw new ClientRequestException("Unable to send request to server (see error log for details)", e);
+			}
+		}
+	
 	public void addImport(ProjectId activeProject, ProjectId projectId) {
 		
 		List<Project> projects = config.getAllProjects();
@@ -380,9 +409,7 @@ public class LocalHttpClient implements Client, ClientSessionListener {
 	@Override
 	public OpenProjectResult openProject(@Nonnull ProjectId projectId)
 		throws AuthorizationException, LoginTimeoutException, ClientRequestException {
-		if (getClientType() == UserType.ADMIN) { // admin clients cannot edit/browse ontologies
-			throw new ClientRequestException("Admin clients cannot open projects");
-		}
+		
 		String requestUrl = PROJECT + "?projectid=" + projectId.get();
 		Response response = get(requestUrl); // send request to server
 		ServerDocument sdoc = retrieveServerDocumentFromServerResponse(response);
