@@ -64,6 +64,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import java.util.zip.ZipInputStream;
 
+import java.net.SocketTimeoutException;
+
 import static org.protege.editor.owl.server.http.ServerEndpoints.*;
 import static org.protege.editor.owl.server.http.ServerProperties.*;
 
@@ -854,54 +856,40 @@ public class LocalHttpClient implements Client, ClientSessionListener {
 		}
 
 		Request.Builder builder = postBuilder(url, body, withCredential);
-
 		builder.addHeader(ServerProperties.PROJECTID_HEADER, projectId.get());
 		builder.addHeader(ServerProperties.SNAPSHOT_CHECKSUM_HEADER, snapshotChecksum.get());
 
-		try {
-			Response response = httpClient.newCall(builder.build()).execute();
+		int count = 0;
+		int tries = 3;
+		int lastTry = tries;
+		Response response = null;
 
-			if (!response.isSuccessful() && response.code() == ServerProperties.HISTORY_SNAPSHOT_OUT_OF_DATE) {
-				
-				/**
-				
-				ListeningExecutorService service = MoreExecutors.listeningDecorator(Executors.newSingleThreadExecutor());
-				ProgressDialog dlg = new ProgressDialog();
-
-				dlg.setMessage("History snapshot out of date. Fetching latest.");
-				final ListenableFuture<?> snapshotTask = service.submit(() -> {
-					try {
-						SnapShot snapshot = getSnapShot(projectId);
-						createLocalSnapShot(snapshot.getOntology(), projectId);
-					} catch (AuthorizationException | ClientRequestException e) {
-						throw new RuntimeException(e);
-					}
-					finally {
-						dlg.setVisible(false);
-					}
-				});
-				dlg.setVisible(true);
-
-				String newChecksum = getSnapshotChecksum(projectId).get();
-
-				builder = postBuilder(url, body, withCredential)
-						.addHeader(ServerProperties.PROJECTID_HEADER, projectId.get())
-						.addHeader(ServerProperties.SNAPSHOT_CHECKSUM_HEADER, newChecksum);
-
+		do {
+			try {
+				count++;
 				response = httpClient.newCall(builder.build()).execute();
-				**/
-				throw new ClientRequestException("Snapshot out of sync with server, please logout and login");
-				
-			}
+				}
+			catch (SocketTimeoutException e) {
+				logger.error(e.getMessage(), e);
+				try { Thread.sleep(2000); } catch (InterruptedException f) {logger.error(f.getMessage(), f);}
+				if (tries == lastTry ) {
+					throw new ClientRequestException("Maximum number of SocketTimeoutExceptions reached", e);
+					}
+				}
+			catch (IOException e) {
+				logger.error(e.getMessage(), e);
+				throw new ClientRequestException("Unable to send request to server (see error log for details)", e);
+				}
+			} while ( count <= tries );
 
-			if (!response.isSuccessful()) {
-				throwRequestExceptions(response);
-			}
-			return response;
-		} catch (IOException e) {
-			logger.error(e.getMessage(), e);
-			throw new ClientRequestException("Unable to send request to server (see error log for details)", e);
+		if (!response.isSuccessful() && response.code() == ServerProperties.HISTORY_SNAPSHOT_OUT_OF_DATE) {
+			throw new ClientRequestException("Snapshot out of sync with server, please logout and login");
 		}
+		if (!response.isSuccessful()) {
+			throwRequestExceptions(response);
+		}
+		return response;
+
 	}
 
 	private Response post(String url, RequestBody body, boolean withCredential)
