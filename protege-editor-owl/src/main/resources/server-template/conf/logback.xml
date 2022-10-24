@@ -16,7 +16,7 @@
     </appender>
     
     <appender name="rolling-files" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>./.protege/logs/protege.log</file>
+        <file>../logs/protege.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <fileNamePattern>./.protege/logs/protege_%d{yyyy-MM-dd}.%i.log</fileNamePattern>
             <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
@@ -30,14 +30,15 @@
     </appender>
     
     
-    <logger name="org.protege.editor.owl.server" level="${client.server.comm.level:-ERROR}">
+    <logger name="org.protege.editor.owl.server" level="${client.server.comm.level:-info}">
         <appender-ref ref="stdout"/>
     	<appender-ref ref="rolling-files"/>
     </logger>   
 
    
-    <root level="${protege.logging.level:-ERROR}">        
+    <root level="${protege.logging.level:-info}">        
         <appender-ref ref="stdout"/>
+    	<appender-ref ref="rolling-files"/>
     </root>
     
    
