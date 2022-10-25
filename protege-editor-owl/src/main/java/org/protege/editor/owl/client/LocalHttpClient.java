@@ -50,6 +50,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import java.io.*;
+import java.net.SocketTimeoutException;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -843,8 +844,8 @@ public class LocalHttpClient implements Client, ClientSessionListener {
 		return builder;
 	}
 
-	private Response postWithProjectId(String url, RequestBody body, @Nonnull ProjectId projectId, boolean withCredential)
-			throws AuthorizationException, ClientRequestException {
+	private Response postWithProjectId(String url, RequestBody body, @Nonnull ProjectId projectId,
+			boolean withCredential) throws AuthorizationException, ClientRequestException {
 		if (projectId == null) {
 			throw new RuntimeException("POST projectId is null: " + url);
 		}
@@ -858,24 +859,41 @@ public class LocalHttpClient implements Client, ClientSessionListener {
 		builder.addHeader(ServerProperties.PROJECTID_HEADER, projectId.get());
 		builder.addHeader(ServerProperties.SNAPSHOT_CHECKSUM_HEADER, snapshotChecksum.get());
 
-		try {
-			Response response = httpClient.newCall(builder.build()).execute();
+		int count = 0;
+		final int tries = 3;
+		Response response = null;
 
-			if (!response.isSuccessful() && response.code() == ServerProperties.HISTORY_SNAPSHOT_OUT_OF_DATE) {
-				
-				
-				throw new ClientRequestException("Snapshot out of sync with server, please logout and login");
-				
+		do {
+			try {
+				count++;
+				response = httpClient.newCall(builder.build()).execute();
+				break;
+			} catch (SocketTimeoutException e) {
+				logger.error(e.getMessage(), e);
+				if (count == tries) {
+					throw new ClientRequestException("Maximum number of SocketTimeoutExceptions reached", e);
+				}
+				try {
+					Thread.sleep(2000);
+				} catch (InterruptedException f) {
+					logger.error(f.getMessage(), f);
+				}
+			} catch (IOException e) {
+				logger.error(e.getMessage(), e);
+				throw new ClientRequestException("Unable to send request to server (see error log for details)", e);
 			}
+		} while (count <= tries);
 
-			if (!response.isSuccessful()) {
-				throwRequestExceptions(response);
-			}
-			return response;
-		} catch (IOException e) {
-			logger.error(e.getMessage(), e);
-			throw new ClientRequestException("Unable to send request to server (see error log for details)", e);
+		if (!response.isSuccessful() && response.code() == ServerProperties.HISTORY_SNAPSHOT_OUT_OF_DATE) {
+
+			throw new ClientRequestException("Snapshot out of sync with server, please logout and login");
+
 		}
+		if (!response.isSuccessful()) {
+			throwRequestExceptions(response);
+		}
+		return response;
+
 	}
 
 	private Response post(String url, RequestBody body, boolean withCredential)
