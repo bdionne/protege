@@ -52,6 +52,7 @@ import javax.annotation.Nonnull;
 import java.io.*;
 import java.net.SocketTimeoutException;
 import java.net.URI;
+import java.net.UnknownHostException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -868,10 +869,10 @@ public class LocalHttpClient implements Client, ClientSessionListener {
 				count++;
 				response = httpClient.newCall(builder.build()).execute();
 				break;
-			} catch (SocketTimeoutException e) {
+			} catch (SocketTimeoutException | UnknownHostException e) {
 				logger.error(e.getMessage(), e);
 				if (count == tries) {
-					throw new ClientRequestException("Maximum number of SocketTimeoutExceptions reached", e);
+					throw new ClientRequestException("Maximum number of SocketTimeoutExceptions or UnknownHostExceptions reached", e);
 				}
 				try {
 					Thread.sleep(2000);
