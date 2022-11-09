@@ -40,6 +40,8 @@ public class RendererPreferencesPanel extends OWLPreferencesPanel {
     private JSpinner fontSizeSpinner;
 
     private JButton configureButton;
+    
+    private JCheckBox useIrisInBatchEdits;
 
     private RendererPlugin originalRendererPlugin;
 
@@ -51,6 +53,7 @@ public class RendererPreferencesPanel extends OWLPreferencesPanel {
         prefs.setHighlightActiveOntologyStatements(highlightAOStatementsCheckBox.isSelected());
         prefs.setRenderHyperlinks(showHyperlinksCheckBox.isSelected());
         prefs.setHighlightKeyWords(highlightKeyWordsCheckBox.isSelected());
+        prefs.setUseIriInBatchEdits(useIrisInBatchEdits.isSelected());
         Integer fontSize = (Integer) fontSizeSpinner.getValue();
         prefs.setFontSize(fontSize);
         if (isDirty()){
@@ -93,6 +96,14 @@ public class RendererPreferencesPanel extends OWLPreferencesPanel {
         layoutPanel.addGroupComponent(highlightAOStatementsCheckBox);
         layoutPanel.addGroupComponent(showHyperlinksCheckBox);
         layoutPanel.addGroupComponent(highlightKeyWordsCheckBox);
+        
+        layoutPanel.addSeparator();
+        layoutPanel.addGroup("Batch Edits");
+        
+        useIrisInBatchEdits = new JCheckBox("Allow IRIs In Batch Edits", prefs.useIriInBatchEdits());
+        
+        layoutPanel.addGroupComponent(useIrisInBatchEdits);
+        
 
         layoutPanel.addSeparator();
 

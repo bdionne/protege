@@ -59,6 +59,8 @@ public class OWLRendererPreferences {
     public static final String DISPLAY_THUMBNAILS_INLINE = "DISPLAY_THUMBNAILS_INLINE";
 
     public static final int DEFAULT_FONT_SIZE = 12;
+    
+    public static final String USE_THIRD_PARTY_IRI = "USE_IRIS_FROM IMPORTS_IN_BATCH";
 
     /**
      * The default logical font name.  This is mappable to a physical font on all systems.
@@ -89,6 +91,8 @@ public class OWLRendererPreferences {
     private boolean highlightChangedEntities;
 
     private boolean highlightKeyWords;
+    
+    private boolean useIriInBatchEdit;
 
     private boolean useThatKeyword;
 
@@ -257,6 +261,7 @@ public class OWLRendererPreferences {
         highlightChangedEntities = p.getBoolean(HIGHLIGHT_CHANGED_ENTITIES, false);
         highlightKeyWords = p.getBoolean(HIGHLIGHT_KEY_WORDS, true);
         useThatKeyword = p.getBoolean(USE_THAT_KEYWORD, false);
+        useIriInBatchEdit = p.getBoolean(USE_THIRD_PARTY_IRI, false);
         allowProtegeToOverrideRenderer = p.getBoolean(ALLOW_PROTEGE_TO_OVERRIDE_RENDERER, true);
         setRendererPlugin(p.getString(RENDERER_CLASS, DEFAULT_RENDERER_CLASS_NAME));
         renderDomainAxiomsAsGCIs = false; p.putBoolean(RENDER_DOMAIN_AXIOMS_AS_GCIS, false);
@@ -469,5 +474,14 @@ public class OWLRendererPreferences {
 
     public boolean isRenderDomainAxiomsAsGCIs() {
         return renderDomainAxiomsAsGCIs;
+    }
+    
+    public boolean useIriInBatchEdits() {
+    	return useIriInBatchEdit;
+    }
+    
+    public void setUseIriInBatchEdits(boolean b) {
+    	useIriInBatchEdit = b;
+    	getPreferences().putBoolean(USE_THIRD_PARTY_IRI, b);
     }
 }
