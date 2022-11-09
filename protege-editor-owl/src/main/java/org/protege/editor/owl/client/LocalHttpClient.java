@@ -863,33 +863,7 @@ public class LocalHttpClient implements Client, ClientSessionListener {
 
 			if (!response.isSuccessful() && response.code() == ServerProperties.HISTORY_SNAPSHOT_OUT_OF_DATE) {
 				
-				/**
 				
-				ListeningExecutorService service = MoreExecutors.listeningDecorator(Executors.newSingleThreadExecutor());
-				ProgressDialog dlg = new ProgressDialog();
-
-				dlg.setMessage("History snapshot out of date. Fetching latest.");
-				final ListenableFuture<?> snapshotTask = service.submit(() -> {
-					try {
-						SnapShot snapshot = getSnapShot(projectId);
-						createLocalSnapShot(snapshot.getOntology(), projectId);
-					} catch (AuthorizationException | ClientRequestException e) {
-						throw new RuntimeException(e);
-					}
-					finally {
-						dlg.setVisible(false);
-					}
-				});
-				dlg.setVisible(true);
-
-				String newChecksum = getSnapshotChecksum(projectId).get();
-
-				builder = postBuilder(url, body, withCredential)
-						.addHeader(ServerProperties.PROJECTID_HEADER, projectId.get())
-						.addHeader(ServerProperties.SNAPSHOT_CHECKSUM_HEADER, newChecksum);
-
-				response = httpClient.newCall(builder.build()).execute();
-				**/
 				throw new ClientRequestException("Snapshot out of sync with server, please logout and login");
 				
 			}
