@@ -8,7 +8,7 @@
     </appender>
     
     <appender name="files" class="ch.qos.logback.core.FileAppender">
-        <file>./.protege/logs/protege.log</file>
+        <file>../logs/protege.log</file>
         <append>true</append>
         <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
             <Pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{0}    %msg%n</Pattern>
@@ -18,7 +18,7 @@
     <appender name="rolling-files" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>../logs/protege.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>./.protege/logs/protege_%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <fileNamePattern>../logs/protege_%d{yyyy-MM-dd}.%i.log</fileNamePattern>
             <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
                 <maxFileSize>100MB</maxFileSize>
             </timeBasedFileNamingAndTriggeringPolicy>
