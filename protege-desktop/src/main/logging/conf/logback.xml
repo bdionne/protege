@@ -33,25 +33,26 @@
     	<appender-ref ref="rolling-files"/>
     </logger>
     
-    <logger name="org.protege.editor.owl.client" level="${client.server.comm.level:-ERROR}">
+    <logger name="org.protege.editor.owl.client" level="${client.server.comm.level:-INFO}">
         <appender-ref ref="stdout"/>
     	<appender-ref ref="rolling-files"/>
     </logger>
     
-    <logger name="org.protege.editor.core.prefs" level="${core.fileprefs.level:-ERROR}">
+    <logger name="org.protege.editor.core.prefs" level="${core.fileprefs.level:-INFO}">
         <appender-ref ref="stdout"/>
     	<appender-ref ref="rolling-files"/>
     </logger>
     
-    <logger name="org.semanticweb.owlapi" level="ERROR">
+    <logger name="org.semanticweb.owlapi" level="INFO">
         <appender-ref ref="stdout"/>
-    	<appender-ref ref="rolling-files"/>
+        <appender-ref ref="rolling-files"/>
     </logger>
     
 
    
-    <root level="${protege.logging.level:-ERROR}">        
+    <root level="${protege.logging.level:-INFO}">
         <appender-ref ref="stdout"/>
+        <appender-ref ref="rolling-files"/>
     </root>
     
     <logger name="gov.nih.nci.curator" level="${curator.logging.level:-INFO}" additivity="false">
