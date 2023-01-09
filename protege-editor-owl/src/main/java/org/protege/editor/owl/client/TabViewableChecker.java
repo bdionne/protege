@@ -108,8 +108,8 @@ public class TabViewableChecker implements TabViewable {
 	
 	@Override
 	public boolean isReadOnly(ViewComponentPlugin view) {
-		if (this.isWorkFlowModeler(clientSession.getActiveProject())) {
-			return true;
+		if (isWorkFlowModeler(clientSession.getActiveProject())) {
+			return !isWorkFlowManager(clientSession.getActiveProject());
 		}
 		return false;
 	}

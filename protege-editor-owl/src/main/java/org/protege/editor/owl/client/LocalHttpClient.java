@@ -81,6 +81,12 @@ public class LocalHttpClient implements Client, ClientSessionListener {
 	private static final String authHeader = "Authorization";
 
 	private static final String SNAPSHOT_CHECKSUM = "-checksum";
+	
+	public static final String CLIENT_RETRY_COUNT = "org.protege.owl.client.retries";
+	public static final String CLIENT_RETRY_SLEEP = "org.protege.owl.client.retries.sleep";
+	
+	private int client_retry_count = 3;
+	private int client_retry_sleep = 2000;
 
 	private final String serverAddress;
 
@@ -114,6 +120,17 @@ public class LocalHttpClient implements Client, ClientSessionListener {
 				.build();
 		// Not all callers are careful enough to pass the protocol here. So we add a default (safe) one
 		URI serverUri = URI.create(serverAddress);
+		
+		String retries = System.getProperty(CLIENT_RETRY_COUNT);
+		if (retries != null) {
+			client_retry_count = Integer.parseInt(retries);
+		}
+		
+		String retry_sleep = System.getProperty(CLIENT_RETRY_SLEEP);
+		if (retry_sleep != null) {
+			client_retry_sleep = Integer.parseInt(retry_sleep);
+		}
+		
 		if (Strings.isNullOrEmpty(serverUri.getScheme())) {
 			serverAddress = "https://" + serverAddress;
 		}
@@ -860,31 +877,8 @@ public class LocalHttpClient implements Client, ClientSessionListener {
 		builder.addHeader(ServerProperties.PROJECTID_HEADER, projectId.get());
 		builder.addHeader(ServerProperties.SNAPSHOT_CHECKSUM_HEADER, snapshotChecksum.get());
 
-		int count = 0;
-		final int tries = 3;
-		Response response = null;
-
-		do {
-			try {
-				count++;
-				response = httpClient.newCall(builder.build()).execute();
-				break;
-			} catch (SocketTimeoutException | UnknownHostException e) {
-				logger.error(e.getMessage(), e);
-				if (count == tries) {
-					throw new ClientRequestException("Maximum number of SocketTimeoutExceptions or UnknownHostExceptions reached", e);
-				}
-				try {
-					Thread.sleep(2000);
-				} catch (InterruptedException f) {
-					logger.error(f.getMessage(), f);
-				}
-			} catch (IOException e) {
-				logger.error(e.getMessage(), e);
-				throw new ClientRequestException("Unable to send request to server (see error log for details)", e);
-			}
-		} while (count <= tries);
-
+		Response response = retryCall(builder.build(), 1);
+		
 		if (!response.isSuccessful() && response.code() == ServerProperties.HISTORY_SNAPSHOT_OUT_OF_DATE) {
 
 			throw new ClientRequestException("Snapshot out of sync with server, please logout and login");
@@ -896,22 +890,44 @@ public class LocalHttpClient implements Client, ClientSessionListener {
 		return response;
 
 	}
-
-	private Response post(String url, RequestBody body, boolean withCredential)
-		throws AuthorizationException, ClientRequestException {
-		Request.Builder builder = postBuilder(url, body, withCredential);
+	
+	Response retryCall(Request req, int cnt) throws ClientRequestException {
+		Response response = null;
 
 		try {
-			Response response = httpClient.newCall(builder.build()).execute();
-
-			if (!response.isSuccessful()) {
-				throwRequestExceptions(response);
+			response = httpClient.newCall(req).execute();
+		} catch (SocketTimeoutException | UnknownHostException e) {
+			logger.error(e.getMessage(), e);
+			if (cnt == client_retry_count) {
+				throw new ClientRequestException("Maximum number of SocketTimeoutExceptions or UnknownHostExceptions reached", e);
 			}
-			return response;
+			try {
+				Thread.sleep(client_retry_sleep);
+			} catch (InterruptedException f) {
+				logger.error(f.getMessage(), f);
+			}
+			// Try again
+			retryCall(req, cnt + 1);
 		} catch (IOException e) {
 			logger.error(e.getMessage(), e);
 			throw new ClientRequestException("Unable to send request to server (see error log for details)", e);
 		}
+
+
+		return response;
+
+
+	}
+
+	private Response post(String url, RequestBody body, boolean withCredential)
+			throws AuthorizationException, ClientRequestException {
+		Request.Builder builder = postBuilder(url, body, withCredential);
+		Response response = retryCall(builder.build(), 1);
+		if (!response.isSuccessful()) {
+			throwRequestExceptions(response);
+		}
+		return response;
+
 	}
 
 	private Response delete(String url, boolean withCredential) throws LoginTimeoutException,
@@ -929,16 +945,12 @@ public class LocalHttpClient implements Client, ClientSessionListener {
 				.delete()
 				.build();
 		}
-		try {
-			Response response = httpClient.newCall(request).execute();
-			if (!response.isSuccessful()) {
-				throwRequestExceptions(response);
-			}
-			return response;
-		} catch (IOException e) {
-			logger.error(e.getMessage(), e);
-			throw new ClientRequestException("Unable to send request to server (see error log for details)", e);
+		Response response = retryCall(request, 1);
+		if (!response.isSuccessful()) {
+			throwRequestExceptions(response);
 		}
+		return response;
+		
 	}
 
 	private Response get(String url) throws LoginTimeoutException, AuthorizationException,
@@ -948,16 +960,12 @@ public class LocalHttpClient implements Client, ClientSessionListener {
 			.addHeader(authHeader, getAuthHeaderString())
 			.get()
 			.build();
-		try {
-			Response response = httpClient.newCall(request).execute();
-			if (!response.isSuccessful()) {
-				throwRequestExceptions(response);
-			}
-			return response;
-		} catch (IOException e) {
-			logger.error(e.getMessage(), e);
-			throw new ClientRequestException("Unable to send request to server (see error log for details)", e);
+		Response response = retryCall(request, 1);
+		if (!response.isSuccessful()) {
+			throwRequestExceptions(response);
 		}
+		return response;
+		
 	}
 
 	private String getAuthHeaderString() {
