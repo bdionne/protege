@@ -148,6 +148,17 @@ public class LocalHttpClient implements Client, ClientSessionListener {
 	public ServerConfiguration getCurrentConfig() {
 		return config.getCurrentConfig();
 	}
+	
+	public boolean isGuest(ProjectId pid) {
+		List<Role> roles = this.getActiveRoles(pid);
+		for (Role r : roles) {
+			if (r.getId().get().equalsIgnoreCase("mp-guest")) {
+				return true;
+			}
+		}
+		return false;
+		
+	}
 
 	public UserType getClientType() {
 		return loginType;
@@ -891,7 +902,7 @@ public class LocalHttpClient implements Client, ClientSessionListener {
 
 	}
 	
-	Response retryCall(Request req, int cnt) throws ClientRequestException {
+	@Nonnull Response retryCall(Request req, int cnt) throws ClientRequestException {
 		Response response = null;
 
 		try {

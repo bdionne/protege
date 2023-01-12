@@ -108,7 +108,9 @@ public class TabViewableChecker implements TabViewable {
 	
 	@Override
 	public boolean isReadOnly(ViewComponentPlugin view) {
-		if (isWorkFlowModeler(clientSession.getActiveProject())) {
+		if (isWorkFlowModeler(clientSession.getActiveProject()) ||
+				isGuest(clientSession.getActiveProject())
+				) {
 			return !isWorkFlowManager(clientSession.getActiveProject());
 		}
 		return false;
@@ -121,7 +123,8 @@ public class TabViewableChecker implements TabViewable {
 		
 		if (isSysAdmin()) {
 			return admin_tabs.contains(cat);
-		} else if (isWorkFlowModeler(clientSession.getActiveProject())) {
+		} else if (isWorkFlowModeler(clientSession.getActiveProject()) ||
+				isGuest(clientSession.getActiveProject())) {
 			return wf_mod_tabs.contains(cat);
 		} else if (isWorkFlowManager(clientSession.getActiveProject())) {
 			return wf_man_tabs.contains(cat);			
@@ -132,6 +135,19 @@ public class TabViewableChecker implements TabViewable {
 		}
 		
 		
+	}
+	
+	private boolean isGuest(ProjectId projectId) {
+		if (projectId == null) {
+			return false;
+		}
+		try {
+			Role wfm = ((LocalHttpClient) client).getRole(new RoleIdImpl("mp-guest"));
+			return client.getActiveRoles(projectId).contains(wfm);
+		} catch (ClientRequestException e) {
+			Logger.getLogger(this.getClass().getName()).warning("isGuest raised " + e.getMessage());
+			return false;
+		}
 	}
 	
 	private boolean isWorkFlowManager(ProjectId projectId) {
@@ -184,7 +200,8 @@ public class TabViewableChecker implements TabViewable {
 			return this.req_admin_tabs.contains(label);
 		} 
 		if (this.isWorkFlowManager(clientSession.getActiveProject()) || this.isWorkFlowModeler(clientSession.getActiveProject())
-				|| this.isAdministrator(clientSession.getActiveProject())) {
+				||  this.isAdministrator(clientSession.getActiveProject()) ||
+				this.isGuest(clientSession.getActiveProject())) {
 			return this.req_editing_tabs.contains(label);
 		}
 		return false;
