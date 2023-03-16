@@ -266,6 +266,7 @@ public class HTTPChangeService extends BaseRoutingHandler {
 				+ File.separator;
 
 		String snapshotName = historyName + "-snapshot";
+		String checksumName = snapshotName + "-checksum";
 
 		String fullHistoryPath = dataDir + historyName;
 		String backupName = new StringBuilder(fullHistoryPath).insert(fullHistoryPath.lastIndexOf(File.separator) + 1, "~").toString();
@@ -273,6 +274,7 @@ public class HTTPChangeService extends BaseRoutingHandler {
 		Files.createDirectories(Paths.get(archiveDir));
 		Files.move(Paths.get(dataDir + historyName), Paths.get(archiveDir + historyName));
 		Files.move(Paths.get(dataDir + snapshotName), Paths.get(archiveDir + snapshotName));
+		Files.move(Paths.get(dataDir + checksumName), Paths.get(archiveDir + checksumName));
 		try {
 			Files.delete(Paths.get(backupName));
 		} catch (NoSuchFileException e) {
