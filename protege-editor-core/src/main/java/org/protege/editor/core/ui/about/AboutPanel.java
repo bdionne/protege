@@ -1,20 +1,14 @@
 package org.protege.editor.core.ui.about;
 
 
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.Version;
 import org.protege.editor.core.plugin.PluginUtilities;
 import org.protege.editor.core.ui.preferences.PreferencesLayoutPanel;
-import org.protege.editor.core.ui.util.Icons;
+import org.protege.editor.core.util.Version;
 
 import javax.swing.*;
-import javax.swing.border.Border;
 import java.awt.*;
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 

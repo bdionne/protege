@@ -3,13 +3,7 @@ package org.protege.editor.core.plugin;
 
 import org.eclipse.core.runtime.*;
 import org.eclipse.equinox.nonosgi.registry.RegistryFactoryHelper;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
-import org.osgi.framework.Version;
-import org.osgi.service.packageadmin.PackageAdmin;
-import org.osgi.util.tracker.ServiceTracker;
-import org.protege.editor.core.ProtegeApplication;
+import org.protege.editor.core.util.Version;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,13 +31,6 @@ public class PluginUtilities {
 
     private static PluginUtilities instance;
     
-    private BundleContext context;
-    
-    private ServiceTracker<?, ?> registryServiceTracker;
-    
-    private ServiceTracker<?, ?> packageServiceTracker;
-
-
     private PluginUtilities() {
 
     }
@@ -59,63 +46,12 @@ public class PluginUtilities {
         return instance;
     }
 
-    public void dispose() {
-        if (registryServiceTracker != null) registryServiceTracker.close();
-        if (packageServiceTracker != null)  packageServiceTracker.close();
-        instance = null;
-    }
-    
-    public BundleContext getApplicationContext() {
-        return context;
-    }
-    
-    public Bundle getApplicationBundle() {
-        return context.getBundle();
-    }
-
-    /**
-     * This method is called by the system to initialise the
-     * plugin utilities.  Users should <b>not</b> call this method.
-     */
-    public void initialise(BundleContext context) {
-       // this.context = context;
-    }
-    
-    public Bundle getBundle(IExtension extension) {
-        IContributor contributor = extension.getContributor();
-        return getBundle(contributor);
-    }
-    
-    public Bundle getExtensionPointBundle(IExtension extension) {
-        IExtensionRegistry  registry = getExtensionRegistry();
-        String extensionPtId = extension.getExtensionPointUniqueIdentifier();
-        IExtensionPoint extensionPt = registry.getExtensionPoint(extensionPtId);
-        IContributor contributor = extensionPt.getContributor();
-        return getBundle(contributor);
-    }
-    
-    public Bundle getBundle(IContributor contributor) {
-       // return null;
-    	String name = contributor.getName();
-        PackageAdmin admin = getPackageAdmin();
-        Bundle[]  bundles = admin.getBundles(name, null);
-        if (bundles == null || bundles.length == 0) return null;
-        return bundles[0];  // if there is more than one we need more work...
-        
-    }
     
     public IExtensionRegistry getExtensionRegistry() {
     	
     	return RegistryFactoryHelper.getRegistry();
     }
     
-    public PackageAdmin getPackageAdmin() {
-        if (packageServiceTracker == null) {
-            packageServiceTracker = new ServiceTracker<Object, Object>(context, PackageAdmin.class.getName(), null);
-            packageServiceTracker.open();
-        }
-        return (PackageAdmin) packageServiceTracker.getService();
-    }
     
     public static Map<String, String> getAttributes(IExtension ext) {
         Map<String, String> attributes = new HashMap<>();
@@ -136,22 +72,6 @@ public class PluginUtilities {
     	return Class.forName(getAttribute(ext, property)).newInstance();
     }
     
-    /*
-     *  ToDo - remove this!
-     *  
-     *  Something strange happens here -
-     *  Even though I have 
-     *      org.osgi.framework.storage.clean=onFirstInit
-     *  (which seems to work) the bundle version is not read from the manifest.
-     *  Deleting the cache means that the bundle id is back but this is impractical.
-     */
-    public static Version getBundleVersion(Bundle b) {
-        return  new Version((String) b.getHeaders().get("Bundle-Version"));
-    }
-    
-    public static String getBuildNumber(Bundle b) {
-        return (String) b.getHeaders().get("Build-Number");
-    }
     
     public String getDocumentation(IExtension extension) {
         logger.error("Don't know how to get documentation yet");
@@ -177,7 +97,7 @@ public class PluginUtilities {
 		            }
 		            Attributes attributes = mf.getMainAttributes();
 		            
-		            String versionString = attributes.getValue(Constants.BUNDLE_VERSION);
+		            String versionString = attributes.getValue("Bundle-Version");
 		            return  new Version(versionString);
 		        } catch (Exception e) {
 		        	throw new RuntimeException("Programmer error - " + e.getMessage());

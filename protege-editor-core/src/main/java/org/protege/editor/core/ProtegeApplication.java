@@ -22,9 +22,6 @@ import javax.swing.UIManager;
 import javax.swing.border.MatteBorder;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
 import org.protege.editor.core.editorkit.EditorKit;
 import org.protege.editor.core.editorkit.EditorKitFactoryPlugin;
 import org.protege.editor.core.editorkit.EditorKitManager;
@@ -37,7 +34,6 @@ import org.protege.editor.core.platform.OSUtils;
 import org.protege.editor.core.platform.PlatformArguments;
 import org.protege.editor.core.platform.apple.ProtegeAppleApplication;
 import org.protege.editor.core.plugin.JPFUtil;
-import org.protege.editor.core.plugin.PluginUtilities;
 import org.protege.editor.core.prefs.Preferences;
 import org.protege.editor.core.prefs.PreferencesManager;
 import org.protege.editor.core.ui.error.ErrorLogPanel;
@@ -101,8 +97,6 @@ public class ProtegeApplication {
 	private static final Map<String, String> frameworkProperties = new HashMap<>();
 
 	private static final List<org.protege.editor.core.launcher.BundleSearchPath> searchPaths = new ArrayList<>();
-
-    private static BundleContext context;
 
     private List<URI> commandLineURIs;
 
@@ -185,15 +179,7 @@ public class ProtegeApplication {
 		}
 	}
 
-    // Called when the application is finally completely shutting down
-    public void stop(BundleContext context) throws Exception {
-        BookMarkedURIManager.getInstance().dispose();
-        RecentEditorKitManager.getInstance().save();
-        RecentEditorKitManager.getInstance().dispose();
-        PluginUtilities.getInstance().dispose();
-        ProtegeManager.getInstance().dispose();
-        logManager.unbind();
-    }
+    
 
 
     /////////////////////////////////////////////////////////////////////////////////
@@ -206,66 +192,16 @@ public class ProtegeApplication {
     // If this isn't liked info can be replaced with debug.
     // It helps with diagnosing problems with the FaCT++ plugin.
     private void displayPlatform() {
-      //  Bundle thisBundle = context.getBundle();
-       // Version v = PluginUtilities.getBundleVersion(thisBundle);
-
         logger.info(LogBanner.start("Protege"));
-        logger.info("Protege Desktop");
-       // logger.info("Version {}.{}.{}, Build {}", v.getMajor(), v.getMinor(), v.getMicro(), v.getQualifier());
-        logger.info("");
+        logger.info("Protege Desktop");logger.info("");
         logger.info("");
         logger.info(LogBanner.start("Platform"));
         logger.info("Java: JVM {}  Memory: {}M", System.getProperty("java.runtime.version"), getMaxMemoryInMegaBytes());
         logger.info("Language: {}, Country: {}", getLang(), getCountry());
-       // logger.info("Framework: {} ({}) ", getFramework(), getFrameworkVersion());
-       // logger.info("OS: {} ({})", getOsName(), getOsVersion());
-       // logger.info("Processor: {}\n", getProcessor());
+       
         logger.info(LogBanner.end());
         logger.info(LogBanner.start("Plugins"));
-      //  int pluginCount = 0;
-      /*  for (Bundle plugin : context.getBundles()) {
-            if (isPlugin(plugin)) {
-                if (isActive(plugin)) {
-                    logger.info("Plugin: {} ({})", getNiceBundleName(plugin), plugin.getVersion());
-                    pluginCount++;
-                }
-                else {
-                    logger.warn("Plugin: {} ({}) was not successfully started.  " +
-                            "Please see the Protégé log for more details.", getNiceBundleName(plugin), plugin.getVersion());
-                }
-            }
-        }
-        if (pluginCount == 0) {
-            logger.info("No plugins installed");
-        }*/
         logger.info(LogBanner.end());
-       /* for (Bundle plugin : context.getBundles()) {
-            if (isPlugin(plugin)) {
-                pluginSanityCheck(plugin);
-            }
-        }*/
-    }
-
-    private static String getProcessor() {
-        return context.getProperty(Constants.FRAMEWORK_PROCESSOR);
-    }
-
-    private static String getOsVersion() {
-        return context.getProperty(Constants.FRAMEWORK_OS_VERSION);
-    }
-
-    private static String getOsName() {
-        return context.getProperty(Constants.FRAMEWORK_OS_NAME);
-    }
-
-    private static String getFrameworkVersion() {
-        return "No Framework version";
-    	//return context.getProperty(Constants.FRAMEWORK_VERSION);
-    }
-
-    private static String getFramework() {
-       return "Non OSGi"; 
-    	//return context.getProperty(Constants.FRAMEWORK_VENDOR);
     }
 
     private static String getCountry() {
@@ -281,49 +217,10 @@ public class ProtegeApplication {
     }
 
 
-    private boolean pluginSanityCheck(Bundle b) {
-        boolean passed = true;
-        boolean hasPluginXml = (b.getResource("/plugin.xml") != null);
-        if (b.getHeaders().get(BUNDLE_WITHOUT_PLUGIN_XML) == null && !hasPluginXml) {
-            logger.debug("\t" + getNiceBundleName(b) + " Plugin has no plugin.xml resource");
-            passed = false;
-        }
-        if (hasPluginXml && !isSingleton(b)) {
-            logger.warn("\t" + getNiceBundleName(b) + " plugin is not a singleton so its plugin.xml will not be seen by the registry.");
-            passed = false;
-        }
-        return passed;
-    }
-
-    public static boolean isActive(Bundle b) {
-        return b.getState() == Bundle.ACTIVE;
-    }
-
-    public static boolean isPlugin(Bundle b) {
-        String location = b.getLocation();
-        return location != null && location.contains("plugin");
-    }
-
-    public static boolean isSingleton(Bundle b) {
-        StringBuffer singleton1 = new StringBuffer(Constants.SINGLETON_DIRECTIVE);
-        singleton1.append(":=true");
-        StringBuffer singleton2 = new StringBuffer(Constants.SINGLETON_DIRECTIVE);
-        singleton2.append(":=\"true\"");
-        return ((String) b.getHeaders().get(Constants.BUNDLE_SYMBOLICNAME)).contains(singleton1.toString()) ||
-                ((String) b.getHeaders().get(Constants.BUNDLE_SYMBOLICNAME)).contains(singleton2.toString());
-    }
-
-    public static String getNiceBundleName(Bundle b) {
-        String name = (String) b.getHeaders().get(Constants.BUNDLE_NAME);
-        if (name == null) {
-            name = b.getSymbolicName();
-        }
-        return name;
-    }
 
     protected ProtegeApplication initApplication() throws Exception {
         try {
-            PluginUtilities.getInstance().initialise(context);
+            //PluginUtilities.getInstance().initialise(context);
             loadDefaults();
             initializeLookAndFeel();
             setupExceptionHandler();
@@ -463,7 +360,7 @@ public class ProtegeApplication {
     private void processCommandLineURIs() {
         try {
             commandLineURIs = new ArrayList<>();
-            for (String arg : PlatformArguments.getArguments(context)) {
+            for (String arg : PlatformArguments.getArguments()) {
                 logger.info("Processing command line argument: {}", arg);
                 File f = new File(arg);
                 if (f.exists()) {
@@ -605,14 +502,7 @@ public class ProtegeApplication {
     //
     /////////////////////////////////////////////////////////////////////////////////
 
-    public static BundleContext getContext() {
-        return context;
-    }
-
-
-//    public static ErrorLog getErrorLog() {
-//        return errorLog;
-//    }
+   
 
 
     public static BackgroundTaskManager getBackgroundTaskManager() {

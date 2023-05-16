@@ -1,7 +1,5 @@
 package org.protege.editor.core.platform;
 
-import org.osgi.framework.BundleContext;
-
 /*
  * There currently does not seem to be any generic method for obtaining the command
  * line arguments in OSGi.  The following has code that checks for specific OSGi implementations
@@ -13,7 +11,7 @@ public class PlatformArguments {
 
     public static final String ARG_PROPERTY = "command.line.arg.";
     
-    public static String[] getArguments(BundleContext context) {
+    public static String[] getArguments() {
         String[] args;
         if ((args = getWrappedArguments()) != null) {
             return args;
