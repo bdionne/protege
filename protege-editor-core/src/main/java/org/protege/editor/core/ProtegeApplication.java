@@ -157,7 +157,6 @@ public class ProtegeApplication {
     
     @SuppressWarnings("unchecked")
 	private static void setLogger(Map configurationMap) {
-		org.protege.editor.core.launcher.FrameworkSlf4jLogger logger = new org.protege.editor.core.launcher.FrameworkSlf4jLogger();
 		configurationMap.put("felix.log.logger", logger);
 	}
     
@@ -416,13 +415,7 @@ public class ProtegeApplication {
             }
             logger.info("Auto-update has not been performed today.  Running it.");
             PluginManager.getInstance().runAutoUpdate();
-          /*  context.addFrameworkListener(new FrameworkListener() {
-                public void frameworkEvent(FrameworkEvent event) {
-                    if (event.getType() == FrameworkEvent.STARTED) {
-                        context.removeFrameworkListener(this);
-                    }
-                }
-            });*/
+          
         } finally {
             logger.info(LogBanner.end());
         }

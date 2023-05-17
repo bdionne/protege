@@ -1,8 +1,8 @@
 package org.protege.editor.core.launcher;
 
 import com.google.common.base.MoreObjects;
-import org.osgi.framework.Constants;
-import org.osgi.framework.Version;
+
+import org.protege.editor.core.util.Version;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -127,13 +127,13 @@ public class BundleSearchPath {
                 return Optional.empty();
             }
             Attributes attributes = mf.getMainAttributes();
-            String symbolicName = attributes.getValue(Constants.BUNDLE_SYMBOLICNAME);
+            String symbolicName = attributes.getValue("Bundle-SymbolicName");
             if (symbolicName == null) {
                 return Optional.empty();
             }
-            String versionString = attributes.getValue(Constants.BUNDLE_VERSION);
+            String versionString = attributes.getValue("Bundle-Version");
             Optional<Version> version =
-                    versionString == null ? Optional.<Version>empty() : Optional.of(new Version(versionString));
+                    versionString == null ? Optional.empty() : Optional.of(new Version(versionString));
             return Optional.of(new BundleInfo(file, new SymbolicName(symbolicName), version));
         } catch (Exception e) {
             logger.warn("Could not parse {} as plugin/bundle. Error: ", file, e);

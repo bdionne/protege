@@ -2,7 +2,7 @@ package org.protege.editor.core.launcher;
 
 import com.google.common.base.Objects;
 import org.apache.maven.artifact.versioning.ComparableVersion;
-import org.osgi.framework.Version;
+import org.protege.editor.core.util.Version;
 
 import java.io.File;
 import java.util.Optional;

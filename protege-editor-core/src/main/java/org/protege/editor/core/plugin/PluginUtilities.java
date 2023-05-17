@@ -4,8 +4,8 @@ package org.protege.editor.core.plugin;
 import org.eclipse.core.runtime.*;
 import org.eclipse.equinox.nonosgi.registry.RegistryFactoryHelper;
 import org.protege.editor.core.util.Version;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+//import org.slf4j.Logger;
+//import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -14,6 +14,8 @@ import java.util.Map;
 import java.util.jar.Attributes;
 import java.util.jar.JarInputStream;
 import java.util.jar.Manifest;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 
 /**
@@ -27,7 +29,7 @@ import java.util.jar.Manifest;
  */
 public class PluginUtilities {
 
-    private final Logger logger = LoggerFactory.getLogger(PluginUtilities.class.getName());
+    private final Logger logger = Logger.getLogger(PluginUtilities.class.getName());
 
     private static PluginUtilities instance;
     
@@ -74,7 +76,7 @@ public class PluginUtilities {
     
     
     public String getDocumentation(IExtension extension) {
-        logger.error("Don't know how to get documentation yet");
+        logger.log(Level.SEVERE, "Don't know how to get documentation yet");
         return "";
     }
     

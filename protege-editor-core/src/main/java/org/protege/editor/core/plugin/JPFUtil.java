@@ -6,6 +6,8 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.util.jar.Pack200;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.net.URL;
@@ -24,10 +26,8 @@ import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
 
 import org.eclipse.core.runtime.IExtension;
-import org.osgi.framework.Constants;
 import org.protege.editor.core.ProtegeApplication;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 
 
 /*
@@ -48,7 +48,7 @@ import org.slf4j.LoggerFactory;
  */
 public class JPFUtil {
     
-    private static final Logger logger = LoggerFactory.getLogger(JPFUtil.class.getCanonicalName());
+    private static final Logger logger = Logger.getLogger(JPFUtil.class.getCanonicalName());
     public final static String EXTENSION_DOCUMENTATION = "documentation";
     
     public static String getDocumentation(IExtension extension) {
@@ -123,7 +123,7 @@ public class JPFUtil {
 
 						jarFile.close();
 					} catch (Exception e) {
-						logger.error("failed to locate plugin.xml: {}", e);
+						logger.log(Level.SEVERE, "failed to locate plugin.xml: {}", e);
 						throw e;
 						
 					}
@@ -158,7 +158,7 @@ public class JPFUtil {
 			try {
 				addFile(path);
 			} catch (Exception e) {
-				logger.error("Error in addFile method", e);
+				error("Error in addFile method", e);
 			}
 		}
 		
@@ -173,7 +173,7 @@ public class JPFUtil {
 	        }
 	        Attributes attributes = mf.getMainAttributes();
 	        
-	        String nameString = attributes.getValue(Constants.BUNDLE_NAME);
+	        String nameString = attributes.getValue("Bundle-Name");
 	        
 	        String oldPath = pluginMap.get(nameString);
 	
@@ -190,7 +190,7 @@ public class JPFUtil {
 	        }
 	        is.close();
     	} catch (Exception ex) {
-    		logger.error("Error in loadPluginMap method", ex);
+    		error("Error in loadPluginMap method", ex);
     	}
 		
     }
@@ -210,9 +210,9 @@ public class JPFUtil {
 		URL urls[] = sysLoader.getURLs();
 		for (int i = 0; i < urls.length; i++) {
 			if (urls[i].toString().equalsIgnoreCase(u.toString())) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("URL " + u + " is already in the CLASSPATH");
-				}
+				//if (logger..isDebugEnabled()) {
+					logger.log(Level.FINE, "URL " + u + " is already in the CLASSPATH");
+				//}
 				return;
 			}
 		}
@@ -222,7 +222,11 @@ public class JPFUtil {
 			method.setAccessible(true);
 			method.invoke(sysLoader, new Object[] { u });
 		} catch (Throwable t) {
-			logger.error("Error, could not add URL to system classloader", t);
+			error("Error, could not add URL to system classloader", t);
 		}
+	}
+	
+	private static void error(String s, Throwable t) {
+		logger.severe(s + t.getLocalizedMessage());
 	}
 }
