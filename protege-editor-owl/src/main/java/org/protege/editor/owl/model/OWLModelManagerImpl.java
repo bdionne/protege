@@ -1,6 +1,8 @@
 package org.protege.editor.owl.model;
 
 import com.google.common.base.Stopwatch;
+
+import org.apache.lucene.sandbox.queries.FuzzyLikeThisQuery;
 import org.protege.editor.core.AbstractModelManager;
 import org.protege.editor.core.log.LogBanner;
 import org.protege.editor.core.ui.error.ErrorLogPanel;
@@ -73,6 +75,8 @@ public class OWLModelManagerImpl extends AbstractModelManager implements OWLMode
     private final Logger logger = LoggerFactory.getLogger(OWLModelManagerImpl.class);
 
     private HistoryManager historyManager;
+    
+    //private SessionRecorder historyManager; 
 
     private OWLModelManagerEntityRenderer entityRenderer;
 
@@ -146,6 +150,7 @@ public class OWLModelManagerImpl extends AbstractModelManager implements OWLMode
 
     private final List<IOListener> ioListeners = new ArrayList<>();
 
+    private ConnectionMode mode;
 
     public OWLModelManagerImpl() {
         super();
@@ -174,7 +179,8 @@ public class OWLModelManagerImpl extends AbstractModelManager implements OWLMode
         activeOntologiesStrategy = new ImportsClosureOntologySelectionStrategy(this);
 
         historyManager = new HistoryManagerImpl(this);
-
+        //historyManager = = SessionRecorder.getInstance(getOWLEditorKit());
+        
         owlReasonerManager = new OWLReasonerManagerImpl(this);
         owlReasonerManager.getReasonerPreferences().addListener(() -> fireEvent(EventType.ONTOLOGY_CLASSIFIED));
 
@@ -217,7 +223,26 @@ public class OWLModelManagerImpl extends AbstractModelManager implements OWLMode
     public boolean isDirty() {
         return !dirtyOntologies.isEmpty();
     }
+    
+    public boolean hasUncommittedChanges() {
+    	// Flatten the stack
+		List<OWLOntologyChange> toReturn = new ArrayList<>();
+		for (List<OWLOntologyChange> changes : getHistoryManager().getLoggedChanges()) {
+			toReturn.addAll(changes);
+		}
+		List<OWLOntologyChange> changes = new ChangeListMinimizer().getMinimisedChanges(toReturn);
+        
+		return !changes.isEmpty();
+    }
 
+    public void setConnectionMode(ConnectionMode mode) {
+    	this.mode = mode;
+    }
+    
+    public ConnectionMode getConnectionMode() {
+    	return this.mode;
+    }
+    
     public boolean isDirty(OWLOntology ontology) {
         return dirtyOntologies.contains(ontology.getOntologyID());
     }

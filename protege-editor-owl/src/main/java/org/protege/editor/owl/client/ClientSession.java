@@ -11,6 +11,7 @@ import java.util.TreeMap;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 
+import org.protege.editor.core.ModelManager.ConnectionMode;
 import org.protege.editor.core.ui.util.JOptionPaneEx;
 import org.protege.editor.core.ui.workspace.WorkspaceTab;
 import org.protege.editor.owl.OWLEditorKit;
@@ -121,6 +122,8 @@ public class ClientSession extends OWLEditorKitHook {
             activeClient = client;
             getEditorKit().getWorkspace().setCheckLevel(new TabViewableChecker(this, client));
             //getEditorKit().getWorkspace().recheckPlugins();
+            getEditorKit().getOWLModelManager().setConnectionMode(ConnectionMode.CLIENTSERVER);
+            
             if (((LocalHttpClient) client).getClientType() == UserType.ADMIN) {
             	getEditorKit().getWorkspace().recheckPlugins();
             	WorkspaceTab admin = getEditorKit().getOWLWorkspace().getWorkspaceTab("metaproject-admin.AdminTab");

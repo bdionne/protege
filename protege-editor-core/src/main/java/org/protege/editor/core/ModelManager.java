@@ -19,8 +19,18 @@ import javax.annotation.Nullable;
  */
 public interface ModelManager extends Disposable {
 
+	public static enum ConnectionMode {
+        LOCALFILE, CLIENTSERVER, OTHER;
+	}
+	
     boolean isDirty();
 
+    boolean hasUncommittedChanges();
+    
+    void setConnectionMode(ConnectionMode mode);
+    
+    ConnectionMode getConnectionMode();
+    
     <T extends Disposable> void put(Object key, T object);
 
     @Nullable
