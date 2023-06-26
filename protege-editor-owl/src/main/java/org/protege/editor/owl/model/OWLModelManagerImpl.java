@@ -150,7 +150,7 @@ public class OWLModelManagerImpl extends AbstractModelManager implements OWLMode
 
     private final List<IOListener> ioListeners = new ArrayList<>();
 
-    private ConnectionMode mode;
+    private ConnectionMode mode = ConnectionMode.OTHER;
 
     public OWLModelManagerImpl() {
         super();
