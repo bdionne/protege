@@ -4,6 +4,7 @@ import com.google.common.base.Optional;
 import org.osgi.framework.ServiceRegistration;
 import org.protege.editor.core.BookMarkedURIManager;
 import org.protege.editor.core.Disposable;
+import org.protege.editor.core.ModelManager.ConnectionMode;
 import org.protege.editor.core.editorkit.*;
 import org.protege.editor.core.log.LogBanner;
 import org.protege.editor.core.ui.error.ErrorLogPanel;
@@ -191,6 +192,7 @@ public class OWLEditorKit extends AbstractEditorKit<OWLEditorKitFactory> {
 
         if (success) {
             addRecent(uri);
+            ((OWLModelManagerImpl) getModelManager()).setConnectionMode(ConnectionMode.LOCALFILE);
         }
         else if (loadErrorHandler.getReloadFlag()) {
             success = handleLoadFrom(uri);
