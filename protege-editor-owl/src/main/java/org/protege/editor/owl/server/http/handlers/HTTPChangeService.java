@@ -264,6 +264,8 @@ public class HTTPChangeService extends BaseRoutingHandler {
 				+ File.separator
 				+ projectId.get()
 				+ File.separator;
+		
+		String gencodeName = serverLayer.getConfiguration().getProperty(ServerProperties.CODEGEN_FILE);
 
 		String snapshotName = historyName + "-snapshot";
 		String checksumName = snapshotName + "-checksum";
@@ -275,6 +277,7 @@ public class HTTPChangeService extends BaseRoutingHandler {
 		Files.move(Paths.get(dataDir + historyName), Paths.get(archiveDir + historyName));
 		Files.move(Paths.get(dataDir + snapshotName), Paths.get(archiveDir + snapshotName));
 		Files.move(Paths.get(dataDir + checksumName), Paths.get(archiveDir + checksumName));
+		Files.copy(Paths.get(dataDir + gencodeName), Paths.get(archiveDir + gencodeName));
 		try {
 			Files.delete(Paths.get(backupName));
 		} catch (NoSuchFileException e) {

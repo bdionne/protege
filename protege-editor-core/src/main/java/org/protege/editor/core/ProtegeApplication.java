@@ -512,6 +512,7 @@ public class ProtegeApplication {
                 return false;
             }
         }
+        System.out.println("JVM is exiting!!!!!");
         System.exit(0);
        /* try {
             boolean forceExit = !OSGi.systemExitHandledByLauncher(); // this call fails after context.getBundle(0).stop()

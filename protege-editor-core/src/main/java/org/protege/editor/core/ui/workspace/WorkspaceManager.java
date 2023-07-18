@@ -73,58 +73,59 @@ public class WorkspaceManager {
      *         actually be closed because the user may cancel the close operation.
      */
     public boolean doClose(Workspace workspace) {
-        try {
-        	ConnectionMode cmode = workspace.getEditorKit().getModelManager().getConnectionMode();
-        	if (cmode != null && cmode.equals(ConnectionMode.CLIENTSERVER)){
-        		boolean hasUncommittedChanges = workspace.getEditorKit().getModelManager().hasUncommittedChanges();
-                if (hasUncommittedChanges) {
-                	int ret = JOptionPane.showConfirmDialog(workspace,
-                            SAVE_CHANGES_MESSAGE,
-                            "Save before exit?",
-                            JOptionPane.YES_NO_OPTION,
-                            JOptionPane.WARNING_MESSAGE);
-                	if (ret == JOptionPane.YES_OPTION || ret == JOptionPane.DEFAULT_OPTION) {
-                        return false;
-                    }
-                	if (ret == JOptionPane.NO_OPTION) {
-                		ProtegeManager.getInstance().disposeOfEditorKit(workspace.getEditorKit());
-                		return true;
-                	}
-                } else {
-                	return true;
-                }
-        	} else {
-	        	
-	        	boolean dirty = workspace.getEditorKit().getModelManager().isDirty();
-	            if (dirty) {
-	                // Ask user if they want to save?
-	                int ret = JOptionPane.showConfirmDialog(workspace,
-	                        SAVE_CONFIRMATION_MESSAGE,
-	                        "Save workspace?",
-	                        JOptionPane.YES_NO_CANCEL_OPTION,
-	                        JOptionPane.WARNING_MESSAGE);
-	
-	                // The default option is returned when the escape button is pressed.
-	                if (ret == JOptionPane.CANCEL_OPTION || ret == JOptionPane.DEFAULT_OPTION) {
-	                    return false;
-	                }
-	                if (ret == JOptionPane.YES_OPTION) {
-	                    workspace.getEditorKit().handleSave();
-	                    if(workspace.getEditorKit().getModelManager().isDirty()) {
-	                        // Wasn't saved - i.e. cancelled
-	                        return false;
-	                    }
-	                }
-	            }
-	            ProtegeManager.getInstance().disposeOfEditorKit(workspace.getEditorKit());
-	            return true;
-        	}
-        	return false;
-        }
-        catch (Exception e) {
-            logger.error("An error occurred whilst closing the workspace.", e);
-            return false;
-        }
+    	try {
+    		ConnectionMode cmode = workspace.getEditorKit().getModelManager().getConnectionMode();
+    		if (cmode != null && cmode.equals(ConnectionMode.CLIENTSERVER)){
+    			boolean hasUncommittedChanges = workspace.getEditorKit().getModelManager().hasUncommittedChanges();
+    			if (hasUncommittedChanges) {
+    				int ret = JOptionPane.showConfirmDialog(workspace,
+    						SAVE_CHANGES_MESSAGE,
+    						"Save before exit?",
+    						JOptionPane.YES_NO_OPTION,
+    						JOptionPane.WARNING_MESSAGE);
+    				if (ret == JOptionPane.YES_OPTION || ret == JOptionPane.DEFAULT_OPTION) {
+    					return false;
+    				}
+    				if (ret == JOptionPane.NO_OPTION) {
+    					ProtegeManager.getInstance().disposeOfEditorKit(workspace.getEditorKit());
+    					return true;
+    				}
+    			} else {
+    				ProtegeManager.getInstance().disposeOfEditorKit(workspace.getEditorKit());
+    				return true;
+    			}
+    		} else {
+
+    			boolean dirty = workspace.getEditorKit().getModelManager().isDirty();
+    			if (dirty) {
+    				// Ask user if they want to save?
+    				int ret = JOptionPane.showConfirmDialog(workspace,
+    						SAVE_CONFIRMATION_MESSAGE,
+    						"Save workspace?",
+    						JOptionPane.YES_NO_CANCEL_OPTION,
+    						JOptionPane.WARNING_MESSAGE);
+
+    				// The default option is returned when the escape button is pressed.
+    				if (ret == JOptionPane.CANCEL_OPTION || ret == JOptionPane.DEFAULT_OPTION) {
+    					return false;
+    				}
+    				if (ret == JOptionPane.YES_OPTION) {
+    					workspace.getEditorKit().handleSave();
+    					if(workspace.getEditorKit().getModelManager().isDirty()) {
+    						// Wasn't saved - i.e. cancelled
+    						return false;
+    					}
+    				}
+    			}
+    			ProtegeManager.getInstance().disposeOfEditorKit(workspace.getEditorKit());
+    			return true;
+    		}
+    		return false;
+    	}
+    	catch (Exception e) {
+    		logger.error("An error occurred whilst closing the workspace.", e);
+    		return false;
+    	}
     }
 
 
