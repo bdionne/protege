@@ -1362,6 +1362,7 @@
       	<editorKitId value="OWLEditorKit"/>
    	</extension>
    
+   <!--
    	<extension id="client.Login"
                name="Login Menu"
                point="org.protege.editor.core.application.EditorKitMenuAction">
@@ -1370,6 +1371,7 @@
       	<editorKitId value="OWLEditorKit"/>
       	<class value="org.protege.editor.owl.client.action.LoginAction"/>
 	</extension>
+	-->
 
 	<extension id="client.Logout"
                name="Logout Menu"
@@ -1379,6 +1381,7 @@
       	<editorKitId value="OWLEditorKit"/>
       	<class value="org.protege.editor.owl.client.action.LogoutAction"/>
 	</extension>
+	
 
 	
 	<extension id="client.Commit"

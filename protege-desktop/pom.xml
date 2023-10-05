@@ -39,6 +39,7 @@
 		<!-- NOTE: These dependency declarations are required to sort this project to the end of the line in the multimodule build. -->
 		
 		<!-- edu.stanford.protege dependency list -->
+		<!--
 		<dependency>
 			<groupId>org.openrdf.sesame</groupId>
 			<artifactId>sesame-queryparser-serql</artifactId>
@@ -49,6 +50,7 @@
 			<artifactId>sesame-queryparser-sparql</artifactId>
 			<version>${sesame.version}</version>
 		</dependency>
+		-->
 		<dependency>
 			<groupId>edu.stanford.protege</groupId>
 			<artifactId>protege-editor-core</artifactId>

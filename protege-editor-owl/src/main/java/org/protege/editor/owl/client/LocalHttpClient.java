@@ -112,7 +112,7 @@ public class LocalHttpClient implements Client, ClientSessionListener {
 	/**
 	 * The constructor
 	 */
-	public LocalHttpClient(String username, String password, String serverAddress, boolean admin)
+	public LocalHttpClient(String username, String password, String serverAddress)
 		throws LoginTimeoutException, AuthorizationException, ClientRequestException {
 		httpClient = new OkHttpClient.Builder()
 				.writeTimeout(1800, TimeUnit.SECONDS)
@@ -135,7 +135,7 @@ public class LocalHttpClient implements Client, ClientSessionListener {
 			serverAddress = "https://" + serverAddress;
 		}
 		this.serverAddress = serverAddress;
-		login(username, password, admin);
+		login(username, password);
 		initConfig();
 		initAuthToken();
 		LocalHttpClient.currentHttpClient = this;
@@ -169,7 +169,7 @@ public class LocalHttpClient implements Client, ClientSessionListener {
 		config = new Config(serverConfiguration, userId);
 	}
 
-	private void login(String username, String password, boolean admin)
+	private void login(String username, String password)
 		throws LoginTimeoutException, AuthorizationException, ClientRequestException {
 		LoginCreds creds = new LoginCreds(username, password);
 		String endPoint = LOGIN;
@@ -179,9 +179,9 @@ public class LocalHttpClient implements Client, ClientSessionListener {
 			false); // send the request to server
 		userInfo = retrieveUserInfoFromServerResponse(response);
 		userId = ConfigurationManager.getFactory().getUserId(userInfo.getId());
-		if (admin) {
-			loginType = UserType.ADMIN;
-		}
+		//if (admin) {
+			//loginType = UserType.ADMIN;
+		//}
 	}
 
 	private void initAuthToken() {
