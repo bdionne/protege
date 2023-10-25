@@ -35,7 +35,7 @@
 		
 		<dependency>
 				<groupId>net.sourceforge.owlapi</groupId>
-				<artifactId>owlapi-distribution</artifactId>
+				<artifactId>owlapi-osgidistribution</artifactId>
 				<version>${owlapi.version}</version>
 			</dependency>
 			
@@ -109,6 +109,7 @@
          	<version>3.3.2.Final</version>
          </dependency>
          <!--
+         
          <dependency>
          	<groupId>org.openrdf.sesame</groupId>
          	<artifactId>sesame-model</artifactId>
@@ -126,6 +127,7 @@
          	<version>2.7.12</version>
          </dependency>
          -->
+         
          <dependency>
          	<groupId>net.sf.trove4j</groupId>
          	<artifactId>trove4j</artifactId>
