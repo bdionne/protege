@@ -4,7 +4,6 @@ import org.protege.editor.owl.model.OWLModelManager;
 import org.protege.editor.owl.model.event.EventType;
 import org.protege.editor.owl.model.event.OWLModelManagerListener;
 import org.protege.editor.owl.model.hierarchy.cls.InferredOWLClassHierarchyProvider;
-import org.protege.editor.owl.model.hierarchy.cls.InferredOWLClassHierarchyProvider2;
 import org.protege.editor.owl.model.hierarchy.property.InferredObjectPropertyHierarchyProvider;
 import org.semanticweb.owlapi.model.OWLAnnotationProperty;
 import org.semanticweb.owlapi.model.OWLClass;
