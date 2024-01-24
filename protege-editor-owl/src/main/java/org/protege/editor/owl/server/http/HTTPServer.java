@@ -47,6 +47,7 @@ import static org.protege.editor.owl.server.http.ServerProperties.*;
 public final class HTTPServer {
 
 	public static final String SERVER_CONFIGURATION_PROPERTY = "org.protege.owl.server.configuration";
+	public static final String UPDATE_TRIPLE_STORE = "org.protege.owl.server.update_triplestore";
 
 	public static final String DEFAULT_HOST = "localhost";
 	public static final int DEFAULT_PORT = 8080;

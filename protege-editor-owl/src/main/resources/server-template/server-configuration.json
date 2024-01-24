@@ -712,6 +712,7 @@
     "ldap_host": "localhost",
     "autoupdate_interval": "60",
     "conhistory_file": "con_history",
-    "root_archive": "root/archive"
+    "root_archive": "root/archive",
+    "triple_store_url": "http://localhost:8890/sparql/"
   }
 }

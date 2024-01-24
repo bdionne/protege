@@ -58,11 +58,8 @@ public class PreferencesDialogPanel extends JPanel implements Disposable {
         for (PreferencesPanelPlugin plugin : plugins) {
             try {
                 PreferencesPanel panel = plugin.newInstance();
-                long beg = System.currentTimeMillis();
                 panel.initialise();
-                System.out.println("prefs panel took " + (System.currentTimeMillis() - beg)
-                		+ " ms");
-                
+                                
                 final String label = plugin.getLabel();
                 final JScrollPane sp = new JScrollPane(panel);
                 sp.setBorder(new EmptyBorder(0, 0, 0, 0));
