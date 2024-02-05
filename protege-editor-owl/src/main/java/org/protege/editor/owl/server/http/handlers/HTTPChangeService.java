@@ -49,6 +49,7 @@ import org.semanticweb.owlapi.model.OWLOntologyChange;
 import edu.stanford.protege.metaproject.api.AuthToken;
 import edu.stanford.protege.metaproject.api.ProjectId;
 import edu.stanford.protege.metaproject.api.User;
+import edu.stanford.protege.metaproject.api.exception.UnknownProjectIdException;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.util.StatusCodes;
 
@@ -121,6 +122,9 @@ public class HTTPChangeService extends BaseRoutingHandler {
 		}
 		catch (ServerException e) {
 			handleServerException(exchange, e);
+		} catch (UnknownProjectIdException e) {
+			internalServerErrorStatusCode(exchange, "Server failed to receive valie project id", e);
+			
 		}
 		finally {
 			exchange.endExchange(); // end the request
@@ -128,7 +132,7 @@ public class HTTPChangeService extends BaseRoutingHandler {
 	}
 
 	private void handlingRequest(HttpServerExchange exchange)
-			throws IOException, ClassNotFoundException, LoginTimeoutException, ServerException {
+			throws IOException, ClassNotFoundException, LoginTimeoutException, ServerException, UnknownProjectIdException {
 		ObjectInputStream ois = new ObjectInputStream(exchange.getInputStream());
 		
 		String requestPath = exchange.getRequestPath();
@@ -206,13 +210,14 @@ public class HTTPChangeService extends BaseRoutingHandler {
 	 */
 
 	private void submitCommitBundle(AuthToken authToken, ProjectId projectId, CommitBundle bundle,
-			OutputStream os) throws ServerException {
+			OutputStream os) throws ServerException, UnknownProjectIdException {
 		try {
 			ChangeHistory hist = serverLayer.commit(authToken, projectId, bundle);
 			ObjectOutputStream oos = new ObjectOutputStream(os);
 			oos.writeObject(hist);
 			if (this.update_triple_store) {
-				writeTripleStore(bundle);
+				Project p = serverLayer.getConfiguration().getProject(projectId);
+				writeTripleStore(bundle, p);
 			}
 		}
 		catch (AuthorizationException e) {
@@ -229,10 +234,11 @@ public class HTTPChangeService extends BaseRoutingHandler {
 		}
 	}
 	
-	private void writeTripleStore(CommitBundle bundle) {
+	private void writeTripleStore(CommitBundle bundle, Project p) {
 		
 		
-		String updateEndpoint = triple_store_url + "foobar";
+		String updateEndpoint = triple_store_url + p.namespace() + "/"
+				+ p.getName().get();
 		SPARQLRepository repo = new SPARQLRepository(triple_store_url, updateEndpoint);
 		
 		repo.initialize();
