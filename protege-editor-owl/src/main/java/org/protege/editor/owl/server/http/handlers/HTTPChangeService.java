@@ -237,9 +237,9 @@ public class HTTPChangeService extends BaseRoutingHandler {
 	private void writeTripleStore(CommitBundle bundle, Project p) {
 		
 		
-		String updateEndpoint = triple_store_url + p.namespace() + "/"
+		String updateEndpoint = p.namespace() + "/"
 				+ p.getName().get();
-		SPARQLRepository repo = new SPARQLRepository(triple_store_url, updateEndpoint);
+		SPARQLRepository repo = new SPARQLRepository(triple_store_url);
 		
 		repo.initialize();
 		for (Commit c : bundle.getCommits()) {
