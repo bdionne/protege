@@ -1090,6 +1090,8 @@
         <accelerator value="D"/>
         <editorKitId value="OWLEditorKit"/>
     </extension>
+    
+    <!--
 
     <extension id="menu.AddCoveringAxiom"
                point="org.protege.editor.core.application.EditorKitMenuAction">
@@ -1145,6 +1147,8 @@
         <path value="org.protege.editor.core.application.menu.EditMenu/SlotM-H"/>
         <editorKitId value="OWLEditorKit"/>
     </extension>
+    
+    -->
 
     <!-- Ontology libraries/locations -->
 
