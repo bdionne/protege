@@ -1,6 +1,10 @@
 package org.protege.editor.owl.server.http.handlers;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Paths;
@@ -9,26 +13,17 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 
-import com.google.common.collect.Lists;
-import edu.stanford.protege.metaproject.api.Project;
-import edu.stanford.protege.metaproject.impl.ProjectIdImpl;
-
 import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
-import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.repository.sparql.SPARQLRepository;
-import org.eclipse.rdf4j.repository.sparql.config.SPARQLRepositoryConfig;
-import org.eclipse.rdf4j.repository.sparql.config.SPARQLRepositoryFactory;
 import org.protege.editor.owl.server.api.ChangeService;
 import org.protege.editor.owl.server.api.CommitBundle;
 import org.protege.editor.owl.server.api.ServerLayer;
 import org.protege.editor.owl.server.api.exception.AuthorizationException;
 import org.protege.editor.owl.server.api.exception.OutOfSyncException;
 import org.protege.editor.owl.server.api.exception.ServerServiceException;
-import org.protege.editor.owl.server.change.ChangeDocumentPool;
-import org.protege.editor.owl.server.change.DefaultChangeService;
 import org.protege.editor.owl.server.http.HTTPServer;
 import org.protege.editor.owl.server.http.ServerEndpoints;
 import org.protege.editor.owl.server.http.ServerProperties;
@@ -39,17 +34,22 @@ import org.protege.editor.owl.server.versioning.Commit;
 import org.protege.editor.owl.server.versioning.api.ChangeHistory;
 import org.protege.editor.owl.server.versioning.api.DocumentRevision;
 import org.protege.editor.owl.server.versioning.api.HistoryFile;
-import org.semanticweb.owlapi.model.AddAxiom;
-import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.AxiomType;
 import org.semanticweb.owlapi.model.OWLAnnotationAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLAxiom;
+import org.semanticweb.owlapi.model.OWLAxiomVisitor;
 import org.semanticweb.owlapi.model.OWLLiteral;
 import org.semanticweb.owlapi.model.OWLOntologyChange;
+import org.semanticweb.owlapi.model.OWLSubClassOfAxiom;
+
+import com.google.common.collect.Lists;
 
 import edu.stanford.protege.metaproject.api.AuthToken;
+import edu.stanford.protege.metaproject.api.Project;
 import edu.stanford.protege.metaproject.api.ProjectId;
 import edu.stanford.protege.metaproject.api.User;
 import edu.stanford.protege.metaproject.api.exception.UnknownProjectIdException;
+import edu.stanford.protege.metaproject.impl.ProjectIdImpl;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.util.StatusCodes;
 
@@ -65,6 +65,74 @@ public class HTTPChangeService extends BaseRoutingHandler {
 	
 	private boolean update_triple_store = false;
 	private String triple_store_url = "http://localhost:8890/sparql/";
+	private String updateEndpoint = null;
+	SPARQLRepository repo = null;
+	
+	private String subClassOf = "http://www.w3.org/2000/01/rdf-schema#subClassOf";
+	
+	private class ConvertToRdf implements OWLAxiomVisitor {
+		
+		private boolean add = true;
+		
+		public void updateRdf(OWLOntologyChange oc) {
+			add = oc.isAddAxiom();
+			oc.getAxiom().accept(this);
+			
+		}
+		
+		public void visit(OWLAnnotationAssertionAxiom ax) {
+
+			OWLAnnotationAssertionAxiom oaa = (OWLAnnotationAssertionAxiom) ax;
+
+			OWLLiteral val = oaa.getValue().asLiteral().get();
+
+			SimpleValueFactory factory = SimpleValueFactory.getInstance();
+			Resource sub = factory.createIRI(oaa.getSubject().asIRI().get().getIRIString());
+			org.eclipse.rdf4j.model.IRI pred = factory
+					.createIRI(oaa.getProperty().asOWLAnnotationProperty().getIRI().getIRIString());
+
+			Statement st = factory.createStatement(sub, pred, factory.createLiteral(val.getLiteral()), null);
+			Resource context = factory.createIRI(updateEndpoint);
+			RepositoryConnection conn = repo.getConnection();
+
+			if (add) {
+				conn.add(st, context);
+			} else {
+				conn.remove(st, context);
+			}
+
+			conn.close();
+
+		}
+		
+		public void visit(OWLSubClassOfAxiom ax) {
+			if (ax.getSuperClass().isOWLClass()) {
+				SimpleValueFactory factory = SimpleValueFactory.getInstance();
+				Resource sub = factory.createIRI(ax.getSubClass().asOWLClass().getIRI().getIRIString());
+				
+				org.eclipse.rdf4j.model.IRI pred = factory
+						.createIRI(subClassOf);
+				
+				Resource sup = factory.createIRI(ax.getSuperClass().asOWLClass().getIRI().getIRIString());
+				
+				Statement st = factory.createStatement(sub, pred, sup, null);
+				Resource context = factory.createIRI(updateEndpoint);
+				RepositoryConnection conn = repo.getConnection();
+
+				if (add) {
+					conn.add(st, context);
+				} else {
+					conn.remove(st, context);
+				}
+
+				conn.close();
+				
+				
+			}
+		}
+	}
+	
+	private ConvertToRdf changeProcessor = null;
 
 	static enum PauseAllowed {
 		OK, NOT_WORKFLOW_MANAGER, NOT_PAUSING_USER, SERVER_PAUSED;
@@ -216,6 +284,7 @@ public class HTTPChangeService extends BaseRoutingHandler {
 			ObjectOutputStream oos = new ObjectOutputStream(os);
 			oos.writeObject(hist);
 			if (this.update_triple_store) {
+				changeProcessor = new ConvertToRdf();
 				Project p = serverLayer.getConfiguration().getProject(projectId);
 				writeTripleStore(bundle, p);
 			}
@@ -237,46 +306,18 @@ public class HTTPChangeService extends BaseRoutingHandler {
 	private void writeTripleStore(CommitBundle bundle, Project p) {
 		
 		
-		String updateEndpoint = p.namespace() + "/"
+		updateEndpoint = p.namespace() + "/"
 				+ p.getName().get();
-		SPARQLRepository repo = new SPARQLRepository(triple_store_url);
+		repo = new SPARQLRepository(triple_store_url);
 		
 		repo.initialize();
 		for (Commit c : bundle.getCommits()) {
 			for (OWLOntologyChange oc : c.getChanges()) {
 				
-				OWLAxiom ax = oc.getAxiom();
-				
-				if (ax instanceof OWLAnnotationAssertionAxiom) {
-					OWLAnnotationAssertionAxiom oaa = (OWLAnnotationAssertionAxiom) ax;
-					
-					OWLLiteral val = oaa.getValue().asLiteral().get();
-					
-					SimpleValueFactory factory = SimpleValueFactory.getInstance();
-					Resource sub = factory.createIRI(oaa.getSubject().asIRI().get().getIRIString());
-					org.eclipse.rdf4j.model.IRI pred = 
-							factory.createIRI(oaa.getProperty().asOWLAnnotationProperty().getIRI().getIRIString());
-					
-					Statement st =
-							factory.createStatement(sub, pred, factory.createLiteral(val.getLiteral()), null);
-					Resource context = factory.createIRI(updateEndpoint);
-					RepositoryConnection conn = repo.getConnection();
-				
-					if (oc.isAddAxiom()) {
-						conn.add(st, context);
-					} else {
-						conn.remove(st, context);
-					}
-
-					conn.close();
-					
-				}
-				
-				
-			}
-			
-		}
-		
+				changeProcessor.updateRdf(oc);
+							
+			}			
+		}		
 	}
 
 	private void retrieveAllChanges(HistoryFile file, OutputStream os) throws ServerException {
