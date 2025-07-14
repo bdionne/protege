@@ -10,12 +10,26 @@ import java.nio.file.NoSuchFileException;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
+import org.eclipse.rdf4j.RDF4JException;
+import org.eclipse.rdf4j.model.BNode;
 import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
+import org.eclipse.rdf4j.query.Binding;
+import org.eclipse.rdf4j.query.BindingSet;
+import org.eclipse.rdf4j.query.GraphQuery;
+import org.eclipse.rdf4j.query.GraphQueryResult;
+import org.eclipse.rdf4j.query.Query;
+import org.eclipse.rdf4j.query.QueryLanguage;
+import org.eclipse.rdf4j.query.QueryResults;
+import org.eclipse.rdf4j.query.TupleQuery;
+import org.eclipse.rdf4j.query.TupleQueryResult;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.repository.sparql.SPARQLRepository;
 import org.protege.editor.owl.server.api.ChangeService;
@@ -35,10 +49,13 @@ import org.protege.editor.owl.server.versioning.api.ChangeHistory;
 import org.protege.editor.owl.server.versioning.api.DocumentRevision;
 import org.protege.editor.owl.server.versioning.api.HistoryFile;
 import org.semanticweb.owlapi.model.AxiomType;
+import org.semanticweb.owlapi.model.OWLAnnotation;
 import org.semanticweb.owlapi.model.OWLAnnotationAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLAxiomVisitor;
+import org.semanticweb.owlapi.model.OWLDeclarationAxiom;
 import org.semanticweb.owlapi.model.OWLLiteral;
+import org.semanticweb.owlapi.model.OWLObjectSomeValuesFrom;
 import org.semanticweb.owlapi.model.OWLOntologyChange;
 import org.semanticweb.owlapi.model.OWLSubClassOfAxiom;
 
@@ -53,45 +70,149 @@ import edu.stanford.protege.metaproject.impl.ProjectIdImpl;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.util.StatusCodes;
 
-
 public class HTTPChangeService extends BaseRoutingHandler {
 
 	private final ServerLayer serverLayer;
 	private ChangeService changeService;
-	
-	private static final String DATE_FORMATTER= "yyyyMMdd-HHmmss";
-	
+
+	private static final String DATE_FORMATTER = "yyyyMMdd-HHmmss";
+
 	private static final String TRIPLESTORE = "triple_store_url";
-	
+
 	private boolean update_triple_store = false;
 	private String triple_store_url = "http://localhost:8890/sparql/";
+	private String graphName = null;
 	private String updateEndpoint = null;
+	private String ncit = null;
 	SPARQLRepository repo = null;
-	
+
+	private String prefix = null;
+
 	private String subClassOf = "http://www.w3.org/2000/01/rdf-schema#subClassOf";
+	private String type = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
+	private String owlclass = "http://www.w3.org/2002/07/owl#Class";
 	
+	
+	private String buildAnonParentQuery(OWLSubClassOfAxiom ax, boolean add) {
+		if (ax.getSuperClass() instanceof OWLObjectSomeValuesFrom) {
+			SimpleValueFactory factory = SimpleValueFactory.getInstance();
+
+			String source = ax.getSubClass().asOWLClass().getIRI().getShortForm();
+			Resource sub = factory.createIRI(ax.getSubClass().asOWLClass().getIRI().getIRIString());
+			org.eclipse.rdf4j.model.IRI pred = factory.createIRI(subClassOf);
+
+			OWLObjectSomeValuesFrom osvf = (OWLObjectSomeValuesFrom) ax.getSuperClass();
+			String objStr = osvf.getProperty().asOWLObjectProperty().getIRI().getShortForm();
+			String fillerStr = osvf.getFiller().asOWLClass().getIRI().getShortForm();
+
+			String base = prefix;
+			if (add) {
+				base += "insert { graph " + graphName + " { ";
+				base += "ncit:" + source + " rdfs:subClassOf _:foo .";
+				base += " _:foo rdf:type owl:Restriction ; ";
+				base += " owl:onProperty ncit:" + objStr + " ; ";
+				base += " owl:someValuesFrom ncit:" + fillerStr + " . ";
+
+				return base += " } } WHERE {}";
+
+			} else {
+				base += "delete { graph " + graphName + " { ";
+				base += "?o ?q ?r . ";
+				base += " ncit:" + source + " rdfs:subClassOf ?o } } where { ";
+
+				base += " ncit:" + source + " rdfs:subClassOf ?o . ";
+				base += " ?o rdf:type owl:Restriction ; ";
+				base += " owl:onProperty ncit:" + objStr + " ; ";
+				base += " owl:someValuesFrom ncit:" + fillerStr + " . ";
+				return base + " ?o ?q ?r }";
+
+			}
+		}
+		return "";
+
+	}
+
+	private String buildCompQuery(OWLAnnotationAssertionAxiom ax, boolean add) {
+		SimpleValueFactory factory = SimpleValueFactory.getInstance();
+
+		String source = ax.getSubject().asIRI().get().getShortForm();
+		String prop = ax.getProperty().asOWLAnnotationProperty().getIRI().getShortForm();
+		OWLLiteral val = ax.getValue().asLiteral().get();
+		String valstr = factory.createLiteral(val.getLiteral()).stringValue();
+
+		String base = prefix;
+		if (add) {
+			base += "insert { graph " + graphName + " { ";
+		} else {
+			base += "delete { graph " + graphName + " { ";
+
+		}
+
+		// In both cases all main assertion
+
+		base += "ncit:" + source + " ncit:" + prop + " " + "\"" + valstr + "\" . ";
+
+		if (ax.getAnnotations().isEmpty()) {
+			return base += " } } WHERE {}";
+		} else {
+			if (add) {
+				base += "[] rdf:type owl:Axiom ; ";
+				base += "owl:annotatedSource ncit:" + source + " ; ";
+				base += "owl:annotatedProperty ncit:" + prop + " ; ";
+				base += "owl:annotatedTarget " + "\"" + valstr + "\" ";
+
+				for (OWLAnnotation an : ax.getAnnotations()) {
+					base += " ; ";
+					String anProp = an.getProperty().getIRI().getShortForm();
+					OWLLiteral anVal = an.getValue().asLiteral().get();
+					String anValStr = factory.createLiteral(anVal.getLiteral()).stringValue();
+					base += "ncit:" + anProp + " \"" + anValStr + "\"";
+
+				}
+
+				return base + " } } WHERE {}";
+			} else {
+				base += "?s ?p ?o  } } WHERE { ";
+				base += "?s owl:annotatedSource ncit:" + source + " ; ";
+				base += "owl:annotatedProperty ncit:" + prop + " ; ";
+				base += "owl:annotatedTarget " + "\"" + valstr + "\" ";
+
+				for (OWLAnnotation an : ax.getAnnotations()) {
+					base += " ; ";
+					String anProp = an.getProperty().getIRI().getShortForm();
+					OWLLiteral anVal = an.getValue().asLiteral().get();
+					String anValStr = factory.createLiteral(anVal.getLiteral()).stringValue();
+					base += "ncit:" + anProp + " \"" + anValStr + "\"";
+
+				}
+				base += " . ";
+
+				return base + " ?s ?p ?o }";
+
+			}
+
+		}
+
+	}
+
 	private class ConvertToRdf implements OWLAxiomVisitor {
-		
+
 		private boolean add = true;
-		
+
 		public void updateRdf(OWLOntologyChange oc) {
 			add = oc.isAddAxiom();
 			oc.getAxiom().accept(this);
-			
+
 		}
-		
-		public void visit(OWLAnnotationAssertionAxiom ax) {
 
-			OWLAnnotationAssertionAxiom oaa = (OWLAnnotationAssertionAxiom) ax;
-
-			OWLLiteral val = oaa.getValue().asLiteral().get();
-
+		public void visit(OWLDeclarationAxiom axiom) {
 			SimpleValueFactory factory = SimpleValueFactory.getInstance();
-			Resource sub = factory.createIRI(oaa.getSubject().asIRI().get().getIRIString());
-			org.eclipse.rdf4j.model.IRI pred = factory
-					.createIRI(oaa.getProperty().asOWLAnnotationProperty().getIRI().getIRIString());
 
-			Statement st = factory.createStatement(sub, pred, factory.createLiteral(val.getLiteral()), null);
+			Resource sub = factory.createIRI(axiom.getEntity().getIRI().getIRIString());
+			org.eclipse.rdf4j.model.IRI pred = factory.createIRI(type);
+			org.eclipse.rdf4j.model.IRI val = factory.createIRI(owlclass);
+			
+			Statement st = factory.createStatement(sub, pred, val, null);
 			Resource context = factory.createIRI(updateEndpoint);
 			RepositoryConnection conn = repo.getConnection();
 
@@ -104,17 +225,26 @@ public class HTTPChangeService extends BaseRoutingHandler {
 			conn.close();
 
 		}
-		
+
+		public void visit(OWLAnnotationAssertionAxiom ax) {
+
+			String q = buildCompQuery(ax, add);
+
+			Query query = repo.getConnection().prepareQuery(QueryLanguage.SPARQL, q);
+
+			if (query instanceof GraphQuery) {
+				GraphQueryResult res = ((GraphQuery) query).evaluate();
+			}
+		}
+
 		public void visit(OWLSubClassOfAxiom ax) {
 			if (ax.getSuperClass().isOWLClass()) {
 				SimpleValueFactory factory = SimpleValueFactory.getInstance();
+				
 				Resource sub = factory.createIRI(ax.getSubClass().asOWLClass().getIRI().getIRIString());
-				
-				org.eclipse.rdf4j.model.IRI pred = factory
-						.createIRI(subClassOf);
-				
+				org.eclipse.rdf4j.model.IRI pred = factory.createIRI(subClassOf);
 				Resource sup = factory.createIRI(ax.getSuperClass().asOWLClass().getIRI().getIRIString());
-				
+
 				Statement st = factory.createStatement(sub, pred, sup, null);
 				Resource context = factory.createIRI(updateEndpoint);
 				RepositoryConnection conn = repo.getConnection();
@@ -126,12 +256,20 @@ public class HTTPChangeService extends BaseRoutingHandler {
 				}
 
 				conn.close();
-				
+
+			} else {
+				String q = buildAnonParentQuery(ax, add);
+
+				Query query = repo.getConnection().prepareQuery(QueryLanguage.SPARQL, q);
+
+				if (query instanceof GraphQuery) {
+					GraphQueryResult res = ((GraphQuery) query).evaluate();
+				}
 				
 			}
 		}
 	}
-	
+
 	private ConvertToRdf changeProcessor = null;
 
 	static enum PauseAllowed {
@@ -139,14 +277,14 @@ public class HTTPChangeService extends BaseRoutingHandler {
 
 		String message() {
 			switch (this) {
-				case OK:
-					return "";
-				case NOT_WORKFLOW_MANAGER:
-					return "you aren't a workflow manager";
-				case NOT_PAUSING_USER:
-					return "Server in maintenance mode. Only pauser can do these actions now";
-				case SERVER_PAUSED:
-					return "Server in maintenance mode. Please try again later";
+			case OK:
+				return "";
+			case NOT_WORKFLOW_MANAGER:
+				return "you aren't a workflow manager";
+			case NOT_PAUSING_USER:
+				return "Server in maintenance mode. Only pauser can do these actions now";
+			case SERVER_PAUSED:
+				return "Server in maintenance mode. Please try again later";
 			}
 			return "impossible"; // impossible to reach
 		}
@@ -159,7 +297,7 @@ public class HTTPChangeService extends BaseRoutingHandler {
 			if (ServerEndpoints.LATEST_CHANGES.equals(path)) {
 				return OK;
 			} else if (HTTPServer.server().isWorkFlowManager(user, projectId)
-			        && HTTPServer.server().isPausingUser(user)) {
+					&& HTTPServer.server().isPausingUser(user)) {
 				return OK;
 			} else {
 				return SERVER_PAUSED;
@@ -181,85 +319,71 @@ public class HTTPChangeService extends BaseRoutingHandler {
 	public void handleRequest(HttpServerExchange exchange) {
 		try {
 			handlingRequest(exchange);
-		}
-		catch (IOException | ClassNotFoundException e) {
+		} catch (IOException | ClassNotFoundException e) {
 			internalServerErrorStatusCode(exchange, "Server failed to receive the sent data", e);
-		}
-		catch (LoginTimeoutException e) {
+		} catch (LoginTimeoutException e) {
 			loginTimeoutErrorStatusCode(exchange, e);
-		}
-		catch (ServerException e) {
+		} catch (ServerException e) {
 			handleServerException(exchange, e);
 		} catch (UnknownProjectIdException e) {
 			internalServerErrorStatusCode(exchange, "Server failed to receive valie project id", e);
-			
-		}
-		finally {
+
+		} finally {
 			exchange.endExchange(); // end the request
 		}
 	}
 
-	private void handlingRequest(HttpServerExchange exchange)
-			throws IOException, ClassNotFoundException, LoginTimeoutException, ServerException, UnknownProjectIdException {
+	private void handlingRequest(HttpServerExchange exchange) throws IOException, ClassNotFoundException,
+			LoginTimeoutException, ServerException, UnknownProjectIdException {
 		ObjectInputStream ois = new ObjectInputStream(exchange.getInputStream());
-		
+
 		String requestPath = exchange.getRequestPath();
 		if (HTTPServer.server().isPaused()) {
-			List<String> allowedPausedEndpoints = Lists.newArrayList(
-				ServerEndpoints.COMMIT, ServerEndpoints.SQUASH, ServerEndpoints.LATEST_CHANGES);
+			List<String> allowedPausedEndpoints = Lists.newArrayList(ServerEndpoints.COMMIT, ServerEndpoints.SQUASH,
+					ServerEndpoints.LATEST_CHANGES);
 			if (allowedPausedEndpoints.contains(requestPath)) {
 				User user = this.getAuthToken(exchange).getUser();
 				PauseAllowed ccs = PauseAllowed.create(projectId(exchange), user, requestPath);
 				if (!ccs.ok()) {
 					throw new ServerException(StatusCodes.SERVICE_UNAVAILABLE, ccs.message());
 				}
-			}
-			else {
+			} else {
 				throw new ServerException(StatusCodes.SERVICE_UNAVAILABLE, PauseAllowed.SERVER_PAUSED.message());
 			}
 		}
 
-		
-		if (	requestPath.equals(ServerEndpoints.COMMIT) ||
-				requestPath.equals(ServerEndpoints.HEAD) ||
-				requestPath.equals(ServerEndpoints.ALL_CHANGES) ||
-				requestPath.equals(ServerEndpoints.LATEST_CHANGES) ||
-				requestPath.equals(ServerEndpoints.SQUASH)) {
+		if (requestPath.equals(ServerEndpoints.COMMIT) || requestPath.equals(ServerEndpoints.HEAD)
+				|| requestPath.equals(ServerEndpoints.ALL_CHANGES) || requestPath.equals(ServerEndpoints.LATEST_CHANGES)
+				|| requestPath.equals(ServerEndpoints.SQUASH)) {
 			ProjectId projectId = projectId(exchange);
 
-			String clientChecksum = exchange.getRequestHeaders()
-					.getFirst(ServerProperties.SNAPSHOT_CHECKSUM_HEADER);
+			String clientChecksum = exchange.getRequestHeaders().getFirst(ServerProperties.SNAPSHOT_CHECKSUM_HEADER);
 			if (clientChecksum == null) {
-				throw new ServerException(StatusCodes.BAD_REQUEST, "project " + projectId + " does not have a checksum");
+				throw new ServerException(StatusCodes.BAD_REQUEST,
+						"project " + projectId + " does not have a checksum");
 			}
 			Optional<String> serverChecksum = serverLayer.getSnapshotChecksum(projectId);
-			if(serverChecksum.isPresent() && !clientChecksum.equals(serverChecksum.get())) {
+			if (serverChecksum.isPresent() && !clientChecksum.equals(serverChecksum.get())) {
 				throw new ServerException(ServerProperties.HISTORY_SNAPSHOT_OUT_OF_DATE,
-						"History snapshot out of date for "
-								+ projectId + ": " + clientChecksum + " != " + serverChecksum.get());
+						"History snapshot out of date for " + projectId + ": " + clientChecksum + " != "
+								+ serverChecksum.get());
 			}
 		}
-
-		
 
 		if (requestPath.equals(ServerEndpoints.COMMIT)) {
 			CommitBundle bundle = (CommitBundle) ois.readObject();
 			submitCommitBundle(getAuthToken(exchange), projectId(exchange), bundle, exchange.getOutputStream());
-		}
-		else if (requestPath.equals(ServerEndpoints.ALL_CHANGES)) {
+		} else if (requestPath.equals(ServerEndpoints.ALL_CHANGES)) {
 			HistoryFile file = (HistoryFile) ois.readObject();
 			retrieveAllChanges(file, exchange.getOutputStream());
-		}
-		else if (requestPath.equals(ServerEndpoints.LATEST_CHANGES)) {
+		} else if (requestPath.equals(ServerEndpoints.LATEST_CHANGES)) {
 			HistoryFile file = (HistoryFile) ois.readObject();
 			DocumentRevision start = (DocumentRevision) ois.readObject();
 			retrieveLatestChanges(file, start, exchange.getOutputStream());
-		}
-		else if (requestPath.equals(ServerEndpoints.HEAD)) {
+		} else if (requestPath.equals(ServerEndpoints.HEAD)) {
 			HistoryFile file = (HistoryFile) ois.readObject();
 			retrieveHeadRevision(file, exchange.getOutputStream());
-		}
-		else if (requestPath.equals(ServerEndpoints.SQUASH)) {
+		} else if (requestPath.equals(ServerEndpoints.SQUASH)) {
 			SnapShot snapshot = (SnapShot) ois.readObject();
 			squashHistory(snapshot, projectId(exchange), exchange.getOutputStream());
 		}
@@ -267,18 +391,19 @@ public class HTTPChangeService extends BaseRoutingHandler {
 
 	private ProjectId projectId(HttpServerExchange exchange) throws ServerException {
 		String sProjectId = exchange.getRequestHeaders().getFirst(ServerProperties.PROJECTID_HEADER);
-		if(sProjectId == null) {
+		if (sProjectId == null) {
 			throw new ServerException(StatusCodes.BAD_REQUEST, "Missing ProjectId");
 		}
 		return new ProjectIdImpl(sProjectId);
 	}
 
 	/*
-	 * Private methods that handlers each service provided by the server end-point above.
+	 * Private methods that handlers each service provided by the server end-point
+	 * above.
 	 */
 
-	private void submitCommitBundle(AuthToken authToken, ProjectId projectId, CommitBundle bundle,
-			OutputStream os) throws ServerException, UnknownProjectIdException {
+	private void submitCommitBundle(AuthToken authToken, ProjectId projectId, CommitBundle bundle, OutputStream os)
+			throws ServerException, UnknownProjectIdException {
 		try {
 			ChangeHistory hist = serverLayer.commit(authToken, projectId, bundle);
 			ObjectOutputStream oos = new ObjectOutputStream(os);
@@ -288,36 +413,35 @@ public class HTTPChangeService extends BaseRoutingHandler {
 				Project p = serverLayer.getConfiguration().getProject(projectId);
 				writeTripleStore(bundle, p);
 			}
-		}
-		catch (AuthorizationException e) {
+		} catch (AuthorizationException e) {
 			throw new ServerException(StatusCodes.UNAUTHORIZED, "Access denied", e);
-		}
-		catch (OutOfSyncException e) {
+		} catch (OutOfSyncException e) {
 			throw new ServerException(StatusCodes.CONFLICT, "Commit failed, please update your local copy first", e);
-		}
-		catch (ServerServiceException e) {
+		} catch (ServerServiceException e) {
 			throw new ServerException(StatusCodes.INTERNAL_SERVER_ERROR, "Server failed to receive the commit data", e);
-		}
-		catch (IOException e) {
-			throw new ServerException(StatusCodes.INTERNAL_SERVER_ERROR, "Server failed to transmit the returned data", e);
+		} catch (IOException e) {
+			throw new ServerException(StatusCodes.INTERNAL_SERVER_ERROR, "Server failed to transmit the returned data",
+					e);
 		}
 	}
-	
+
 	private void writeTripleStore(CommitBundle bundle, Project p) {
-		
-		
-		updateEndpoint = p.namespace() + "/"
-				+ p.getName().get();
+
+		graphName = "<" + p.namespace() + "/" + p.getName().get() + ">";
+		updateEndpoint = p.namespace() + "/" + p.getName().get();
+		ncit = "<" + p.namespace() + "#>";
+		prefix = "prefix ncit:" + ncit + " ";
+
 		repo = new SPARQLRepository(triple_store_url);
-		
+
 		repo.initialize();
 		for (Commit c : bundle.getCommits()) {
 			for (OWLOntologyChange oc : c.getChanges()) {
-				
+
 				changeProcessor.updateRdf(oc);
-							
-			}			
-		}		
+
+			}
+		}
 	}
 
 	private void retrieveAllChanges(HistoryFile file, OutputStream os) throws ServerException {
@@ -326,12 +450,11 @@ public class HTTPChangeService extends BaseRoutingHandler {
 			ChangeHistory history = changeService.getChanges(file, DocumentRevision.START_REVISION, headRevision);
 			ObjectOutputStream oos = new ObjectOutputStream(os);
 			oos.writeObject(history);
-		}
-		catch (ServerServiceException e) {
+		} catch (ServerServiceException e) {
 			throw new ServerException(StatusCodes.INTERNAL_SERVER_ERROR, "Server failed to get all changes", e);
-		}
-		catch (IOException e) {
-			throw new ServerException(StatusCodes.INTERNAL_SERVER_ERROR, "Server failed to transmit the returned data", e);
+		} catch (IOException e) {
+			throw new ServerException(StatusCodes.INTERNAL_SERVER_ERROR, "Server failed to transmit the returned data",
+					e);
 		}
 	}
 
@@ -342,12 +465,11 @@ public class HTTPChangeService extends BaseRoutingHandler {
 			ChangeHistory history = changeService.getChanges(file, start, headRevision);
 			ObjectOutputStream oos = new ObjectOutputStream(os);
 			oos.writeObject(history);
-		}
-		catch (ServerServiceException | IllegalArgumentException e) {
+		} catch (ServerServiceException | IllegalArgumentException e) {
 			throw new ServerException(StatusCodes.INTERNAL_SERVER_ERROR, "Server failed to get the latest changes", e);
-		}
-		catch (IOException e) {
-			throw new ServerException(StatusCodes.INTERNAL_SERVER_ERROR, "Server failed to transmit the returned data", e);
+		} catch (IOException e) {
+			throw new ServerException(StatusCodes.INTERNAL_SERVER_ERROR, "Server failed to transmit the returned data",
+					e);
 		}
 	}
 
@@ -356,43 +478,36 @@ public class HTTPChangeService extends BaseRoutingHandler {
 			DocumentRevision headRevision = changeService.getHeadRevision(file);
 			ObjectOutputStream oos = new ObjectOutputStream(os);
 			oos.writeObject(headRevision);
-		}
-		catch (ServerServiceException e) {
+		} catch (ServerServiceException e) {
 			throw new ServerException(StatusCodes.INTERNAL_SERVER_ERROR, "Server failed to get the head revision", e);
-		}
-		catch (IOException e) {
-			throw new ServerException(StatusCodes.INTERNAL_SERVER_ERROR, "Server failed to transmit the returned data", e);
+		} catch (IOException e) {
+			throw new ServerException(StatusCodes.INTERNAL_SERVER_ERROR, "Server failed to transmit the returned data",
+					e);
 		}
 	}
 
 	private void squashHistory(SnapShot snapShot, ProjectId projectId, OutputStream os) throws IOException {
 		HistoryFile historyFile = serverLayer.createHistoryFile(projectId);
 		String historyName = historyFile.getName();
-		
+
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_FORMATTER);
 		LocalDateTime localDateTime = LocalDateTime.now();
-        String formatDateTime = localDateTime.format(formatter);
+		String formatDateTime = localDateTime.format(formatter);
 
-		String archiveDir = serverLayer.getConfiguration().getProperty(ServerProperties.ARCHIVE_ROOT)
-				+ File.separator
-				+ projectId.get()
-				+ File.separator
-				+ "squash-"
-				+ formatDateTime
+		String archiveDir = serverLayer.getConfiguration().getProperty(ServerProperties.ARCHIVE_ROOT) + File.separator
+				+ projectId.get() + File.separator + "squash-" + formatDateTime + File.separator;
+
+		String dataDir = serverLayer.getConfiguration().getServerRoot() + File.separator + projectId.get()
 				+ File.separator;
 
-		String dataDir = serverLayer.getConfiguration().getServerRoot()
-				+ File.separator
-				+ projectId.get()
-				+ File.separator;
-		
 		String gencodeName = serverLayer.getConfiguration().getProperty(ServerProperties.CODEGEN_FILE);
 
 		String snapshotName = historyName + "-snapshot";
 		String checksumName = snapshotName + "-checksum";
 
 		String fullHistoryPath = dataDir + historyName;
-		String backupName = new StringBuilder(fullHistoryPath).insert(fullHistoryPath.lastIndexOf(File.separator) + 1, "~").toString();
+		String backupName = new StringBuilder(fullHistoryPath)
+				.insert(fullHistoryPath.lastIndexOf(File.separator) + 1, "~").toString();
 
 		Files.createDirectories(Paths.get(archiveDir));
 		Files.move(Paths.get(dataDir + historyName), Paths.get(archiveDir + historyName));
@@ -407,7 +522,7 @@ public class HTTPChangeService extends BaseRoutingHandler {
 		Files.createFile(Paths.get(dataDir + historyName));
 
 		serverLayer.saveProjectSnapshot(snapShot, projectId, os);
-		
+
 		changeService.clearHistoryCacheEntry(historyFile);
 	}
 }
