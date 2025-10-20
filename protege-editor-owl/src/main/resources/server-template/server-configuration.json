@@ -663,6 +663,22 @@
       "type": "EXECUTE",
       "scope": "SERVER"
     },
+	{
+	      "default": false,
+	      "id": "unmerge",
+	      "name": "UnMerge",
+	      "description": "Accept a proposed unmerging of a merged class",
+	      "type": "WRITE",
+	      "scope": "ONTOLOGY"
+	    },
+	    {
+	      "default": false,
+	      "id": "unretire",
+	      "name": "UnRetire",
+	      "description": "Accept a proposed unretirement of a preretired class",
+	      "type": "WRITE",
+	      "scope": "ONTOLOGY"
+	    },
     {
       "default": true,
       "id": "Split",
